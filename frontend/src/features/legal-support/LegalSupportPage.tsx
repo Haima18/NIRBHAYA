@@ -83,7 +83,7 @@ export const LegalSupportPage: React.FC = () => {
       <Alert type="info" title="Not legal advice">
         This page provides general information, not legal advice, and does not create a lawyer-client relationship. The
         advocate cards are layout samples, not real practitioners. For free legal aid, call NALSA at{' '}
-        <a href="tel:1516" style={{ color: 'inherit', fontWeight: 600 }}>1516</a> or contact your State Legal Services
+        <a href="tel:15100" style={{ color: 'inherit', fontWeight: 600 }}>15100</a> or contact your State Legal Services
         Authority.
       </Alert>
 
@@ -109,8 +109,8 @@ export const LegalSupportPage: React.FC = () => {
               Eligibility and scope are determined by the legal services authority, not by NIRBHAYA.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <a href="tel:1516" style={{ textDecoration: 'none' }}>
-                <Button variant="primary" size="sm" leftIcon={<Phone size={16} />}>NALSA 1516</Button>
+              <a href="tel:15100" style={{ textDecoration: 'none' }}>
+                <Button variant="primary" size="sm" leftIcon={<Phone size={16} />}>NALSA 15100</Button>
               </a>
               <a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                 <Button variant="outline" size="sm" leftIcon={<ExternalLink size={16} />}>NALSA portal</Button>
@@ -293,7 +293,7 @@ export const LegalSupportPage: React.FC = () => {
             </p>
             <ul style={{ margin: '0.5rem 0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
               <li>Free legal aid can cover representation and related court fees, subject to the authority&apos;s rules.</li>
-              <li>Call <strong>1516</strong> or use <a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer">nalsa.gov.in</a> to find your State Legal Services Authority.</li>
+              <li>Call <strong>15100</strong> or use <a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer">nalsa.gov.in</a> to find your State Legal Services Authority.</li>
               <li>NIRBHAYA does not decide eligibility and cannot fast-track an application.</li>
             </ul>
           </Card>
@@ -363,7 +363,7 @@ export const LegalSupportPage: React.FC = () => {
                 This note was stored in your browser. It was not sent to {selectedLawyer.name} or any legal-aid office.
               </Alert>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                To contact a real legal-aid office, call NALSA at <a href="tel:1516">1516</a> or use your State Legal
+                To contact a real legal-aid office, call NALSA at <a href="tel:15100">15100</a> or use your State Legal
                 Services Authority. For immediate danger, call 112.
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

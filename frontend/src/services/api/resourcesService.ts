@@ -50,12 +50,12 @@ export const EMERGENCY_CONTACTS: EmergencyContact[] = [
     website: 'https://cybercrime.gov.in'
   },
   {
-    id: 'em_1516',
-    title: 'NALSA Free Legal Aid Helpline',
-    number: '1516',
+    id: 'em_15100',
+    title: 'NALSA National Free Legal Aid Helpline',
+    number: '15100',
     category: 'legal',
-    description: 'Free legal services and legal advice for women under Section 12 of the Legal Services Authorities Act.',
-    operationalHours: 'Hours vary by State Legal Services Authority',
+    description: 'Toll-free free legal aid and advice under the Legal Services Authorities Act. Women are eligible under Section 12. For Delhi-specific legal aid, 1516 is also available.',
+    operationalHours: '24/7 (NALSA national helpline)',
     website: 'https://nalsa.gov.in'
   },
   {
@@ -95,7 +95,7 @@ export const LAWYER_PROFILES: LawyerProfile[] = [
     feeType: 'sliding_scale',
     experienceYears: 0,
     consultationModes: ['Sample only'],
-    bio: 'Illustrative profile layout. This is not a real lawyer, a verified partner, or a booking channel. Use NALSA 1516 or your State Legal Services Authority to find a licensed advocate.',
+    bio: 'Illustrative profile layout. This is not a real lawyer, a verified partner, or a booking channel. Use NALSA 15100 or your State Legal Services Authority to find a licensed advocate.',
     isVerifiedSample: false
   },
   {
@@ -109,7 +109,7 @@ export const LAWYER_PROFILES: LawyerProfile[] = [
     feeType: 'pro_bono',
     experienceYears: 0,
     consultationModes: ['Sample only'],
-    bio: 'Illustrative profile layout only. NIRBHAYA cannot confirm fees, availability, or credentials. Contact the District Legal Services Authority or call 1516 for free legal aid.',
+    bio: 'Illustrative profile layout only. NIRBHAYA cannot confirm fees, availability, or credentials. Contact the District Legal Services Authority or call 15100 for free legal aid.',
     isVerifiedSample: false
   },
   {
@@ -195,7 +195,7 @@ export const EMPOWERMENT_RESOURCES: EmpowermentResource[] = [
     summary: 'Free legal services for eligible victims of domestic violence, including representation and help with protection, residence, and monetary-relief applications. Eligibility is decided by the legal services authority.',
     officialPortal: 'https://nalsa.gov.in',
     keyBenefits: ['Free legal representation for eligible applicants', 'Court-fee and procedural support as applicable', 'Access to paralegal volunteers where available'],
-    contactHelpline: '1516'
+    contactHelpline: '15100'
   }
 ];
 

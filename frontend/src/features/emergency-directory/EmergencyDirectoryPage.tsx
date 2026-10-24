@@ -66,7 +66,7 @@ export const EmergencyDirectoryPage: React.FC = () => {
             <option value="women">Women Distress & Police</option>
             <option value="cyber">Cyber Crime (1930)</option>
             <option value="domestic">Domestic Abuse (181)</option>
-            <option value="legal">Free Legal Aid (1516)</option>
+            <option value="legal">Free Legal Aid (15100)</option>
             <option value="counselling">Mental Health & Crisis</option>
           </select>
         </div>

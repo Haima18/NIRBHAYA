@@ -44,10 +44,10 @@ vite v5.4.21 building for production...
 ✓ 2011 modules transformed.
 dist/index.html                 1.28 kB │ gzip:   0.73 kB
 dist/assets/index-CfTTaxG1.css  7.70 kB │ gzip:   2.68 kB
-dist/assets/index-Da9y9J8g.js 542.69 kB │ gzip: 149.22 kB
+dist/assets/index-Defn3e5q.js 542.77 kB │ gzip: 149.26 kB
 
 (!) Some chunks are larger than 500 kB after minification.
-✓ built in 6.19s
+✓ built in 4.56s
 ```
 
 Interpretation:

@@ -82,7 +82,7 @@ def _local_response(query: str, provider_note: Optional[str] = None) -> dict:
             "• You can ask any police station to register a **Zero FIR** when immediate registration is required, "
             "even outside its jurisdiction; the case is later transferred.\n"
             "• Every woman is entitled to free legal aid under **Section 12 of the Legal Services Authorities Act, 1987**. "
-            "Call **1516** or visit nalsa.gov.in.\n"
+            "Call **15100** or visit nalsa.gov.in.\n"
             "• Build a factual timeline and keep original files. NIRBHAYA's lawyer profiles are illustrative samples, "
             "not verified empanelment. Verify an advocate independently through the State Bar Council or NALSA."
         )

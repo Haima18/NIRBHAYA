@@ -127,11 +127,11 @@ export const locationService = {
         isNationalHelpline: true
       },
       {
-        id: 'national_1516',
-        name: 'NALSA Free Legal Aid Helpline',
+        id: 'national_15100',
+        name: 'NALSA National Free Legal Aid Helpline',
         category: 'legal',
-        address: 'National free legal aid line (working hours may vary)',
-        phone: '1516',
+        address: 'National free legal aid line (24/7, toll-free)',
+        phone: '15100',
         distanceKm: null,
         coords: null,
         officialUrl: 'https://nalsa.gov.in',
