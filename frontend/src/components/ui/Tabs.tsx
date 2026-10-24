@@ -13,55 +13,24 @@ export interface TabsProps {
   onChange: (id: string) => void;
 }
 
-export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange }) => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 'var(--space-2)',
-        borderBottom: '1px solid var(--border-color-default)',
-        overflowX: 'auto',
-        paddingBottom: '2px'
-      }}
-    >
-      {tabs.map(tab => {
-        const isActive = tab.id === activeTab;
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onChange(tab.id)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.625rem 1rem',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: isActive ? 'var(--font-weight-semibold)' : 'var(--font-weight-medium)',
-              color: isActive ? 'var(--color-brand-primary)' : 'var(--text-secondary)',
-              borderBottom: isActive ? '2px solid var(--color-brand-primary)' : '2px solid transparent',
-              marginBottom: '-2px',
-              transition: 'all var(--transition-fast)',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            {tab.icon}
-            {tab.label}
-            {tab.badge !== undefined && (
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '2px 6px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: isActive ? 'var(--color-brand-primary-light)' : 'var(--color-neutral-200)',
-                  color: isActive ? 'var(--color-brand-primary)' : 'var(--text-muted)'
-                }}
-              >
-                {tab.badge}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-};
+export const Tabs: React.FC<TabsProps> = ({ tabs, activeTab, onChange }) => (
+  <div className="ui-tabs" role="tablist">
+    {tabs.map(tab => {
+      const isActive = tab.id === activeTab;
+      return (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          aria-selected={isActive}
+          onClick={() => onChange(tab.id)}
+          className={`ui-tab${isActive ? ' active' : ''}`}
+        >
+          {tab.icon}
+          {tab.label}
+          {tab.badge !== undefined && <span className="ui-tab__badge">{tab.badge}</span>}
+        </button>
+      );
+    })}
+  </div>
+);

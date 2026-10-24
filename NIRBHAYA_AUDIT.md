@@ -3,7 +3,7 @@
 **Audit date:** 2026-10-24  
 **Baseline commit:** `7319d2b` — *Baseline snapshot before audit repairs*  
 **Scope:** Existing React/Flask/SQLite application, all feature modules, API routes, data flows, safety claims, and documentation.  
-**Outcome:** The application was repaired in place. The visual identity (lavender/butterfly theme) and the React + Flask + SQLite architecture were preserved.
+**Outcome:** The application was repaired in place, then visually redesigned as *The Living Lavender Sanctuary*. The React + Flask + SQLite architecture, all routes, API contracts, and safety logic were preserved.
 
 > This was a product, safety-claim, and application-security review performed by reading the source and running the test suites. It was **not** a formal penetration test, dependency CVE audit, load test, or legal compliance review.
 
@@ -144,3 +144,92 @@ See [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) for the full user-facing list.
 ## 8. Conclusion
 
 The baseline was a broad, visually complete prototype with unsafe overclaims. The repaired build keeps the same architecture and design while making its behaviour, storage, and limitations legible. The most important outcome is not a new feature count; it is that **a user can now tell what the application did, what it did not do, and what they must do themselves**.
+
+---
+
+## 9. Redesign pass — The Living Lavender Sanctuary
+
+A subsequent design pass rebuilt the presentation layer. It did not change the audit conclusions above.
+
+### What changed
+
+- New lavender/peach/cyan design tokens and editorial typography (Playfair Display + Inter Tight after the motion pass; the first pass used Cormorant Garamond + Manrope).
+- Branded loading screen used only during the real session-restore request; no simulated progress.
+- New public landing page at `/welcome` with a layered SVG valley and a genuine lazy-loaded Three.js butterfly (with an image fallback when WebGL is unavailable).
+- Restyled application shell: header, grouped sidebar, footer, Quick Exit bar, dashboard, auth pages, and all shared UI primitives.
+- Unauthenticated protected routes now redirect to `/welcome` while carrying the intended internal path; sign-in returns the user there.
+
+### What did not change
+
+- Every route, API endpoint, request/response shape, storage key, and safety flow.
+- SOS (`tel:112`) and siren remain separate, immediate, and independent of the loader and decorative scene.
+- All honest claims and sample-data labels from the audit remain in place.
+- No new external integration was added or claimed.
+
+### Decorative-layer honesty
+
+The valley and butterfly are atmosphere, not safety infrastructure. The landing page states that emergency shortcuts remain available without an account, and the fallback copy explains when still artwork is shown. A WebGL failure, slow chunk load, or blocked image never disables SOS, siren, navigation, or any feature route.
+
+### Redesign verification
+
+| Check | Result |
+| :--- | :--- |
+| `cd frontend && npm run build` | **Passed** — TypeScript clean; 2,019 modules; CSS 75.98 kB; main JS 550.41 kB; lazy butterfly chunk 516.39 kB; chunk-size warning only. |
+| `cd frontend && npm test` | **Passed** — 13 tests. |
+| `cd backend && python -m unittest discover -s tests -v` | **Passed** — 17 tests. |
+| Lighthouse on `/welcome` (development server) | Accessibility **100**, Best Practices **100**, SEO **100**. |
+| Manual desktop/mobile visual QA | Landing, dashboard, auth, Physical Safety, Evidence Vault, Settings. |
+| WebGL fallback | Forced by disabling WebGL context creation; fallback artwork rendered and copy changed. |
+| Siren | Started and stopped from the header; no console errors. |
+| Protected-route redirect | `/settings` while signed out → `/welcome` → `/login`. |
+
+### Residual redesign risks
+
+1. The Three.js chunk is large (≈516 kB, ≈132 kB gzip) and should be code-split further if the landing becomes a primary acquisition page.
+2. The valley is an original SVG interpretation, not the supplied reference photograph.
+3. Reduced motion is implemented in CSS and `matchMedia` but was not tested with a real OS-level assistive setting or a screen reader.
+4. The landing page was audited with Lighthouse on a development server; production hosting, caching, and compression may change the result.
+
+See [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md) §6–7 for the full redesign and motion inventory.
+
+---
+
+## 10. Editorial motion pass
+
+A second presentation pass applied the supplied editorial/motion references to the public landing page and the shared interaction language. It did not change the audit conclusions, routes, API contracts, data model, or safety logic.
+
+### What changed
+
+- `/welcome` is now a dark cinematic editorial composition: fixed scroll-aware nav, full-screen overlay menu, mixed sans/serif hero, peach status star, tilted polaroid, vertical side words, scroll cue, giant italic watermark, and reveal-on-scroll content sections.
+- Typography moved to Playfair Display (headings, italic accents, watermark) and Inter Tight (navigation, controls, body, safety information).
+- `components/sanctuary/Reveal.tsx` adds a one-shot IntersectionObserver reveal that respects reduced motion.
+- The shared `.btn` family gained a subtle fill-up hover. The `danger` and `emergency` variants were deliberately excluded so emergency controls keep their solid, immediate treatment.
+- The overlay menu traps focus, locks background scrolling, restores focus, and includes a `tel:112` route.
+
+### What did not change
+
+- Every feature, route, API shape, storage key, auth rule, and safety flow.
+- SOS (`tel:112`), siren, and Quick Exit remain immediate and independent of decorative motion, the reveal observer, and the 3D scene.
+- Quick Exit and the floating SOS sit above the overlay menu in z-order and stay clickable while it is open.
+- All honest claims, limits, and sample-data labels remain intact. No third-party fashion/portfolio media is hotlinked.
+
+### Verification
+
+| Check | Result |
+| :--- | :--- |
+| `cd frontend && npm run build` | **Passed** — TypeScript clean; 2,019 modules; CSS 75.98 kB; main JS 550.41 kB; lazy butterfly chunk 516.39 kB; chunk-size warning only. |
+| `cd frontend && npm test` | **Passed** — 13 tests. |
+| `cd backend && python -m unittest discover -s tests -v` | **Passed** — 17 tests. |
+| Lighthouse on `/welcome` (development server) | Accessibility **100**, Best Practices **100**, SEO **100**. |
+| Manual desktop/mobile visual QA | 1440×960 and 390 px landing, overlay menu and focus handoff, section reveals, mobile nav grouping, dashboard, auth, Physical Safety, Evidence Vault, Settings. |
+| WebGL fallback | Forced by disabling WebGL context creation; fallback artwork rendered and decorative copy changed. |
+| Siren | Started and stopped from the header; no console errors. |
+| Protected-route redirect | `/settings` while signed out → `/welcome` → `/login`. |
+
+### Residual motion-pass risks
+
+1. No licensed hero photograph or video matching the references is available locally; the existing butterfly image, SVG valley, and Three.js scene carry the atmosphere instead. The third-party media was not hotlinked.
+2. The landing remains a long page below the first screen because NIRBHAYA’s feature, principle, and step content must remain reachable. The references were one-screen heroes.
+3. The Three.js chunk remains large (≈516 kB, ≈132 kB gzip). It is decorative and never blocks safety controls.
+4. Reduced motion is implemented in CSS and `matchMedia` but was not tested with a real OS-level assistive setting or a screen reader.
+5. Lighthouse was run on a development server; production hosting, caching, and compression may change the result.

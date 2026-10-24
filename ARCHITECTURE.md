@@ -6,7 +6,7 @@ NIRBHAYA is a two-process web application with a local-first data model.
 - **Backend:** Flask 3, Flask-CORS, SQLite, Pillow, Requests, python-dotenv.
 - **Optional outbound:** Gemini / OpenAI / Anthropic (AI), OpenStreetMap (maps).
 
-The architecture was preserved during the audit. No framework migration or visual redesign was performed.
+The architecture was preserved during the audit and the later visual passes. No framework migration was performed; the redesign changed presentation, not routes, API contracts, storage, or safety logic.
 
 ---
 
@@ -67,7 +67,8 @@ frontend/src/
 │   ├── App.tsx               # RouterProvider
 │   └── router.tsx            # Public/protected routes
 ├── components/
-│   ├── layout/               # PageLayout, Header, Sidebar, Footer, QuickExitBar
+│   ├── layout/               # PageLayout, Header, Sidebar, Footer, QuickExitBar, AuthShell
+│   ├── sanctuary/            # ButterflyScene, ButterflyFallback, ValleyBackdrop, Reveal
 │   └── ui/                   # Button, Card, Input, Modal, Tabs, Alert, Badge, ...
 ├── features/
 │   ├── auth/                 # Login, SignUp, ForgotPassword, ResetPassword
@@ -101,7 +102,7 @@ frontend/src/
 │   ├── notifications/        # tel/sms/browser notification helpers
 │   ├── storage/              # scoped localStorage
 │   └── audio/                # Web Audio helpers
-├── styles/                   # tokens.css, globals.css
+├── styles/                   # tokens.css, sanctuary.css, globals.css
 ├── tests/                    # Vitest unit tests
 ├── types/                    # shared TypeScript types
 └── utils/                    # printable incident summary
@@ -120,10 +121,21 @@ Session state is held by `authService` and exposed through `useAuth`. On load, `
 
 ### Design system
 
-- `styles/tokens.css` contains colors, spacing, radii, shadows, typography, and layout dimensions.
+- `styles/tokens.css` contains colors, spacing, radii, shadows, typography, and layout dimensions. Typography is Playfair Display for headings/italic accents and Inter Tight for navigation, controls, forms, and safety information, with system fallbacks.
+- `styles/sanctuary.css` owns the landing and shared atmospheric layer: the loader, layered valley, butterfly stage, editorial `ed-*` landing, and the auth frame.
+- `styles/globals.css` imports the token and sanctuary layers, then defines the application shell, shared primitives, and the fill-up hover used by the standard `.btn` family.
 - `PageLayout` owns the navigation shell; feature pages render through `<Outlet />`.
 - UI primitives in `components/ui/` are reusable across modules.
-- The lavender/butterfly identity is unchanged. Responsive rules, `:focus-visible`, and reduced-motion handling were added.
+- `components/sanctuary/` holds the decorative pieces: a lazy-loaded Three.js butterfly with an image fallback, an SVG valley, and a one-shot IntersectionObserver `Reveal` wrapper.
+- The public landing is a dark editorial composition; the authenticated application stays light and high-contrast for safety readability. Responsive rules, `:focus-visible`, and reduced-motion handling apply to both.
+
+### Landing and motion boundaries
+
+- `/welcome` is public and does not depend on session state. Its fixed nav, overlay menu, atmosphere, polaroid, watermark, and scroll reveals are presentation only.
+- The overlay menu is a focus-trapped dialog rendered below Quick Exit (`--z-quick-exit`) and the floating SOS in z-order, so emergency controls stay reachable while it is open.
+- `Reveal.tsx` observes once, animates only opacity/transform, and becomes a visible no-op for reduced motion or when `IntersectionObserver` is unavailable.
+- SOS (`tel:112`), the siren, and Quick Exit never route through decorative motion or the 3D scene.
+- The Three.js scene is dynamically imported so the main bundle and the safety UI do not wait for it.
 
 ---
 

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /welcome
+Allow: /login
+Allow: /signup
+Allow: /forgot-password
+Allow: /reset-password
+Allow: /share/
+Disallow: /

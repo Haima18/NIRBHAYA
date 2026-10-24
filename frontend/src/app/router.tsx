@@ -25,17 +25,26 @@ import { WelcomePage } from '@/features/welcome/WelcomePage';
 import { PublicSharePage } from '@/features/location-share/PublicSharePage';
 import { useAuth } from '@/hooks/useAuth';
 
+/**
+ * Signed-out visitors are shown the public sanctuary landing page. The path
+ * they intended to visit travels with them so sign-in can return them there.
+ */
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   return isAuthenticated
     ? <>{children}</>
-    : <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    : <Navigate to="/welcome" replace state={{ from: location.pathname }} />;
 };
 
 const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
+};
+
+const FallbackRoute: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  return <Navigate to={isAuthenticated ? '/' : '/welcome'} replace />;
 };
 
 export const router = createBrowserRouter([
@@ -91,6 +100,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />
+    element: <FallbackRoute />
   }
 ]);

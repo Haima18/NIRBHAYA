@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, ArrowLeft } from 'lucide-react';
-import { QuickExitBar } from '@/components/layout/QuickExitBar';
+import { ArrowLeft, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
+import { AuthShell } from '@/components/layout/AuthShell';
 import { authService } from '@/services/auth/authService';
 
 export const ResetPasswordPage: React.FC = () => {
@@ -37,35 +37,77 @@ export const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0e0a1a', color: '#fff' }}>
-      <QuickExitBar />
-      <main style={{ flexGrow: 1, display: 'grid', placeItems: 'center', padding: '2rem' }}>
-        <div style={{ width: '100%', maxWidth: '480px', background: 'rgba(255,255,255,.04)', border: '1px solid rgba(222,203,254,.2)', borderRadius: '20px', padding: '2rem' }}>
-          <Lock size={30} color="#c5a3fc" />
-          <h1 className="font-serif" style={{ fontSize: '1.8rem', margin: '0.75rem 0 0.4rem' }}>Choose a new password</h1>
-          <p style={{ color: '#c5a3fc', fontSize: '0.88rem', lineHeight: 1.5 }}>
-            Reset tokens are single-use and expire after 30 minutes. A password must contain at least 8 characters.
-          </p>
+    <AuthShell
+      eyebrow="Account recovery"
+      title={<>Choose something <em>only you know.</em></>}
+      description="Reset tokens are single-use and expire after 30 minutes. A password must contain at least 8 characters."
+      points={[
+        'Your new password is hashed by the backend',
+        'Existing sessions may need to sign in again',
+        'Use a unique passphrase you have not used elsewhere'
+      ]}
+    >
+      <div className="auth-card__icon"><Lock size={20} /></div>
+      <p className="auth-card__eyebrow">New password</p>
+      <h2>Choose a new password</h2>
+      <p className="auth-card__intro">
+        Paste the token from your reset email, then set a password of at least 8 characters.
+      </p>
 
-          {success && <div style={{ marginTop: '1rem' }}><Alert type="success" title="Password updated">Taking you to the sign-in page…</Alert></div>}
-          {error && <div style={{ marginTop: '1rem' }}><Alert type="danger" title="Reset failed">{error}</Alert></div>}
-
-          {!success && (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
-              <Input label="Reset token" value={token} onChange={e => setToken(e.target.value)} required placeholder="Paste the single-use token" />
-              <Input label="New password" type="password" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
-              <Input label="Confirm new password" type="password" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={8} autoComplete="new-password" />
-              <Button variant="primary" type="submit" isLoading={loading} leftIcon={<Lock size={18} />}>
-                Set new password
-              </Button>
-            </form>
-          )}
-
-          <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '1.25rem', color: '#decbfe', fontSize: '0.85rem' }}>
-            <ArrowLeft size={15} /> Back to sign in
-          </Link>
+      {success && (
+        <div style={{ marginBottom: '1rem' }}>
+          <Alert type="success" title="Password updated">Taking you to the sign-in page…</Alert>
         </div>
-      </main>
-    </div>
+      )}
+      {error && (
+        <div style={{ marginBottom: '1rem' }}>
+          <Alert type="danger" title="Reset failed">{error}</Alert>
+        </div>
+      )}
+
+      {!success && (
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <Input
+            label="Reset token"
+            value={token}
+            onChange={event => setToken(event.target.value)}
+            required
+            placeholder="Paste the single-use token"
+          />
+          <Input
+            label="New password"
+            type="password"
+            value={password}
+            onChange={event => setPassword(event.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+            helperText="At least 8 characters."
+          />
+          <Input
+            label="Confirm new password"
+            type="password"
+            value={confirm}
+            onChange={event => setConfirm(event.target.value)}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+          <Button variant="primary" type="submit" isLoading={loading} leftIcon={<Lock size={17} />}>
+            Set new password
+          </Button>
+        </form>
+      )}
+
+      <div className="auth-links">
+        <p>
+          <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <ArrowLeft size={14} aria-hidden="true" /> Back to sign in
+          </Link>
+        </p>
+      </div>
+    </AuthShell>
   );
 };
+
+export default ResetPasswordPage;

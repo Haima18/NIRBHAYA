@@ -25,105 +25,100 @@ interface NavItem {
   path: string;
   labelKey: TranslationKey;
   icon: React.ReactNode;
-  badge?: string;
+  end?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { path: '/', labelKey: 'navDashboard', icon: <LayoutDashboard size={18} /> },
-  { path: '/map', labelKey: 'navMap', icon: <MapPinned size={18} /> },
-  { path: '/profile', labelKey: 'navProfile', icon: <UserRound size={18} /> },
-  { path: '/physical-safety', labelKey: 'navPhysicalSafety', icon: <ShieldAlert size={18} /> },
-  { path: '/digital-guardian', labelKey: 'navDigitalGuardian', icon: <ShieldCheck size={18} /> },
-  { path: '/privacy-shield', labelKey: 'navPrivacyShield', icon: <Eye size={18} /> },
-  { path: '/deepfake-detective', labelKey: 'navDeepfake', icon: <FileSearch size={18} /> },
-  { path: '/pathway', labelKey: 'navPathway', icon: <Compass size={18} /> },
-  { path: '/hercircle', labelKey: 'navCircle', icon: <Users size={18} /> },
-  { path: '/legal-support', labelKey: 'navLegal', icon: <Scale size={18} /> },
-  { path: '/evidence-vault', labelKey: 'navVault', icon: <FolderLock size={18} /> },
-  { path: '/ai-assistant', labelKey: 'navAssistant', icon: <Bot size={18} /> },
-  { path: '/safety-news', labelKey: 'navNews', icon: <Newspaper size={18} /> },
-  { path: '/empowerment', labelKey: 'navEmpowerment', icon: <Sparkles size={18} /> },
-  { path: '/emergency-directory', labelKey: 'navEmergency', icon: <PhoneCall size={18} /> },
-  { path: '/settings', labelKey: 'navSettings', icon: <Settings size={18} /> }
+interface NavGroup {
+  id: string;
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'home',
+    label: 'Your space',
+    items: [
+      { path: '/', labelKey: 'navDashboard', icon: <LayoutDashboard size={17} />, end: true },
+      { path: '/map', labelKey: 'navMap', icon: <MapPinned size={17} /> },
+      { path: '/profile', labelKey: 'navProfile', icon: <UserRound size={17} /> }
+    ]
+  },
+  {
+    id: 'protect',
+    label: 'Protect',
+    items: [
+      { path: '/physical-safety', labelKey: 'navPhysicalSafety', icon: <ShieldAlert size={17} /> },
+      { path: '/digital-guardian', labelKey: 'navDigitalGuardian', icon: <ShieldCheck size={17} /> },
+      { path: '/privacy-shield', labelKey: 'navPrivacyShield', icon: <Eye size={17} /> },
+      { path: '/deepfake-detective', labelKey: 'navDeepfake', icon: <FileSearch size={17} /> }
+    ]
+  },
+  {
+    id: 'navigate',
+    label: 'Navigate',
+    items: [
+      { path: '/pathway', labelKey: 'navPathway', icon: <Compass size={17} /> },
+      { path: '/hercircle', labelKey: 'navCircle', icon: <Users size={17} /> },
+      { path: '/legal-support', labelKey: 'navLegal', icon: <Scale size={17} /> },
+      { path: '/evidence-vault', labelKey: 'navVault', icon: <FolderLock size={17} /> }
+    ]
+  },
+  {
+    id: 'grow',
+    label: 'Grow',
+    items: [
+      { path: '/ai-assistant', labelKey: 'navAssistant', icon: <Bot size={17} /> },
+      { path: '/safety-news', labelKey: 'navNews', icon: <Newspaper size={17} /> },
+      { path: '/empowerment', labelKey: 'navEmpowerment', icon: <Sparkles size={17} /> },
+      { path: '/emergency-directory', labelKey: 'navEmergency', icon: <PhoneCall size={17} /> }
+    ]
+  },
+  {
+    id: 'account',
+    label: 'Account',
+    items: [{ path: '/settings', labelKey: 'navSettings', icon: <Settings size={17} /> }]
+  }
 ];
 
 export const Sidebar: React.FC = () => {
   const { t } = useTranslation();
+
   return (
-    <aside
-      style={{
-        width: 'var(--layout-sidebar-width)',
-        backgroundColor: 'var(--bg-surface)',
-        borderRight: '1px solid var(--border-color-default)',
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'calc(100vh - var(--layout-header-height) - var(--layout-quick-exit-height))',
-        position: 'sticky',
-        top: 'calc(var(--layout-header-height) + var(--layout-quick-exit-height))',
-        overflowY: 'auto',
-        padding: 'var(--space-4) var(--space-3)'
-      }}
-    >
-      <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', padding: '0.5rem 0.75rem 0.25rem' }}>
-        {t('navGroupTitle')}
-      </div>
-
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        {NAV_ITEMS.map(item => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.6rem 0.75rem',
-              borderRadius: 'var(--radius-md)',
-              fontSize: 'var(--font-size-sm)',
-              fontWeight: isActive ? 600 : 500,
-              color: isActive ? 'var(--color-brand-primary)' : 'var(--text-secondary)',
-              backgroundColor: isActive ? 'var(--color-brand-primary-subtle)' : 'transparent',
-              textDecoration: 'none',
-              transition: 'all var(--transition-fast)'
-            })}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              {item.icon}
-              <span>{t(item.labelKey)}</span>
-            </div>
-            {item.badge && (
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '1px 6px',
-                  borderRadius: 'var(--radius-full)',
-                  backgroundColor: 'var(--color-brand-primary-light)',
-                  color: 'var(--color-brand-primary)'
-                }}
+    <aside className="app-sidebar" aria-label="NIRBHAYA feature navigation">
+      {NAV_GROUPS.map(group => (
+        <div className="app-sidebar__group" key={group.id}>
+          <p className="app-sidebar__label">{group.label}</p>
+          <nav className="app-sidebar__nav">
+            {group.items.map(item => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.end}
+                className={({ isActive }) => `app-nav-link${isActive ? ' active' : ''}`}
               >
-                {item.badge}
-              </span>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+                <span className="app-nav-link__inner">
+                  <span aria-hidden="true" style={{ display: 'inline-flex' }}>{item.icon}</span>
+                  <span>{t(item.labelKey)}</span>
+                </span>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      ))}
 
-      {/* Quick Emergency Reminder at Bottom of Sidebar */}
-      <div
-        style={{
-          marginTop: 'auto',
-          padding: 'var(--space-4)',
-          borderRadius: 'var(--radius-md)',
-          backgroundColor: 'var(--color-danger-subtle)',
-          border: '1px solid var(--color-danger-border)',
-          fontSize: '0.75rem',
-          color: 'var(--color-danger-hover)'
-        }}
-      >
-        <p style={{ fontWeight: 700, marginBottom: '0.25rem' }}>🚨 {t('immediateHelp')}:</p>
-        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{t('nationalEmergency')}: <strong>112</strong></p>
-        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{t('cyberHelp')}: <strong>1930</strong></p>
-        <p style={{ margin: 0, color: 'var(--text-secondary)' }}>{t('womenDistress')}: <strong>181</strong></p>
+      <div className="app-sidebar__emergency">
+        <p>{t('immediateHelp')}</p>
+        <p>
+          {t('nationalEmergency')}: <strong><a href="tel:112">112</a></strong>
+          <br />
+          {t('cyberHelp')}: <strong>1930</strong>
+          <br />
+          {t('womenDistress')}: <strong>181</strong>
+        </p>
+        <p style={{ marginTop: '0.45rem', fontSize: '0.64rem' }}>
+          NIRBHAYA cannot dispatch these services for you.
+        </p>
       </div>
     </aside>
   );

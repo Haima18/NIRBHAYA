@@ -135,7 +135,24 @@ This document lists what the application does not do. If a limitation could affe
 
 ---
 
-## 10. Accessibility and localization
+## 10. Presentation and motion
+
+The public landing page and the shared interface use an editorial, motion-led visual layer. None of it is load-bearing for safety.
+
+| Limitation | Impact | What would be required |
+| :--- | :--- | :--- |
+| The atmosphere, polaroid, side words, watermark, and scroll reveals are decorative only. | If a decorative layer fails to render, the page is plainer but every control and route still works. | Nothing for safety; treat decoration as optional. |
+| No licensed hero photograph or video matching the reference designs is bundled. | The landing uses the existing butterfly image, an original SVG valley, and a Three.js butterfly instead. | Commission or license matching media and host it locally. |
+| The Three.js butterfly is a separate lazy chunk (~516 kB, ≈132 kB gzip). | Slow connections may wait before the decorative scene appears; the fallback image shows meanwhile. | Smaller geometry/textures, a lighter renderer, or a static-only hero on low-bandwidth connections. |
+| Reduced motion is handled in CSS and `matchMedia`, not verified with a real OS-level setting or screen reader. | Motion-sensitive users may still see some animation until an assistive-setting audit is done. | Test with OS reduced-motion enabled and with screen readers. |
+| The landing is longer than one screen. | The reference designs were single-screen heroes; NIRBHAYA’s features, principles, and steps must remain reachable below the fold. | A separate condensed one-screen variant, if desired, without dropping content. |
+| The overlay menu and floating SOS share the viewport. | The menu is deliberately placed below Quick Exit and the floating SOS in z-order, so it does not cover the full screen behind them. | Keep emergency controls above any decorative overlay. |
+| Fonts are loaded from Google Fonts. | Offline or blocked-font environments fall back to system serif/sans faces. | Self-host the font files. |
+| Motion and the 3D scene are not benchmarked on low-end hardware. | Frame rate may drop on older devices. | Profile on representative low-end devices and reduce effects accordingly. |
+
+---
+
+## 11. Accessibility and localization
 
 | Limitation | Impact | What would be required |
 | :--- | :--- | :--- |
@@ -147,7 +164,7 @@ This document lists what the application does not do. If a limitation could affe
 
 ---
 
-## 11. Testing and quality
+## 12. Testing and quality
 
 | Limitation | Impact | What would be required |
 | :--- | :--- | :--- |
@@ -162,7 +179,7 @@ This document lists what the application does not do. If a limitation could affe
 
 ---
 
-## 12. Deployment and operations
+## 13. Deployment and operations
 
 | Limitation | Impact | What would be required |
 | :--- | :--- | :--- |
@@ -180,7 +197,7 @@ This document lists what the application does not do. If a limitation could affe
 
 ---
 
-## 13. What would make NIRBHAYA production-ready
+## 14. What would make NIRBHAYA production-ready
 
 At minimum:
 

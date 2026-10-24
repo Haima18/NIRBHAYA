@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldAlert,
   Radio,
@@ -12,7 +12,8 @@ import {
   Sparkles,
   ShieldCheck,
   Eye,
-  Info
+  Info,
+  ArrowRight
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -23,10 +24,40 @@ import { newsService } from '@/services/news/newsService';
 import { useSiren } from '@/hooks/useSiren';
 import { useCheckInTimer } from '@/hooks/useCheckInTimer';
 import { useJourney } from '@/hooks/useJourney';
+import { useAuth } from '@/hooks/useAuth';
 import { notificationService } from '@/services/notifications/notificationService';
 import { IncidentRecord, PathwayPlan, SafetyNewsArticle, TrustedContact } from '@/types';
 
+const FEATURE_TILES = [
+  {
+    to: '/digital-guardian',
+    icon: <ShieldCheck size={20} />,
+    title: 'Digital Guardian',
+    text: 'Screen a message for threats, blackmail, coercion, and cyberstalking patterns with transparent, rule-based checks.'
+  },
+  {
+    to: '/deepfake-detective',
+    icon: <FileSearch size={20} />,
+    title: 'Deepfake Detective',
+    text: 'Inspect file signatures and EXIF metadata. This does not detect synthetic media or prove authenticity.'
+  },
+  {
+    to: '/pathway',
+    icon: <Compass size={20} />,
+    title: 'NIRBHAYA Pathway',
+    text: 'Step-by-step guidance for the question, “I am experiencing this. What can I do next?”'
+  },
+  {
+    to: '/privacy-shield',
+    icon: <Eye size={20} />,
+    title: 'Privacy Shield',
+    text: 'A self-assessment for social visibility, app permissions, sessions, and doxxing response.'
+  }
+];
+
 export const DashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { isPlaying, startSiren, stopSiren } = useSiren();
   const { session: checkInSession, remainingSeconds, confirmSafe } = useCheckInTimer();
   const { journey: activeJourney, confirmArrival } = useJourney();
@@ -43,61 +74,52 @@ export const DashboardPage: React.FC = () => {
     setNews(newsService.getArticles().slice(0, 3));
   }, []);
 
-  const formatTimer = (secs: number) => {
-    const mins = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${mins}m ${s < 10 ? '0' : ''}${s}s`;
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const rest = seconds % 60;
+    return `${mins}m ${rest < 10 ? '0' : ''}${rest}s`;
   };
 
   const handleDial112 = () => {
     notificationService.triggerEmergencyDialer();
   };
 
+  const firstName = user?.name?.trim().split(/\s+/)[0];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
-      {/* 1. Welcome & Primary Emergency Row */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 'var(--space-4)',
-          backgroundColor: 'var(--bg-surface)',
-          padding: 'var(--space-6)',
-          borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--border-color-default)'
-        }}
-      >
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.6rem' }}>
+      {/* 1. Hero and primary emergency actions */}
+      <section className="dashboard-hero" aria-labelledby="dashboard-title">
         <div>
-          <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-            NIRBHAYA Safety Dashboard
+          <p className="dashboard-hero__eyebrow">Your sanctuary today</p>
+          <h1 id="dashboard-title">
+            {firstName ? `Welcome back, ${firstName}.` : 'Welcome back to your safe space.'}
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-            Device-local safety tools, server-backed consent controls, and clearly labelled guidance.
+          <p>
+            Device-local safety tools, server-backed consent controls, and guidance with its limits left visible.
+            Take only the steps that feel right today.
           </p>
         </div>
 
-        {/* Primary Action Buttons */}
-        <div style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+        <div className="dashboard-hero__actions">
           {isPlaying ? (
             <Button
               variant="danger"
               size="lg"
               className="siren-active-indicator"
               onClick={stopSiren}
-              leftIcon={<Radio size={20} />}
+              leftIcon={<Radio size={19} />}
             >
-              STOP EMERGENCY SIREN
+              Stop siren
             </Button>
           ) : (
             <Button
               variant="outline"
               size="lg"
               onClick={startSiren}
-              leftIcon={<Radio size={20} color="var(--color-danger)" />}
+              leftIcon={<Radio size={19} color="var(--color-danger)" />}
             >
-              Activate Siren
+              Activate siren
             </Button>
           )}
 
@@ -105,238 +127,184 @@ export const DashboardPage: React.FC = () => {
             variant="emergency"
             size="lg"
             onClick={handleDial112}
-            leftIcon={<ShieldAlert size={20} />}
+            leftIcon={<ShieldAlert size={19} />}
           >
-            EMERGENCY SOS (112)
+            Emergency SOS (112)
           </Button>
         </div>
-      </div>
+      </section>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '0.5rem',
-          padding: '0.75rem 1rem',
-          borderRadius: 'var(--radius-md)',
-          backgroundColor: 'var(--color-info-subtle)',
-          border: '1px solid var(--color-info-border)',
-          color: 'var(--text-secondary)',
-          fontSize: '0.8rem'
-        }}
-      >
-        <Info size={16} color="var(--color-info)" style={{ flexShrink: 0, marginTop: '2px' }} />
+      <div className="dashboard-note" role="note">
+        <Info size={16} color="var(--color-info)" style={{ flexShrink: 0, marginTop: 2 }} aria-hidden="true" />
         <span>
-          The siren is a local browser sound and the SOS button opens your phone dialer; neither dispatches help.
-          Trusted-contact SMS messages are drafts you must send yourself. Sample directories and unconfigured integrations are labelled.
+          The siren is a local browser sound and SOS opens your phone dialer; neither dispatches help. Trusted-contact
+          SMS messages are drafts you send yourself. Sample directories and unconfigured integrations are labelled.
         </span>
       </div>
 
-      {/* 2. Active Session Banners (Truthful state only!) */}
+      {/* 2. Truthful active-session banners */}
       {(checkInSession?.status === 'active' || activeJourney?.status === 'in_progress') && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-4)' }}>
-          {/* Active Check-In Banner */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
           {checkInSession?.status === 'active' && (
-            <Card variant="danger" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Card variant="danger" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Clock size={28} color="var(--color-danger)" />
+                <Clock size={26} color="var(--color-danger)" aria-hidden="true" />
                 <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-danger-hover)', margin: 0 }}>
-                    Active Safety Check-in Timer
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-danger-hover)', margin: 0 }}>
+                    Safety check-in is active
                   </h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: 0 }}>
                     Remaining: <strong>{formatTimer(remainingSeconds)}</strong>
                   </p>
                 </div>
               </div>
               <Button variant="danger" size="sm" onClick={confirmSafe}>
-                I Am Safe (Check In)
+                I am safe — check in
               </Button>
             </Card>
           )}
 
-          {/* Active Journey Banner */}
           {activeJourney?.status === 'in_progress' && (
-            <Card variant="highlight" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Card variant="highlight" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Navigation size={28} color="var(--color-brand-primary)" />
+                <Navigation size={26} color="var(--color-brand-primary)" aria-hidden="true" />
                 <div>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-brand-primary)', margin: 0 }}>
-                    Active Journey Guardian
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-brand-primary-dark)', margin: 0 }}>
+                    Journey Guardian is active
                   </h3>
-                  <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                    Destination: <strong>{activeJourney.destination}</strong> (ETA: {activeJourney.etaMinutes}m)
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', margin: 0 }}>
+                    Destination: <strong>{activeJourney.destination}</strong> · ETA {activeJourney.etaMinutes}m
                   </p>
                 </div>
               </div>
               <Button variant="primary" size="sm" onClick={confirmArrival}>
-                Confirm Arrival
+                Confirm arrival
               </Button>
             </Card>
           )}
         </div>
       )}
 
-      {/* 3. Core Safety Modules Shortcuts */}
-      <div>
-        <h2 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600, marginBottom: 'var(--space-4)', color: 'var(--text-primary)' }}>
-          Safety & Digital Defense Centers
-        </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 'var(--space-4)' }}>
-          <Link to="/digital-guardian" style={{ textDecoration: 'none' }}>
-            <Card style={{ height: '100%', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--color-brand-primary-light)', color: 'var(--color-brand-primary)' }}>
-                  <ShieldCheck size={22} />
-                </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                  Digital Guardian
-                </h3>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Scan messages for threats, blackmail, extortion, sexual solicitation, and cyberstalking patterns.
-              </p>
-            </Card>
-          </Link>
-
-          <Link to="/deepfake-detective" style={{ textDecoration: 'none' }}>
-            <Card style={{ height: '100%', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--color-brand-secondary-light)', color: 'var(--color-brand-secondary)' }}>
-                  <FileSearch size={22} />
-                </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                  Deepfake Detective
-                </h3>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Inspect file signatures and EXIF metadata. This does not detect synthetic media or prove authenticity.
-              </p>
-            </Card>
-          </Link>
-
-          <Link to="/pathway" style={{ textDecoration: 'none' }}>
-            <Card style={{ height: '100%', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--color-info-light)', color: 'var(--color-info)' }}>
-                  <Compass size={22} />
-                </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                  NIRBHAYA Pathway
-                </h3>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Step-by-step guidance answering &ldquo;I am experiencing this situation. What can I do next?&rdquo;
-              </p>
-            </Card>
-          </Link>
-
-          <Link to="/privacy-shield" style={{ textDecoration: 'none' }}>
-            <Card style={{ height: '100%', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#fef3c7', color: '#d97706' }}>
-                  <Eye size={22} />
-                </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
-                  Privacy Shield
-                </h3>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Work through a self-assessment checklist for social media visibility, app permissions, sessions, and doxxing.
-              </p>
-            </Card>
-          </Link>
+      {/* 3. Feature shortcuts */}
+      <section aria-labelledby="modules-heading">
+        <div className="dashboard-section-title">
+          <h2 id="modules-heading">Safety &amp; digital defence</h2>
+          <p>Every destination below is a working part of NIRBHAYA.</p>
         </div>
-      </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '0.9rem' }}>
+          {FEATURE_TILES.map(tile => (
+            <Link key={tile.to} to={tile.to} style={{ textDecoration: 'none', display: 'block' }}>
+              <Card className="feature-tile">
+                <div className="feature-tile__icon" aria-hidden="true">{tile.icon}</div>
+                <h3 style={{ marginTop: '0.8rem' }}>{tile.title}</h3>
+                <p>{tile.text}</p>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    marginTop: '0.75rem',
+                    color: 'var(--color-brand-primary)',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.03em'
+                  }}
+                >
+                  Open <ArrowRight size={13} aria-hidden="true" />
+                </span>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </section>
 
-      {/* 4. Split Grid: Evidence Vault & Active Safety Plans */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 'var(--space-6)' }}>
-        {/* Recent Incidents & Evidence */}
+      {/* 4. Evidence Vault and safety pathways */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.1rem' }}>
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <FolderLock size={20} color="var(--color-brand-primary)" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Evidence Vault Records</h3>
+              <FolderLock size={19} color="var(--color-brand-primary)" aria-hidden="true" />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Evidence Vault records</h3>
             </div>
-            <Link to="/evidence-vault" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              View All ({incidents.length})
+            <Link to="/evidence-vault" style={{ fontSize: '0.78rem', fontWeight: 700 }}>
+              View all ({incidents.length})
             </Link>
           </div>
 
           {incidents.length === 0 ? (
             <EmptyState
               icon={<FolderLock size={24} />}
-              title="No Incidents Logged"
-              description="Your Evidence Vault is currently empty. You can log harassing texts, threats, or media anytime."
-              actionLabel="Create First Incident Log"
-              onAction={() => { window.location.assign('/evidence-vault'); }}
+              title="No incidents logged"
+              description="Your Evidence Vault is empty. You can record harassing messages, threats, or media whenever you are ready."
+              actionLabel="Create first incident record"
+              onAction={() => navigate('/evidence-vault')}
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-              {incidents.slice(0, 3).map(inc => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+              {incidents.slice(0, 3).map(incident => (
                 <div
-                  key={inc.id}
+                  key={incident.id}
                   style={{
-                    padding: 'var(--space-3)',
+                    padding: '0.7rem 0.85rem',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-color-default)',
-                    backgroundColor: 'var(--bg-app)',
+                    border: '1px solid var(--border-color-muted)',
+                    backgroundColor: 'var(--color-brand-primary-subtle)',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    gap: '0.6rem'
                   }}
                 >
                   <div>
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{inc.title}</h4>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-                      {inc.category} • {inc.incidentDate}
+                    <h4 style={{ fontSize: '0.86rem', fontWeight: 600, margin: 0 }}>{incident.title}</h4>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: 0 }}>
+                      {incident.category} · {incident.incidentDate}
                     </p>
                   </div>
-                  <Badge variant={inc.severity}>{inc.severity}</Badge>
+                  <Badge variant={incident.severity}>{incident.severity}</Badge>
                 </div>
               ))}
             </div>
           )}
         </Card>
 
-        {/* Pending Steps in Safety Plans */}
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Compass size={20} color="var(--color-info)" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Active Safety Pathways</h3>
+              <Compass size={19} color="var(--color-info)" aria-hidden="true" />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Active safety pathways</h3>
             </div>
-            <Link to="/pathway" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              Explore Pathways
+            <Link to="/pathway" style={{ fontSize: '0.78rem', fontWeight: 700 }}>
+              Explore pathways
             </Link>
           </div>
 
           {plans.length === 0 ? (
             <EmptyState
               icon={<Compass size={24} />}
-              title="No Active Safety Plans"
-              description="Explore the NIRBHAYA Pathway to create an actionable, step-by-step protection plan."
-              actionLabel="Generate a Safety Plan"
-              onAction={() => { window.location.assign('/pathway'); }}
+              title="No active safety plans"
+              description="Explore the NIRBHAYA Pathway to build an actionable, step-by-step protection plan at your own pace."
+              actionLabel="Create a safety plan"
+              onAction={() => navigate('/pathway')}
             />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-              {plans.map(p => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+              {plans.map(plan => (
                 <div
-                  key={p.situation}
+                  key={plan.situation}
                   style={{
-                    padding: 'var(--space-3)',
+                    padding: '0.7rem 0.85rem',
                     borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--border-color-default)',
-                    backgroundColor: 'var(--bg-app)'
+                    border: '1px solid var(--border-color-muted)',
+                    backgroundColor: 'var(--color-brand-primary-subtle)'
                   }}
                 >
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0, color: 'var(--color-brand-primary)' }}>
-                    {p.situationTitle}
+                  <h4 style={{ fontSize: '0.86rem', fontWeight: 600, margin: 0, color: 'var(--color-brand-primary-dark)' }}>
+                    {plan.situationTitle}
                   </h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    {p.steps.reduce((acc, s) => acc + s.actions.filter(a => a.completed).length, 0)} of{' '}
-                    {p.steps.reduce((acc, s) => acc + s.actions.length, 0)} action items completed.
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 3 }}>
+                    {plan.steps.reduce((acc, step) => acc + step.actions.filter(action => action.completed).length, 0)} of{' '}
+                    {plan.steps.reduce((acc, step) => acc + step.actions.length, 0)} action items completed.
                   </p>
                 </div>
               ))}
@@ -345,82 +313,82 @@ export const DashboardPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* 5. Trusted Circle & Awareness News Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 'var(--space-6)' }}>
-        {/* Trusted Circle */}
+      {/* 5. Trusted circle and awareness */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.1rem' }}>
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users size={20} color="var(--color-brand-secondary)" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Trusted Circle Contacts</h3>
+              <Users size={19} color="var(--color-brand-secondary)" aria-hidden="true" />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Trusted circle</h3>
             </div>
-            <Link to="/physical-safety" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              Manage Contacts
+            <Link to="/physical-safety" style={{ fontSize: '0.78rem', fontWeight: 700 }}>
+              Manage contacts
             </Link>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
             {contacts.length === 0 ? (
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                No trusted contacts are stored in this browser. Add one to prepare a manual SMS draft.
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                No trusted contacts are stored in this browser. Add one to prepare a manual SMS draft you control.
               </p>
-            ) : contacts.map(c => (
-              <div
-                key={c.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: 'var(--space-3)',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-app)',
-                  border: '1px solid var(--border-color-default)',
-                  gap: '0.5rem'
-                }}
-              >
-                <div>
-                  <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{c.name}</h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{c.relationship} • {c.phone}</p>
+            ) : (
+              contacts.map(contact => (
+                <div
+                  key={contact.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.7rem 0.85rem',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: 'var(--color-brand-primary-subtle)',
+                    border: '1px solid var(--border-color-muted)',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <div>
+                    <h4 style={{ fontSize: '0.86rem', fontWeight: 600, margin: 0 }}>{contact.name}</h4>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+                      {contact.relationship} · {contact.phone}
+                    </p>
+                  </div>
+                  <Badge variant={contact.notifyOnSOS ? 'info' : 'neutral'}>
+                    {contact.notifyOnSOS ? 'In SOS draft' : 'Not in SOS'}
+                  </Badge>
                 </div>
-                <Badge variant={c.notifyOnSOS ? 'info' : 'neutral'}>
-                  {c.notifyOnSOS ? 'In SOS draft' : 'Not in SOS'}
-                </Badge>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 
-        {/* Evergreen awareness content, not a live news feed */}
         <Card>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Sparkles size={20} color="var(--color-brand-primary)" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Evergreen Safety Awareness</h3>
+              <Sparkles size={19} color="var(--color-brand-primary)" aria-hidden="true" />
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Evergreen safety awareness</h3>
             </div>
-            <Link to="/safety-news" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              Awareness Library
+            <Link to="/safety-news" style={{ fontSize: '0.78rem', fontWeight: 700 }}>
+              Awareness library
             </Link>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
             {news.map(article => (
               <div
                 key={article.id}
                 style={{
-                  padding: 'var(--space-3)',
+                  padding: '0.7rem 0.85rem',
                   borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-app)',
-                  border: '1px solid var(--border-color-default)'
+                  backgroundColor: 'var(--color-brand-primary-subtle)',
+                  border: '1px solid var(--border-color-muted)'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-                  <h4 style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
-                    {article.headline}
-                  </h4>
+                  <h4 style={{ fontSize: '0.84rem', fontWeight: 600, margin: 0 }}>{article.headline}</h4>
                   <Badge variant="neutral">{article.category}</Badge>
                 </div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
-                  💡 <strong>Safety Lesson:</strong> {article.safetyLesson}
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>
+                  <strong>Practical note:</strong> {article.safetyLesson}
                 </p>
               </div>
             ))}

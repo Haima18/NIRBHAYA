@@ -1,8 +1,9 @@
 # Test Report
 
 **Report date:** 2026-10-24  
-**Baseline commit:** `7319d2b`  
-**Post-repair state:** working tree / audit repair commit  
+**Audit baseline:** `7319d2b`  
+**Redesign/motion starting point:** `dd63065`  
+**Post-repair state:** working tree / audit repair commits plus the sanctuary and editorial-motion passes  
 **Environment:** Windows, Node.js 20.18.0, npm 10.8.2, Python 3.13.14
 
 This report records what was actually executed. It does not claim tests that were not run.
@@ -16,6 +17,8 @@ This report records what was actually executed. It does not claim tests that wer
 | Frontend production build + type check | `cd frontend && npm run build` | **PASS** |
 | Frontend unit tests | `cd frontend && npm test` | **PASS** — 4 files, 13 tests |
 | Backend unit/API tests | `cd backend && python -m unittest discover -s tests -v` | **PASS** — 17 tests |
+| Lighthouse (landing, development server) | Browser audit of `/welcome` | **PASS** — Accessibility 100, Best Practices 100, SEO 100 |
+| Manual browser visual QA | Desktop 1440×960 and 390 px landing, overlay menu, dashboard, auth, Physical Safety, Evidence Vault, Settings | **PASS (manual)** |
 | Live API smoke test | Start `python app.py`; `GET /api/health`, `GET /api/status` | **PASS** |
 | Lint | — | **NOT RUN** — no ESLint config/script |
 | Browser E2E / visual regression | — | **NOT RUN** — no Playwright/Cypress suite |
@@ -41,20 +44,22 @@ Actual output (abridged):
 > tsc && vite build
 
 vite v5.4.21 building for production...
-✓ 2011 modules transformed.
-dist/index.html                 1.28 kB │ gzip:   0.73 kB
-dist/assets/index-CfTTaxG1.css  7.70 kB │ gzip:   2.68 kB
-dist/assets/index-Defn3e5q.js 542.77 kB │ gzip: 149.26 kB
+✓ 2019 modules transformed.
+dist/index.html                 1.37 kB │ gzip:   0.77 kB
+dist/assets/index-Uw6sastr.css 75.98 kB │ gzip:  16.39 kB
+dist/assets/ButterflyScene-*.js 516.39 kB │ gzip: 132.07 kB
+dist/assets/index-*.js        550.41 kB │ gzip: 155.53 kB
 
 (!) Some chunks are larger than 500 kB after minification.
-✓ built in 4.56s
+✓ built in 5.13s
 ```
 
 Interpretation:
 
 - `tsc` completed with no TypeScript errors.
 - Vite produced a production bundle.
-- The only warning is the >500 kB JavaScript chunk. It is not a failure; code-splitting is future work.
+- The Three.js butterfly is split into its own lazy chunk.
+- The only warning is the >500 kB JavaScript chunk. It is not a failure; further code-splitting is future work.
 
 ---
 
@@ -233,12 +238,18 @@ This confirms the repaired API starts and reports capability status without expo
 | Secret handling | `/api/status` returns booleans/lists, not keys | Pass |
 | Port hygiene | Stale v1.0.0 process identified and stopped | Pass |
 | Documentation | Seven required docs present; README rewritten | Pass |
+| Landing visual QA | 1440×960 and 390 px composition, fixed nav, overlay menu, section reveals, polaroid/watermark fallbacks | Pass (manual) |
+| Landing focus handoff | Overlay menu focuses the first link, locks body scroll, restores focus on close | Pass (manual) |
+| Mobile nav grouping | SOS icon and menu button stay grouped and reachable at 390 px | Pass (manual) |
+| Auth and dashboard | Login page and authenticated dashboard render with the new typography and unchanged controls | Pass (manual) |
+| Lighthouse | `/welcome` on the development server | Accessibility 100, Best Practices 100, SEO 100 |
 
 Manual verification **not** performed:
 
-- Clicking through every page in a real browser.
-- Mobile viewport visual inspection.
-- Screen-reader or keyboard-only navigation audit.
+- Clicking through every feature page and every form submission.
+- Screen-reader or keyboard-only navigation audit beyond the overlay focus handoff.
+- A real OS-level reduced-motion setting (CSS and `matchMedia` were checked by code inspection).
+- Physical mobile devices.
 - Actual geolocation permission prompts.
 - Actual siren audio output on hardware.
 - Actual `tel:`/`sms:` app handoff on a phone.
@@ -249,18 +260,38 @@ Manual verification **not** performed:
 
 ---
 
-## 7. Known warnings and non-failures
+## 7. Redesign and editorial-motion verification
+
+The visual layer was verified separately from the automated safety tests.
+
+| Check | Result |
+| :--- | :--- |
+| Desktop landing at 1440×960 | Hero, fixed nav, mixed sans/serif headline, butterfly rail, tilted polaroid, watermark, and all content sections render. |
+| Phone landing at 390 px | Hero reflows to one column; SOS and menu buttons stay grouped; butterfly remains visible; no horizontal overflow. |
+| Overlay menu | Opens from the nav pill and mobile menu button; first link receives focus; body scroll locks; Escape is still governed by the global Quick Exit priority; focus returns on close. |
+| Section reveals | All three feature cards and the principles/steps reveal at the intended time; the observer disconnects after first reveal. |
+| Reduced motion (code path) | CSS disables atmosphere/pulse/scroll-line animations; reveal content is forced visible; smooth scrolling is skipped. |
+| WebGL fallback | Forced by disabling WebGL context creation; fallback artwork rendered and decorative copy changed. |
+| Shared button motion | Fill-up hover applies to standard buttons; `danger` and `emergency` variants are excluded. |
+| SOS / Quick Exit | Floating SOS and Quick Exit remain above the overlay menu and clickable; no decorative layer blocks them. |
+| Auth and dashboard | Login and authenticated dashboard render with Playfair Display/Inter Tight and unchanged controls. |
+| Console | No errors on `/welcome`; only the pre-existing React Router v7 future-flag warning. |
+| Lighthouse | Accessibility 100, Best Practices 100, SEO 100 on the development server. |
+
+---
+
+## 8. Known warnings and non-failures
 
 | Warning | Meaning | Action |
 | :--- | :--- | :--- |
-| `Some chunks are larger than 500 kB` | Single JS bundle is 541.84 kB minified. | Optional code-splitting; not a build failure. |
+| `Some chunks are larger than 500 kB` | Main JS is 550.41 kB minified; the lazy Three.js butterfly is 516.39 kB. | Optional code-splitting; not a build failure. |
 | `SECRET_KEY is not configured` during tests | Test environment leaves it unset. | Expected; production must set it. |
 | PowerShell exit code 1 with no output | Often caused by `Get-NetTCPConnection` finding no listener. | Check the actual command output, not only `$LASTEXITCODE`. |
 | Git LF→CRLF warnings | Windows line-ending normalization. | Harmless. |
 
 ---
 
-## 8. How to reproduce
+## 9. How to reproduce
 
 ```powershell
 cd frontend
@@ -291,8 +322,8 @@ Open `http://localhost:3000`.
 
 ---
 
-## 9. Bottom line
+## 10. Bottom line
 
-The repaired code **builds, type-checks, and passes all existing automated tests**. The tested safety-critical behaviours are: auth/consent enforcement, password change, account deletion purge, location-share lifecycle, deepfake `not_determined` reporting, and temp-media non-retention.
+The repaired code **builds, type-checks, and passes all existing automated tests**. The tested safety-critical behaviours are: auth/consent enforcement, password change, account deletion purge, location-share lifecycle, deepfake `not_determined` reporting, and temp-media non-retention. The redesigned landing also passes Lighthouse accessibility/best-practices/SEO audits and the manual desktop/phone checks listed in §7.
 
-The application is **not fully tested** for browser interaction, accessibility, load, or production security. Those gaps are listed above and in [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
+The application is **not fully tested** for every browser interaction, screen-reader traversal, load, or production security. Those gaps are listed above and in [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).
