@@ -122,20 +122,21 @@ Session state is held by `authService` and exposed through `useAuth`. On load, `
 ### Design system
 
 - `styles/tokens.css` contains colors, spacing, radii, shadows, typography, and layout dimensions. Typography is Playfair Display for headings/italic accents and Inter Tight for navigation, controls, forms, and safety information, with system fallbacks.
-- `styles/sanctuary.css` owns the landing and shared atmospheric layer: the loader, layered valley, butterfly stage, editorial `ed-*` landing, and the auth frame.
-- `styles/globals.css` imports the token and sanctuary layers, then defines the application shell, shared primitives, and the fill-up hover used by the standard `.btn` family.
+- `styles/sanctuary.css` owns the loader, auth frame, and shared sanctuary styles. `styles/landing.css` owns the public `mh-*` hero: the full-bleed scene, grid, nav, headline, polaroid, watermark, and responsive/reduced-motion rules.
+- `styles/globals.css` imports the token, sanctuary, and landing layers, then defines the application shell, shared primitives, and the fill-up hover used by the standard `.btn` family.
 - `PageLayout` owns the navigation shell; feature pages render through `<Outlet />`.
 - UI primitives in `components/ui/` are reusable across modules.
-- `components/sanctuary/` holds the decorative pieces: a lazy-loaded Three.js butterfly with an image fallback, an SVG valley, and a one-shot IntersectionObserver `Reveal` wrapper.
-- The public landing is a dark editorial composition; the authenticated application stays light and high-contrast for safety readability. Responsive rules, `:focus-visible`, and reduced-motion handling apply to both.
+- `components/sanctuary/` still holds the Three.js butterfly, SVG valley, and `Reveal` wrapper, but the landing no longer imports them. The loader uses the butterfly image directly.
+- The public landing is a one-screen editorial hero over a supplied portrait; the authenticated application stays light and high-contrast for safety readability. Responsive rules, `:focus-visible`, and reduced-motion handling apply to both.
 
 ### Landing and motion boundaries
 
-- `/welcome` is public and does not depend on session state. Its fixed nav, overlay menu, atmosphere, polaroid, watermark, and scroll reveals are presentation only.
-- The overlay menu is a focus-trapped dialog rendered below Quick Exit (`--z-quick-exit`) and the floating SOS in z-order, so emergency controls stay reachable while it is open.
-- `Reveal.tsx` observes once, animates only opacity/transform, and becomes a visible no-op for reduced motion or when `IntersectionObserver` is unavailable.
-- SOS (`tel:112`), the siren, and Quick Exit never route through decorative motion or the 3D scene.
-- The Three.js scene is dynamically imported so the main bundle and the safety UI do not wait for it.
+- `/welcome` is public and does not depend on session state. Its grid, nav, headline, polaroid, watermark, and entrance sequence are presentation only.
+- The hero uses the supplied CloudFront photo, polaroid, and 4.04 s loop. Two muted videos alternate and crossfade the last second into the first so the loop never jumps or reverses.
+- The video fades in once its first frame is ready and is removed entirely for reduced motion, leaving the photo.
+- The frame is scaled from a 1155x767 composition with `--u = min(100vw/1155, (100svh - Quick Exit)/767)`; phones use the full viewport below the Quick Exit bar with no scrolling.
+- SOS (`tel:112`), the siren, and Quick Exit never route through decorative motion, and they keep their own z-index above the hero.
+- The landing imports no Three.js scene, so the main bundle does not wait for one.
 
 ---
 

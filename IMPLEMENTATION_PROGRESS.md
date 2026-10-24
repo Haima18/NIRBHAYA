@@ -90,11 +90,11 @@ This document distinguishes **implemented**, **partial**, **sample/demo**, and *
 
 | Check | Status | Detail |
 | :--- | :--- | :--- |
-| TypeScript build | **Passed** | `tsc && vite build`; 2,019 modules; CSS 75.98 kB (16.39 kB gzip); main JS 550.41 kB (155.53 kB gzip); lazy butterfly chunk 516.39 kB (132.07 kB gzip). |
+| TypeScript build | **Passed** | `tsc && vite build`; 2,013 modules; CSS 68.48 kB (15.01 kB gzip); main JS 527.12 kB (148.41 kB gzip); no separate 3D chunk. |
 | Frontend tests | **Passed** | 4 files / 13 tests (analyzer 5, location 3, notifications 2, pathway 3). |
 | Backend tests | **Passed** | 17 tests (12 auth/API, 5 services). |
 | Lighthouse (landing, dev server) | **Passed** | Accessibility 100, Best Practices 100, SEO 100. Not a production performance benchmark. |
-| Browser visual QA | **Passed (manual)** | Desktop 1440Ã—960 and 390 px landing, overlay menu and focus handoff, dashboard, auth, Physical Safety, Evidence Vault, Settings; WebGL fallback; siren toggle; protected-route redirect. |
+| Browser visual QA | **Passed (manual)** | Desktop 1440x960 and 390x844 one-screen hero, video crossfade, reduced-motion hero, dashboard, auth, Physical Safety, Evidence Vault, Settings; siren toggle; protected-route redirect. |
 | Deepfake retention | **Passed** | `mediaRetained: false`, `authenticityStatus: not_determined`. |
 | Location share lifecycle | **Passed** | Create â†’ public read â†’ stop â†’ coordinates cleared. |
 | Account deletion purge | **Passed** | Shares return 404 after deletion. |
@@ -181,6 +181,8 @@ The application was re-skinned and re-composed as **The Living Lavender Sanctuar
 
 ## 7. Editorial motion integration (2026-10-24)
 
+> **Superseded by section 8.** This section is kept as a record of the previous pass.
+
 The landing page was re-composed a second time, using the supplied editorial/motion references as a **design language** rather than copying their media or copy. The interior application remains light and high-contrast for safety readability; the public landing is the cinematic, dark surface.
 
 ### Landing composition
@@ -218,3 +220,46 @@ The landing page was re-composed a second time, using the supplied editorial/mot
 - No licensed hero photograph or video matching the references is available locally, and the third-party fashion/portfolio media was deliberately not hotlinked. The existing `butterfly-glow.jpg`, the original SVG valley, and the Three.js butterfly carry the atmosphere instead.
 - The landing remains a long page below the first screen; the references were one-screen heroes, but NIRBHAYAâ€™s feature, principle, and step content must remain reachable.
 - The 3D scene is still a ~516 kB lazy chunk. It is decorative and never blocks safety controls.
+
+---
+
+## 8. MAREN hero landing (2026-10-24)
+
+The public landing was replaced a third time as a one-screen editorial hero built from the supplied MAREN composition and its CloudFront photo, polaroid, and loop. This is a complete replacement: the previous `ed-*` landing markup and styles are gone. NIRBHAYA branding and honest safety copy are retained; no fashion copy, shop links, or third-party brands were added. Routes, API contracts, auth, storage, and safety logic are unchanged.
+
+### Composition
+
+- `features/welcome/WelcomePage.tsx` renders a single 1155x767 frame scaled with `--u = min(100vw/1155, (100svh - Quick Exit)/767)`, with the supplied portrait as the scene and a thin white grid over it.
+- Header: italic serif `NIRBHAYA`, Safety / Privacy / Support links, and glass heart (signup) and user (login) buttons.
+- Headline: "Your safety." / "Your voice." in Inter Tight 300, then "*Your choice.*" in Playfair Display Italic.
+- Right column: peach star "Always open", the honest introduction, the "not an emergency service" line with inline `112` and `112.gov.in`, a white "Step inside" pill, and a round arrow to signup.
+- Lower left: "Private / By design / Always yours", the tilted -13 degree polaroid captioned "Your everyday courage", and a giant italic `NIRBHAYA` watermark.
+- The floating `tel:112` SOS stays above every decorative layer.
+
+### Media and motion
+
+- The supplied CloudFront photo, polaroid, and 4.04 s loop are referenced directly; no local copies are bundled.
+- Two muted `<video>` elements alternate: when the active clip has about 1 s left, the standby seeks to 0, starts, and crossfades in over 1 s, so the loop never jumps or reverses.
+- The video layer fades in over 0.8 s once the first frame is ready and stays hidden if autoplay or the network fails; the photo remains the scene.
+- Entrance animation is one CSS sequence: header drop, headline rise, copy fade-up, polaroid drop, grid draw.
+- `prefers-reduced-motion: reduce` removes every entrance animation, renders the photo only (no `<video>` elements), and disables hover transitions.
+
+### Responsive and safety guardrails
+
+- Phones (<=900 px or <=4:5 aspect) use the full viewport below the Quick Exit bar, keep the photo full-bleed with a face-safe crop (`50% 14%`), and reflow the headline and copy over a deeper scrim. The polaroid shrinks, the watermark scales, and the page stays one screen with no scrolling.
+- SOS, Quick Exit, and the siren keep their own z-index and handlers; no decorative element intercepts pointer events.
+- Focus-visible outlines are explicit, and the CTA and SOS accessible names include their visible text.
+
+### Verification
+
+- `npm run build` passed; TypeScript clean; 2,013 modules; CSS 68.48 kB (15.01 kB gzip); main JS 527.12 kB (148.41 kB gzip); no butterfly chunk.
+- Frontend 13/13 tests passed.
+- Lighthouse on `/welcome` (development server): Accessibility 100, Best Practices 100, SEO 100, zero failing audits.
+- Manual checks: 1440x960 (frame 1388x922 at y=38, document height 960, no scroll), 390x844 (frame 390x806 at y=38, document height 844, no scroll, face visible), crossfade switching near the last second, no console errors.
+- Reduced motion verified with headless Chrome `--force-prefers-reduced-motion`: zero `<video>` elements in the DOM and a static photo.
+
+### Limitations
+
+- The hero depends on the supplied CloudFront host; if it is unavailable the page falls back to its `#3B2F5C` background and still renders every control.
+- The media is third-party and unlicensed for redistribution; host and license it before production.
+- Real OS reduced-motion settings, screen readers, and physical phones were not exercised.

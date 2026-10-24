@@ -32,7 +32,7 @@
 
 The baseline already contained a substantial, working prototype:
 
-- React 18 + TypeScript + Vite frontend with a lavender/butterfly visual identity.
+- React 18 + TypeScript + Vite frontend with a lavender/peach visual identity.
 - Flask API with SQLite account storage and Werkzeug password hashing.
 - Login and registration pages, a dashboard, and 14+ feature pages.
 - Web Audio siren, `tel:112` link, check-in timer, journey tracking, fake-call modal.
@@ -196,6 +196,8 @@ See [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md) §6–7 for the ful
 
 ## 10. Editorial motion pass
 
+> **Superseded by section 11.** This section is kept as a record of the previous pass.
+
 A second presentation pass applied the supplied editorial/motion references to the public landing page and the shared interaction language. It did not change the audit conclusions, routes, API contracts, data model, or safety logic.
 
 ### What changed
@@ -233,3 +235,41 @@ A second presentation pass applied the supplied editorial/motion references to t
 3. The Three.js chunk remains large (≈516 kB, ≈132 kB gzip). It is decorative and never blocks safety controls.
 4. Reduced motion is implemented in CSS and `matchMedia` but was not tested with a real OS-level assistive setting or a screen reader.
 5. Lighthouse was run on a development server; production hosting, caching, and compression may change the result.
+
+---
+
+## 11. MAREN hero replacement (2026-10-24)
+
+The public landing was replaced with a one-screen editorial hero using the supplied MAREN composition and its CloudFront photo, polaroid, and loop. NIRBHAYA branding and safety copy were kept. This supersedes the landing descriptions in sections 9 and 10; routes, API contracts, data, and safety logic are unchanged.
+
+### What changed
+
+- `/welcome` is now a single 1155x767 frame scaled to the viewport below the Quick Exit bar: full-bleed portrait, thin white grid, mixed sans/serif headline, peach "Always open" star, right-hand introduction and entry control, tilted polaroid, and a giant italic `NIRBHAYA` watermark.
+- The supplied CloudFront photo, polaroid, and 4.04 s loop are used directly. Two alternating muted videos crossfade the last second into the first, so the loop never jumps or reverses. The video fades in once ready and is hidden for reduced motion.
+- The previous `ed-*` landing markup, overlay menu, scroll reveals, side words, and long-form sections were removed. `styles/landing.css` now owns the `mh-*` hero; `styles/sanctuary.css` keeps the loader, auth, and shared sanctuary styles.
+- `Reveal.tsx`, `ButterflyScene.tsx`, and `ValleyBackdrop.tsx` are no longer imported by the landing. `three` remains installed but is not in the production bundle.
+
+### What did not change
+
+- Every route, API contract, auth rule, storage rule, and safety behaviour.
+- SOS (`tel:112`), Quick Exit, and siren handlers and their z-order above decorative layers.
+- Honest safety copy: the hero states that NIRBHAYA is a support tool, not an emergency service, and links `112` and `112.gov.in` inline.
+
+### Verification
+
+| Check | Result |
+| :--- | :--- |
+| `cd frontend && npm run build` | **Passed** - TypeScript clean; 2,013 modules; CSS 68.48 kB (15.01 kB gzip); main JS 527.12 kB (148.41 kB gzip); no separate 3D chunk. |
+| Frontend tests | **Passed** - 4 files / 13 tests. |
+| Lighthouse (`/welcome`, development server) | **Passed** - Accessibility 100, Best Practices 100, SEO 100, zero failing audits. |
+| Desktop 1440x960 | **Passed** - frame 1388x922 at y=38; document height 960; no scroll. |
+| Phone 390x844 | **Passed** - frame 390x806 at y=38; document height 844; no scroll; face visible. |
+| Video loop | **Passed** - two videos alternate and crossfade with about 1 s remaining; no console errors. |
+| Reduced motion | **Passed** - headless Chrome with `--force-prefers-reduced-motion` renders zero `<video>` elements and a static photo. |
+
+### Residual risks
+
+1. The hero depends on a third-party CloudFront host; a block or outage leaves the flat `#3B2F5C` background with every control still usable.
+2. The media is not licensed for redistribution and should be replaced with owned assets before production.
+3. Real OS reduced-motion settings, screen readers, and physical devices were not exercised.
+4. The one-screen hero removes the previous long-form feature sections; feature discovery now relies on the header links and the right-hand copy.

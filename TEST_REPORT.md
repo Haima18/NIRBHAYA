@@ -18,7 +18,7 @@ This report records what was actually executed. It does not claim tests that wer
 | Frontend unit tests | `cd frontend && npm test` | **PASS** — 4 files, 13 tests |
 | Backend unit/API tests | `cd backend && python -m unittest discover -s tests -v` | **PASS** — 17 tests |
 | Lighthouse (landing, development server) | Browser audit of `/welcome` | **PASS** — Accessibility 100, Best Practices 100, SEO 100 |
-| Manual browser visual QA | Desktop 1440×960 and 390 px landing, overlay menu, dashboard, auth, Physical Safety, Evidence Vault, Settings | **PASS (manual)** |
+| Manual browser visual QA | Desktop 1440x960 and 390x844 one-screen landing, video crossfade, reduced motion, dashboard, auth, Physical Safety, Evidence Vault, Settings | **PASS (manual)** |
 | Live API smoke test | Start `python app.py`; `GET /api/health`, `GET /api/status` | **PASS** |
 | Lint | — | **NOT RUN** — no ESLint config/script |
 | Browser E2E / visual regression | — | **NOT RUN** — no Playwright/Cypress suite |
@@ -44,22 +44,20 @@ Actual output (abridged):
 > tsc && vite build
 
 vite v5.4.21 building for production...
-✓ 2019 modules transformed.
-dist/index.html                 1.37 kB │ gzip:   0.77 kB
-dist/assets/index-Uw6sastr.css 75.98 kB │ gzip:  16.39 kB
-dist/assets/ButterflyScene-*.js 516.39 kB │ gzip: 132.07 kB
-dist/assets/index-*.js        550.41 kB │ gzip: 155.53 kB
+2013 modules transformed.
+dist/index.html                 1.37 kB  gzip:   0.77 kB
+dist/assets/index-*.css        68.48 kB  gzip:  15.01 kB
+dist/assets/index-*.js        527.12 kB  gzip: 148.41 kB
 
 (!) Some chunks are larger than 500 kB after minification.
-✓ built in 5.13s
+built in 3.88s
 ```
 
 Interpretation:
 
 - `tsc` completed with no TypeScript errors.
 - Vite produced a production bundle.
-- The Three.js butterfly is split into its own lazy chunk.
-- The only warning is the >500 kB JavaScript chunk. It is not a failure; further code-splitting is future work.
+- The landing no longer imports Three.js, so there is no separate scene chunk.
 
 ---
 
@@ -238,9 +236,9 @@ This confirms the repaired API starts and reports capability status without expo
 | Secret handling | `/api/status` returns booleans/lists, not keys | Pass |
 | Port hygiene | Stale v1.0.0 process identified and stopped | Pass |
 | Documentation | Seven required docs present; README rewritten | Pass |
-| Landing visual QA | 1440×960 and 390 px composition, fixed nav, overlay menu, section reveals, polaroid/watermark fallbacks | Pass (manual) |
-| Landing focus handoff | Overlay menu focuses the first link, locks body scroll, restores focus on close | Pass (manual) |
-| Mobile nav grouping | SOS icon and menu button stay grouped and reachable at 390 px | Pass (manual) |
+| Landing visual QA | 1440x960 and 390x844 one-screen hero, grid, polaroid, watermark, nav, CTA, and floating SOS | Pass (manual) |
+| Landing video loop | Two videos crossfade the last second into the first; no jump or reverse | Pass (manual) |
+| Landing mobile layout | 390x844 one screen, face visible, no horizontal overflow, SOS icon reachable | Pass (manual) |
 | Auth and dashboard | Login page and authenticated dashboard render with the new typography and unchanged controls | Pass (manual) |
 | Lighthouse | `/welcome` on the development server | Accessibility 100, Best Practices 100, SEO 100 |
 
@@ -262,6 +260,8 @@ Manual verification **not** performed:
 
 ## 7. Redesign and editorial-motion verification
 
+> The landing rows in this table describe the previous editorial pass. The MAREN hero subsection below supersedes them; the dashboard, auth, and safety-control rows still apply.
+
 The visual layer was verified separately from the automated safety tests.
 
 | Check | Result |
@@ -278,13 +278,26 @@ The visual layer was verified separately from the automated safety tests.
 | Console | No errors on `/welcome`; only the pre-existing React Router v7 future-flag warning. |
 | Lighthouse | Accessibility 100, Best Practices 100, SEO 100 on the development server. |
 
+### MAREN hero verification (2026-10-24)
+
+| Check | Result |
+| :--- | :--- |
+| Desktop 1440x960 | Frame 1388x922 at y=38; document height 960; no scroll; model fills the frame; grid, headline, polaroid, watermark, nav, CTA, and SOS correct. |
+| Phone 390x844 | Frame 390x806 at y=38; document height 844; no scroll; face visible with `50% 14%` crop; CTA on one line; SOS icon clear. |
+| Video loop | Two muted videos alternate; the outgoing clip fades out near 3.8 s while the incoming clip starts at 0 and fades in; no jump or reverse. |
+| Reduced motion | Headless Chrome `--force-prefers-reduced-motion` produced zero `<video>` elements and a static photo; watermark stays centred. |
+| Lighthouse (`/welcome`) | Accessibility 100, Best Practices 100, SEO 100, zero failing audits. |
+| Console | No errors; only the pre-existing React Router v7 future-flag warning. |
+
+The supplied CloudFront photo, polaroid, and loop are used directly. No local copies are bundled. The previous `ed-*` landing, overlay menu, scroll reveals, and long-form sections are gone.
+
 ---
 
 ## 8. Known warnings and non-failures
 
 | Warning | Meaning | Action |
 | :--- | :--- | :--- |
-| `Some chunks are larger than 500 kB` | Main JS is 550.41 kB minified; the lazy Three.js butterfly is 516.39 kB. | Optional code-splitting; not a build failure. |
+| `Some chunks are larger than 500 kB` | Main JS is 527.12 kB minified; there is no separate 3D chunk. | Optional code-splitting; not a build failure. |
 | `SECRET_KEY is not configured` during tests | Test environment leaves it unset. | Expected; production must set it. |
 | PowerShell exit code 1 with no output | Often caused by `Get-NetTCPConnection` finding no listener. | Check the actual command output, not only `$LASTEXITCODE`. |
 | Git LF→CRLF warnings | Windows line-ending normalization. | Harmless. |

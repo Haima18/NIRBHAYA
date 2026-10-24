@@ -137,18 +137,18 @@ This document lists what the application does not do. If a limitation could affe
 
 ## 10. Presentation and motion
 
-The public landing page and the shared interface use an editorial, motion-led visual layer. None of it is load-bearing for safety.
+The public landing page is a one-screen editorial hero with an external photo, polaroid, and video loop. The authenticated interface stays light and high-contrast. None of the landing decoration is load-bearing for safety.
 
 | Limitation | Impact | What would be required |
 | :--- | :--- | :--- |
-| The atmosphere, polaroid, side words, watermark, and scroll reveals are decorative only. | If a decorative layer fails to render, the page is plainer but every control and route still works. | Nothing for safety; treat decoration as optional. |
-| No licensed hero photograph or video matching the reference designs is bundled. | The landing uses the existing butterfly image, an original SVG valley, and a Three.js butterfly instead. | Commission or license matching media and host it locally. |
-| The Three.js butterfly is a separate lazy chunk (~516 kB, ≈132 kB gzip). | Slow connections may wait before the decorative scene appears; the fallback image shows meanwhile. | Smaller geometry/textures, a lighter renderer, or a static-only hero on low-bandwidth connections. |
-| Reduced motion is handled in CSS and `matchMedia`, not verified with a real OS-level setting or screen reader. | Motion-sensitive users may still see some animation until an assistive-setting audit is done. | Test with OS reduced-motion enabled and with screen readers. |
-| The landing is longer than one screen. | The reference designs were single-screen heroes; NIRBHAYA’s features, principles, and steps must remain reachable below the fold. | A separate condensed one-screen variant, if desired, without dropping content. |
-| The overlay menu and floating SOS share the viewport. | The menu is deliberately placed below Quick Exit and the floating SOS in z-order, so it does not cover the full screen behind them. | Keep emergency controls above any decorative overlay. |
+| The grid, peach star, polaroid, watermark, and entrance sequence are decorative only. | If a decorative layer fails to render, the page is plainer but every control and route still works. | Nothing for safety; treat decoration as optional. |
+| The hero photo, polaroid, and 4 s loop load from a third-party CloudFront host. | A block, outage, or offline use leaves the flat `#3B2F5C` background; every control still works. | License the media and host it locally with a bundled fallback. |
+| Autoplay may be blocked, and the loop is streamed rather than bundled. | The hero falls back to the still photo, which is also the reduced-motion state. | None; the photo is the fallback. |
+| Reduced motion is handled in CSS and `matchMedia` and was checked with headless Chrome, not a real OS setting or screen reader. | Motion-sensitive users may still see some animation until an assistive-setting audit is done. | Test with OS reduced-motion enabled and with screen readers. |
+| The one-screen hero omits the previous long-form feature, principle, and step sections. | Feature discovery relies on the header links and the right-hand copy; every route still exists. | Add a separate overview page if long-form discovery is needed. |
+| The floating SOS overlaps the lower-right of the hero. | It is deliberately above every decorative layer and remains tappable; on phones it is icon-only. | Keep emergency controls above any decorative overlay. |
 | Fonts are loaded from Google Fonts. | Offline or blocked-font environments fall back to system serif/sans faces. | Self-host the font files. |
-| Motion and the 3D scene are not benchmarked on low-end hardware. | Frame rate may drop on older devices. | Profile on representative low-end devices and reduce effects accordingly. |
+| The video loop and entrance motion are not benchmarked on low-end hardware. | Frame rate may drop on older devices; reduced motion removes the video. | Profile on representative low-end devices and lower the media weight. |
 
 ---
 
