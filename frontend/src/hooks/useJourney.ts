@@ -7,6 +7,18 @@ export function useJourney() {
   const [journey, setJourney] = useState<Journey | null>(() => storageService.getJourney());
   const [isTracking, setIsTracking] = useState(false);
   const [trackingError, setTrackingError] = useState<string | null>(null);
+  const [isOverdue, setIsOverdue] = useState(false);
+
+  useEffect(() => {
+    if (!journey || journey.status !== 'in_progress') {
+      setIsOverdue(false);
+      return;
+    }
+    const check = () => setIsOverdue(Date.now() > journey.targetArrivalTime);
+    check();
+    const timer = setInterval(check, 15000);
+    return () => clearInterval(timer);
+  }, [journey]);
 
   const startJourney = async (destination: string, etaMinutes: number, shareWithCircle = false) => {
     const now = Date.now();
@@ -81,6 +93,7 @@ export function useJourney() {
   return {
     journey,
     isTracking,
+    isOverdue,
     trackingError,
     startJourney,
     updateLocation,

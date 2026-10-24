@@ -28,12 +28,27 @@ export function useAuth() {
     return await authService.updateProfile(updates);
   }, []);
 
+  const updatePreferences = useCallback(async (updates: Partial<UserProfile>) => {
+    return await authService.updatePreferences(updates);
+  }, []);
+
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+    return await authService.changePassword(currentPassword, newPassword);
+  }, []);
+
+  const deleteAccount = useCallback(async (password: string) => {
+    return await authService.deleteAccount(password);
+  }, []);
+
   return {
     user: session.user,
     isAuthenticated: session.isAuthenticated,
     login,
     signup,
     logout,
-    updateProfile
+    updateProfile,
+    updatePreferences,
+    changePassword,
+    deleteAccount
   };
 }

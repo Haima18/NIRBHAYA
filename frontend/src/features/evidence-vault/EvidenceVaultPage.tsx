@@ -4,12 +4,9 @@ import {
   Plus,
   Trash2,
   Printer,
-  Search,
-  Calendar,
-  AlertCircle,
-  FileText,
-  Clock,
-  Download
+  Pencil,
+  Paperclip,
+  X
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -24,9 +21,10 @@ import { IncidentRecord, SeverityLevel } from '@/types';
 export const EvidenceVaultPage: React.FC = () => {
   const [incidents, setIncidents] = useState<IncidentRecord[]>(() => storageService.getIncidents());
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Form State
+  // Form state
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Online Harassment');
   const [incidentDate, setIncidentDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -35,6 +33,7 @@ export const EvidenceVaultPage: React.FC = () => {
   const [perpetratorInfo, setPerpetratorInfo] = useState('');
   const [notes, setNotes] = useState('');
   const [pastedText, setPastedText] = useState('');
+  const [attachmentNames, setAttachmentNames] = useState<string[]>([]);
 
   const filtered = incidents.filter(i =>
     i.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -42,53 +41,88 @@ export const EvidenceVaultPage: React.FC = () => {
     i.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreate = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setEditingId(null);
+    setTitle('');
+    setCategory('Online Harassment');
+    setIncidentDate(new Date().toISOString().split('T')[0]);
+    setSeverity('medium');
+    setDescription('');
+    setPerpetratorInfo('');
+    setNotes('');
+    setPastedText('');
+    setAttachmentNames([]);
+  };
+
+  const openCreate = () => {
+    resetForm();
+    setIsFormOpen(true);
+  };
+
+  const openEdit = (incident: IncidentRecord) => {
+    setEditingId(incident.id);
+    setTitle(incident.title);
+    setCategory(incident.category);
+    setIncidentDate(incident.incidentDate);
+    setSeverity(incident.severity);
+    setDescription(incident.description);
+    setPerpetratorInfo(incident.perpetratorInfo || '');
+    setNotes(incident.notes);
+    setPastedText(incident.pastedText || '');
+    setAttachmentNames(incident.attachmentNames || []);
+    setIsFormOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
 
-    const newRecord: IncidentRecord = {
-      id: `inc_${Date.now()}`,
-      title,
+    const existing = editingId ? incidents.find(inc => inc.id === editingId) : null;
+    const record: IncidentRecord = {
+      id: existing?.id || `inc_${Date.now()}`,
+      title: title.trim(),
       category,
       incidentDate,
       severity,
-      description,
+      description: description.trim(),
       perpetratorInfo: perpetratorInfo.trim() || undefined,
-      notes,
+      notes: notes.trim(),
       pastedText: pastedText.trim() || undefined,
-      attachmentNames: [],
-      createdAt: new Date().toISOString(),
+      attachmentNames,
+      createdAt: existing?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
-    storageService.saveIncident(newRecord);
+    storageService.saveIncident(record);
     setIncidents(storageService.getIncidents());
-    setIsCreateOpen(false);
+    setIsFormOpen(false);
     resetForm();
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this incident record from your vault?')) {
+    if (window.confirm('Delete this incident record from this browser? This cannot be undone.')) {
       storageService.deleteIncident(id);
       setIncidents(storageService.getIncidents());
     }
   };
 
+  const handleAddAttachmentNames = (files: FileList | null) => {
+    if (!files) return;
+    const names = Array.from(files).map(file => file.name);
+    setAttachmentNames(prev => Array.from(new Set([...prev, ...names])));
+  };
+
   const handleExportHtml = () => {
+    if (filtered.length === 0) {
+      window.alert('There are no records to export.');
+      return;
+    }
     const html = generateIncidentHtmlSummary(filtered);
     const win = window.open('', '_blank');
     if (win) {
       win.document.write(html);
       win.document.close();
     }
-  };
-
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setPerpetratorInfo('');
-    setNotes('');
-    setPastedText('');
   };
 
   return (
@@ -99,56 +133,47 @@ export const EvidenceVaultPage: React.FC = () => {
             Evidence Vault & Incident Journal
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-            Private, secure chronological record of threats, harassment, and digital evidence with printable legal consultation exports.
+            A private chronological record stored in this browser. Add, edit, and export summaries for your own use or a
+            consultation.
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <Button
-            variant="outline"
-            size="md"
-            onClick={handleExportHtml}
-            leftIcon={<Printer size={18} />}
-          >
-            Export / Print Summary
+          <Button variant="outline" size="md" onClick={handleExportHtml} leftIcon={<Printer size={18} />}>
+            Export / print summary
           </Button>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => setIsCreateOpen(true)}
-            leftIcon={<Plus size={18} />}
-          >
-            Log New Incident
+          <Button variant="primary" size="md" onClick={openCreate} leftIcon={<Plus size={18} />}>
+            Log new incident
           </Button>
         </div>
       </div>
 
-      <Alert type="info">
-        <strong>Evidence Integrity Notice:</strong> Exported logs serve as chronological summaries for consultation with lawyers or police. Under Indian Law (Section 65B Indian Evidence Act / Section 63 BSA), always retain original digital message threads, screenshots with dates, and phone numbers unedited.
+      <Alert type="warning" title="Local records, not a certified evidence system">
+        Entries are stored unencrypted in this browser&apos;s local storage. NIRBHAYA does not upload, hash, or
+        cryptographically certify them. Keep the original messages, files, and screenshots separately. A summary is not
+        a substitute for original evidence, and rules such as Section 63 of the Bharatiya Sakshya Adhiniyam may apply.
       </Alert>
 
-      {/* Search Bar */}
       <Card style={{ padding: 'var(--space-4)' }}>
         <Input
-          placeholder="Search incident records by title, category, or description..."
+          placeholder="Search records by title, category, or description..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
       </Card>
 
-      {/* Incident List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
         {filtered.length === 0 ? (
           <Card style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
             <FolderLock size={40} color="var(--color-neutral-400)" style={{ margin: '0 auto 0.75rem' }} />
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-              No Incidents Found
+              No records found
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '400px', margin: '4px auto 1rem' }}>
-              Your vault has no records matching your query. Tap &ldquo;Log New Incident&rdquo; to start documenting.
+              Your vault has no records matching your query. Create an entry to start documenting.
             </p>
-            <Button variant="primary" size="sm" onClick={() => setIsCreateOpen(true)}>
-              Create First Entry
+            <Button variant="primary" size="sm" onClick={openCreate}>
+              Create first entry
             </Button>
           </Card>
         ) : (
@@ -156,7 +181,7 @@ export const EvidenceVaultPage: React.FC = () => {
             <Card key={inc.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
                       {inc.title}
                     </h3>
@@ -164,17 +189,35 @@ export const EvidenceVaultPage: React.FC = () => {
                   </div>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
                     Category: <strong>{inc.category}</strong> • Date: <strong>{inc.incidentDate}</strong>
-                    {inc.perpetratorInfo && ` • Reported Person: ${inc.perpetratorInfo}`}
+                    {inc.perpetratorInfo && ` • Identifier: ${inc.perpetratorInfo}`}
                   </p>
+                  {inc.updatedAt !== inc.createdAt && (
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
+                      Last edited {new Date(inc.updatedAt).toLocaleString()}
+                    </p>
+                  )}
                 </div>
 
-                <button
-                  onClick={() => handleDelete(inc.id)}
-                  style={{ color: 'var(--color-danger)', padding: '6px', cursor: 'pointer' }}
-                  title="Delete record"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => openEdit(inc)}
+                    aria-label={`Edit record ${inc.title}`}
+                    style={{ color: 'var(--color-brand-primary)', background: 'none', border: 'none', padding: '6px', cursor: 'pointer' }}
+                    title="Edit record"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(inc.id)}
+                    aria-label={`Delete record ${inc.title}`}
+                    style={{ color: 'var(--color-danger)', background: 'none', border: 'none', padding: '6px', cursor: 'pointer' }}
+                    title="Delete record"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
 
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: '0.5rem 0' }}>
@@ -182,11 +225,11 @@ export const EvidenceVaultPage: React.FC = () => {
               </p>
 
               {inc.pastedText && (
-                <div style={{ margin: '0.75rem 0', padding: '0.75rem', backgroundColor: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 'var(--radius-md)' }}>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#991b1b', textTransform: 'uppercase' }}>
-                    Preserved Message / Threat Text:
+                <div style={{ margin: '0.75rem 0', padding: '0.75rem', backgroundColor: 'var(--color-danger-subtle)', border: '1px solid var(--color-danger-border)', borderRadius: 'var(--radius-md)' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-danger-hover)', textTransform: 'uppercase' }}>
+                    Preserved message / threat text
                   </span>
-                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem', color: '#881337', margin: '4px 0 0', fontFamily: 'monospace' }}>
+                  <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem', color: 'var(--text-primary)', margin: '4px 0 0', fontFamily: 'monospace' }}>
                     {inc.pastedText}
                   </pre>
                 </div>
@@ -194,20 +237,33 @@ export const EvidenceVaultPage: React.FC = () => {
 
               {inc.notes && (
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: '0.5rem 0 0' }}>
-                  Journal Note: {inc.notes}
+                  Journal note: {inc.notes}
                 </p>
+              )}
+
+              {inc.attachmentNames && inc.attachmentNames.length > 0 && (
+                <div style={{ marginTop: '0.6rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                  {inc.attachmentNames.map(name => (
+                    <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.72rem', color: 'var(--text-secondary)', backgroundColor: 'var(--bg-app)', border: '1px solid var(--border-color-default)', borderRadius: 'var(--radius-full)', padding: '2px 8px' }}>
+                      <Paperclip size={11} /> {name}
+                    </span>
+                  ))}
+                </div>
               )}
             </Card>
           ))
         )}
       </div>
 
-      {/* Create Modal */}
-      <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} title="Log New Incident in Vault">
-        <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Modal
+        isOpen={isFormOpen}
+        onClose={() => { setIsFormOpen(false); resetForm(); }}
+        title={editingId ? 'Edit incident record' : 'Log new incident'}
+      >
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Input
-            label="Incident Title"
-            placeholder="e.g. Unsolicited WhatsApp blackmail message"
+            label="Incident title"
+            placeholder="e.g. Unsolicited blackmail message"
             value={title}
             onChange={e => setTitle(e.target.value)}
             required
@@ -215,13 +271,14 @@ export const EvidenceVaultPage: React.FC = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
-                Category:
+              <label htmlFor="evidence-category" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                Category
               </label>
               <select
+                id="evidence-category"
                 value={category}
                 onChange={e => setCategory(e.target.value)}
-                style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}
+                style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option>Online Harassment</option>
                 <option>Blackmail & Extortion</option>
@@ -233,13 +290,14 @@ export const EvidenceVaultPage: React.FC = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
-                Severity Level:
+              <label htmlFor="evidence-severity" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                Severity
               </label>
               <select
+                id="evidence-severity"
                 value={severity}
                 onChange={e => setSeverity(e.target.value as SeverityLevel)}
-                style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}
+                style={{ width: '100%', padding: '0.625rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -250,7 +308,7 @@ export const EvidenceVaultPage: React.FC = () => {
           </div>
 
           <Input
-            label="Date of Occurrence"
+            label="Date of occurrence"
             type="date"
             value={incidentDate}
             onChange={e => setIncidentDate(e.target.value)}
@@ -258,45 +316,95 @@ export const EvidenceVaultPage: React.FC = () => {
           />
 
           <Input
-            label="Sender / Perpetrator Handle or Identifier (Optional)"
+            label="Sender / account identifier (optional)"
             placeholder="e.g. @unknown_user99 / +91 98XXX XXXXX"
             value={perpetratorInfo}
             onChange={e => setPerpetratorInfo(e.target.value)}
           />
 
           <div>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
-              Detailed Description:
+            <label htmlFor="evidence-description" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+              Description
             </label>
             <textarea
+              id="evidence-description"
               rows={4}
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Provide a factual summary of what occurred..."
+              placeholder="A factual summary of what happened."
               required
-              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}
+              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
             />
           </div>
 
           <div>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
-              Exact Message Text / Threat Transcript (Optional):
+            <label htmlFor="evidence-message" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+              Exact message or threat transcript (optional)
             </label>
             <textarea
+              id="evidence-message"
               rows={3}
               value={pastedText}
               onChange={e => setPastedText(e.target.value)}
-              placeholder="Paste exact words or chat messages received..."
-              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}
+              placeholder="Paste the exact words received."
+              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
             />
           </div>
 
+          <div>
+            <label htmlFor="evidence-notes" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+              Journal note (optional)
+            </label>
+            <textarea
+              id="evidence-notes"
+              rows={2}
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="How you felt, what you did next, or who you told."
+              style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="evidence-attachments" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+              Attachment references (optional)
+            </label>
+            <input
+              id="evidence-attachments"
+              type="file"
+              multiple
+              onChange={e => handleAddAttachmentNames(e.target.files)}
+              style={{ fontSize: '0.8rem' }}
+            />
+            <p style={{ margin: '0.35rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Only the file names are saved. Files are not uploaded, copied, or encrypted by NIRBHAYA. Keep the originals
+              in a separate secure location.
+            </p>
+            {attachmentNames.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                {attachmentNames.map(name => (
+                  <span key={name} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '0.72rem', backgroundColor: 'var(--bg-app)', border: '1px solid var(--border-color-default)', borderRadius: 'var(--radius-full)', padding: '2px 8px' }}>
+                    <Paperclip size={11} /> {name}
+                    <button
+                      type="button"
+                      aria-label={`Remove attachment reference ${name}`}
+                      onClick={() => setAttachmentNames(prev => prev.filter(item => item !== name))}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'inline-flex', padding: 0 }}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-            <Button variant="outline" type="button" onClick={() => setIsCreateOpen(false)}>
+            <Button variant="outline" type="button" onClick={() => { setIsFormOpen(false); resetForm(); }}>
               Cancel
             </Button>
             <Button variant="primary" type="submit">
-              Save Incident
+              {editingId ? 'Save changes' : 'Save incident'}
             </Button>
           </div>
         </form>

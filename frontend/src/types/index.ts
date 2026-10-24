@@ -12,8 +12,6 @@ export interface UserProfile {
   avatarUrl?: string;
   phone?: string;
   bio?: string;
-  emergencyPin?: string;
-  emergencyCodeWord?: string;
   quickExitUrl: string;
   aiProcessingConsent: boolean;
   locationConsent: boolean;
@@ -77,6 +75,26 @@ export interface TrustedContact {
   notifyOnCheckInMissed: boolean;
 }
 
+export interface LocationShare {
+  id: number;
+  token: string;
+  ownerToken?: string;
+  sharePath: string;
+  recipientLabel: string;
+  message: string;
+  createdAt: string;
+  expiresAt: string;
+  updatedAt: string | null;
+  revoked: boolean;
+  active: boolean;
+  location: {
+    lat: number;
+    lng: number;
+    accuracyMeters: number | null;
+    recordedAt: string | null;
+  } | null;
+}
+
 export interface FakeCallConfig {
   callerName: string;
   callerNumber: string;
@@ -127,7 +145,10 @@ export interface MediaMetadata {
   durationSeconds?: number;
   hasExif: boolean;
   deviceModel?: string;
+  cameraModel?: string;
   software?: string;
+  signature?: string;
+  signatureMatchesExtension?: boolean;
 }
 
 export interface ForensicHeuristic {
@@ -144,7 +165,9 @@ export interface DeepfakeReport {
   metadata: MediaMetadata;
   heuristics: ForensicHeuristic[];
   suspiciousTimestamps?: string[];
-  authenticityStatus: 'unverified_heuristics_only' | 'suspicious_artifacts' | 'standard_metadata';
+  authenticityStatus: 'not_determined' | 'suspicious_artifacts';
+  detectorConfigured?: boolean;
+  method?: string;
   disclaimer: string;
   guidance: string[];
 }
@@ -197,7 +220,7 @@ export interface HerCircleRequest {
   preferredLanguage: string;
   preferredChannel: 'chat' | 'call' | 'in_person';
   notes: string;
-  status: 'submitted' | 'matched' | 'scheduled' | 'completed';
+  status: 'saved_locally' | 'matched' | 'scheduled' | 'completed';
   createdAt: string;
   scheduledTime?: string;
 }
@@ -228,6 +251,25 @@ export interface LawyerProfile {
   consultationModes: string[];
   bio: string;
   isVerifiedSample: boolean;
+}
+
+export interface LegalConsultationRequest {
+  id: string;
+  lawyerId: string;
+  lawyerName: string;
+  contactName: string;
+  contactDetails: string;
+  preferredMode: string;
+  notes: string;
+  status: 'saved_locally';
+  createdAt: string;
+}
+
+export interface SafePlacePlan {
+  destination: string;
+  trustedContact: string;
+  codeWord: string;
+  updatedAt: string;
 }
 
 // Module I: Evidence Vault
@@ -267,6 +309,7 @@ export interface SafetyNewsArticle {
   sourceUrl: string;
   safetyLesson: string;
   relatedFeatureRoute: string;
+  isEvergreen?: boolean;
   isSaved?: boolean;
 }
 

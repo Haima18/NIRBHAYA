@@ -1,5 +1,7 @@
 /**
  * Server-backed account authentication with a browser-local profile cache.
+ * Preferences (AI consent, location consent, language, quick exit) are owned by
+ * the server and cached only for fast rendering.
  */
 import { UserProfile, AuthSession } from '@/types';
 import { storageService } from '@/services/storage/storageService';
@@ -7,7 +9,15 @@ import { storageService } from '@/services/storage/storageService';
 const AUTH_KEY = 'nirbhaya_auth_session';
 
 type AuthListener = (session: AuthSession) => void;
-type AuthResponse = { user?: Partial<UserProfile>; error?: string };
+type AuthResponse = {
+  user?: Partial<UserProfile>;
+  error?: string;
+  message?: string;
+  success?: boolean;
+  devResetToken?: string;
+  devNotice?: string;
+  emailDeliveryConfigured?: boolean;
+};
 const listeners: Set<AuthListener> = new Set();
 let currentSession: AuthSession = { user: null, isAuthenticated: false };
 
@@ -17,13 +27,19 @@ function notifyListeners(session: AuthSession) {
 }
 
 async function requestAuth(path: string, method: string, body?: Record<string, unknown>): Promise<AuthResponse> {
-  const response = await fetch(`/api/auth/${path}`, {
-    method,
-    credentials: 'include',
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
-    body: body ? JSON.stringify(body) : undefined
-  });
-  const data = await response.json() as AuthResponse;
+  let response: Response;
+  try {
+    response = await fetch(`/api/auth/${path}`, {
+      method,
+      credentials: 'include',
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined
+    });
+  } catch {
+    throw new Error('The account service is unreachable. Check that the backend is running.');
+  }
+
+  const data = await response.json().catch(() => ({})) as AuthResponse;
   if (!response.ok) {
     throw new Error(data.error || 'The account service could not complete this request.');
   }
@@ -31,29 +47,31 @@ async function requestAuth(path: string, method: string, body?: Record<string, u
 }
 
 function profileFromServer(serverProfile: Partial<UserProfile>): UserProfile {
-  const cachedProfile = storageService.getProfile();
-  const sameAccount = cachedProfile.email?.toLowerCase() === serverProfile.email?.toLowerCase();
   return {
-    ...(sameAccount ? cachedProfile : {}),
     id: serverProfile.id || '',
     name: serverProfile.name || '',
     email: serverProfile.email || '',
     phone: serverProfile.phone || '',
-    quickExitUrl: sameAccount ? cachedProfile.quickExitUrl : serverProfile.quickExitUrl || 'https://www.accuweather.com',
-    aiProcessingConsent: sameAccount ? cachedProfile.aiProcessingConsent : false,
-    locationConsent: sameAccount ? cachedProfile.locationConsent : false,
-    discreetMode: sameAccount ? cachedProfile.discreetMode : false,
-    preferredLanguage: sameAccount ? cachedProfile.preferredLanguage : serverProfile.preferredLanguage || 'English',
+    bio: serverProfile.bio || '',
+    quickExitUrl: serverProfile.quickExitUrl || 'https://www.accuweather.com',
+    aiProcessingConsent: Boolean(serverProfile.aiProcessingConsent),
+    locationConsent: Boolean(serverProfile.locationConsent),
+    discreetMode: Boolean(serverProfile.discreetMode),
+    preferredLanguage: serverProfile.preferredLanguage || 'English',
     joinedDate: serverProfile.joinedDate
   };
+}
+
+function persistSession(user: UserProfile) {
+  storageService.saveProfile(user);
+  localStorage.setItem(AUTH_KEY, JSON.stringify({ user, isAuthenticated: true }));
+  notifyListeners({ user, isAuthenticated: true });
 }
 
 function setAuthenticatedUser(serverProfile: Partial<UserProfile>): UserProfile {
   storageService.setUserScope(serverProfile.id || null);
   const user = profileFromServer(serverProfile);
-  storageService.saveProfile(user);
-  localStorage.setItem(AUTH_KEY, JSON.stringify({ user, isAuthenticated: true }));
-  notifyListeners({ user, isAuthenticated: true });
+  persistSession(user);
   return user;
 }
 
@@ -123,21 +141,65 @@ export const authService = {
     if (!currentUser) {
       throw new Error('Please sign in again before updating your profile.');
     }
-    const accountFields = { ...currentUser, ...updates };
+    const merged = { ...currentUser, ...updates };
     const response = await requestAuth('profile', 'PUT', {
-      name: accountFields.name,
-      email: accountFields.email,
-      phone: accountFields.phone
+      name: merged.name,
+      email: merged.email,
+      phone: merged.phone,
+      bio: merged.bio || '',
+      preferences: {
+        quickExitUrl: merged.quickExitUrl,
+        aiProcessingConsent: merged.aiProcessingConsent,
+        locationConsent: merged.locationConsent,
+        discreetMode: merged.discreetMode,
+        preferredLanguage: merged.preferredLanguage
+      }
     });
     if (!response.user) {
       throw new Error('The account service returned an invalid profile response.');
     }
-    const serverFields = profileFromServer(response.user);
-    const updated = { ...serverFields, ...updates, id: serverFields.id };
-    storageService.saveProfile(updated);
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ user: updated, isAuthenticated: true }));
-    notifyListeners({ user: updated, isAuthenticated: true });
+    const updated = profileFromServer(response.user);
+    persistSession(updated);
     return updated;
+  },
+
+  async updatePreferences(updates: Partial<UserProfile>): Promise<UserProfile> {
+    const currentUser = currentSession.user;
+    if (!currentUser) {
+      throw new Error('Please sign in again before changing preferences.');
+    }
+    const merged = { ...currentUser, ...updates };
+    const response = await requestAuth('preferences', 'PATCH', {
+      quickExitUrl: merged.quickExitUrl,
+      aiProcessingConsent: merged.aiProcessingConsent,
+      locationConsent: merged.locationConsent,
+      discreetMode: merged.discreetMode,
+      preferredLanguage: merged.preferredLanguage
+    });
+    if (!response.user) {
+      throw new Error('The account service returned an invalid preference response.');
+    }
+    const updated = profileFromServer(response.user);
+    persistSession(updated);
+    return updated;
+  },
+
+  async forgotPassword(email: string): Promise<AuthResponse> {
+    return requestAuth('forgot-password', 'POST', { email });
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<AuthResponse> {
+    return requestAuth('reset-password', 'POST', { token, newPassword });
+  },
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse> {
+    return requestAuth('password', 'PUT', { currentPassword, newPassword });
+  },
+
+  async deleteAccount(password: string): Promise<void> {
+    await requestAuth('account', 'DELETE', { password });
+    storageService.wipeAllData();
+    clearLocalSession();
   },
 
   subscribe(listener: AuthListener): () => void {

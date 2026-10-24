@@ -1,127 +1,186 @@
-# NIRBHAYA — Complete Women’s Safety, Digital Privacy & Empowerment Platform
+# NIRBHAYA
 
-> **Tagline:** *Your safety. Your voice. Your choice.*
+**Your safety. Your voice. Your choice.**
 
-NIRBHAYA is an independent, modular technology platform designed to help women respond to physical danger, online harassment, cyberstalking, privacy violations, AI-generated deepfakes, domestic abuse, and complex situations where they need immediate, actionable guidance.
+NIRBHAYA is a women's safety, digital-privacy, and empowerment web application built with **React 18 + TypeScript + Vite** and a **Flask + SQLite** API. It combines practical safety tools, evidence journaling, awareness content, and official helpline signposting in one interface.
 
----
-
-## 1. Architectural Foundation & Replaceable Frontend Design
-
-NIRBHAYA was designed from the ground up with a strict **Separation of Concerns** principle: **the frontend visual design, layout, typography, and color palette can be completely replaced without changing or breaking the application's underlying business logic, workflows, or data models.**
-
-### How to Replace the Visual Design Later
-If you want to apply a completely new visual theme, screenshot reference, or component aesthetic:
-1. **Centralized Design Tokens (`frontend/src/styles/tokens.css`):**
-   - All colors (primary, brand, semantic status), typography scales, spacing, border radii, shadows, and layout dimensions are defined as CSS Custom Properties in `tokens.css`.
-   - To rebrand or change the color palette, simply edit the values in `tokens.css`. No component code needs to be edited.
-2. **Decoupled Layout Wrapper (`frontend/src/components/layout/`):**
-   - The navigation structure, top action bar, sidebar, and footer live inside `PageLayout.tsx`, `Header.tsx`, and `Sidebar.tsx`.
-   - You can replace the entire navigation shell (e.g. switch to a bottom dock, top mega-menu, or mobile-first floating sheet) by modifying only `PageLayout.tsx`. All feature modules render into `<Outlet />` without awareness of the surrounding layout.
-3. **Reusable Presentation Primitives (`frontend/src/components/ui/`):**
-   - Buttons, Cards, Modals, Inputs, Tabs, Badges, and Alerts are decoupled primitives. Modifying their visual appearance in `src/components/ui/` automatically updates all 14 feature modules consistently.
-4. **Independent Service Layer (`frontend/src/services/`):**
-   - All state mutations, audio synthesis, geolocation math, NLP heuristics, and API calls are isolated in pure TypeScript services and custom React hooks (`useSiren`, `useCheckInTimer`, `useJourney`, `useFakeCall`). Feature pages simply consume these hooks.
+This repository has been audited and repaired so that the application does **not** claim capabilities it does not have. Read [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) before relying on it in a real emergency.
 
 ---
 
-## 2. Feature Inventory (Modules A – N)
+## What NIRBHAYA is
 
-| Module | Feature Name | Status | Description & Capabilities |
-| :--- | :--- | :--- | :--- |
-| **Module A** | **Home Dashboard** | **Implemented** | Real-time safety state, quick siren/SOS actions, active check-in/journey banners, recent vault records, active safety plans, and empty states. |
-| **Module B** | **Physical Safety & SOS** | **Implemented** | Web Audio API Emergency Siren (100% offline), 112 SOS dialer trigger, Safety Check-in Timer with missed deadline escalations, Journey Guardian with GPS waypoints, Fake Call simulation, and Trusted Circle management. |
-| **Module C** | **Digital Guardian** | **Implemented** | Heuristic text analyzer for threats, blackmail, cyberstalking, and sexual harassment; breakdown with confidence index and direct "Save to Evidence Vault" flow. |
-| **Module D** | **Privacy Shield** | **Implemented** | Personal hardening audit checklist covering social media privacy, app permissions, session revocation, Aadhaar biometric lock, and search engine doxxing removal. |
-| **Module E** | **Deepfake Detective** | **Implemented** | Media inspector for image/video/audio (drag-and-drop, 50MB limit), EXIF metadata analysis, synthetic AI markers, StopNCII hash takedown guidance, and honest forensic disclaimers. |
-| **Module F** | **NIRBHAYA Pathway** | **Implemented** | Signature triage engine answering *"I am experiencing this situation. What can I do next?"* covering 11 critical scenarios with urgent danger checks and interactive action checklists. |
-| **Module G** | **HerCircle** | **Implemented** | Confidential women-to-women peer support intake, verified counselor directory, safe-place haven planner, and emergency document grab-bag checklist. |
-| **Module H** | **Women’s Legal Support** | **Implemented** | Searchable directory of female advocates in India (Delhi, Mumbai, Bengaluru, Kolkata), practice area filters, Zero FIR legal rights guide, and NALSA free legal aid access. |
-| **Module I** | **Evidence Vault** | **Implemented** | Private chronological incident journal with full CRUD, severity tagging, message logs, and one-click printable/PDF-ready summary reports with legal disclaimers. |
-| **Module J** | **NIRBHAYA AI Assistant** | **Implemented** | Trauma-informed conversational assistant with provider-independent cloud adapter (Gemini/OpenAI/Claude) and a robust offline rule-based safety engine. |
-| **Module K** | **Safety & Rights News** | **Implemented** | Verified awareness feed with Supreme Court directives, cyber advisories, key safety lessons, and bookmarks. |
-| **Module L** | **Empowerment Hub** | **Implemented** | Directory of verified government schemes (Mudra Yojana, DISHA, SWADHAR Greh, STEP, NALSA) with benefits and official links. |
-| **Module M** | **Emergency Directory** | **Implemented** | Direct-dial directory for official Indian helplines: 112 (ERSS), 1091 (Women Police), 181 (Women in Distress), 1930 (Cybercrime), 1516 (NALSA), and 7827170170 (NCW). |
-| **Module N** | **Settings & Privacy** | **Implemented** | Account profile customization, configurable Quick-Exit target URL, external AI consent toggles, location permissions, JSON data export, and emergency data wipe. |
-| **Module O** | **Safety Map** | **Implemented** | User-triggered browser geolocation shown on an OpenStreetMap map, with location-sharing disclosure and direct emergency-call links. |
+- A local-first safety toolkit for a phone or laptop browser.
+- A server-backed account system with consent-controlled location sharing.
+- A structured way to preserve incident notes and prepare for conversations with police, lawyers, or support services.
+- A signpost to **official** Indian helplines and legal-aid routes.
+
+## What NIRBHAYA is not
+
+- **Not an emergency dispatch service.** The SOS button opens `tel:112`; it does not call or notify police by itself.
+- **Not a monitored alarm.** The siren is a local browser sound.
+- **Not a verified lawyer, counselor, or listener directory.** Directory cards are clearly labelled sample layouts.
+- **Not a live news service.** The awareness library contains evergreen guidance, not current reporting.
+- **Not a deepfake detector.** It inspects file type and metadata and reports authenticity as `not_determined`.
+- **Not an encrypted vault.** Local records are stored unencrypted in browser `localStorage`.
+- **Not a production-hardened identity provider.** Email delivery, email/phone verification, and session revocation are not implemented.
 
 ---
 
-## 3. Implemented vs. Planned Integrations
+## Feature status at a glance
 
-### Genuinely Implemented
-- **Synthesized Dual-Tone Emergency Siren:** 100% offline Web Audio API sound generator (850Hz modulated sawtooth/square wave) with Start, Stop, Mute, and volume controls.
-- **National Emergency SOS Dialer:** System-native `tel:112` protocol trigger with automated SMS dispatch to configured Trusted Circle contacts.
-- **Simulated Incoming Call Pretext:** Web Audio synthesized phone ringtone, realistic incoming call screen (Accept/Decline), call timer, and suggested pretext dialogue.
-- **Heuristic Threat & Extortion Analyzer:** Rule-based NLP pattern matcher that flags blackmail, violence, sexual solicitation, doxxing, and cyberstalking.
-- **Media Container & EXIF Inspector:** Safe upload validation, image dimension and duration calculation, hardware metadata inspection, and temporary file sanitization.
-- **Client-Side Resilient Storage:** Incident and feature data use browser localStorage with complete JSON backup export and emergency data wipe.
-- **Password-Backed Accounts:** Account name, email, phone, and Werkzeug password hash are stored in the backend SQLite database. Authentication uses an HttpOnly Flask session cookie. Profile preferences remain local to the browser.
-- **Language Rollout, Phase 1:** English and Hindi translations cover navigation and the Safety Map. Profile/Settings offer English plus all 22 Eighth Schedule language choices; additional selected languages are saved as preferences and will fall back to English until translated.
-- **Safety Map:** Uses browser geolocation only after the user requests it. Coordinates are sent to OpenStreetMap to render the map; no location is requested automatically.
-- **Provider-Independent AI Interface:** Backend endpoint supporting Google Gemini and OpenAI when API keys are provided, with zero-dependency local rule-based safety fallback.
-- **Printable Legal Evidence Export:** Formatted HTML report generator with Section 65B Indian Evidence Act / Section 63 BSA disclaimers.
-
-### Planned for Future Scaled Deployments
-- **Pretrained Neural Deepfake Models:** Heavy deep neural networks (e.g. MesoNet or FaceForensics++) for frame-by-frame deepfake probability scoring.
-- **Automated SMS Gateway:** Direct server-side cellular SMS delivery via Twilio or Gupshup (currently utilizes device native SMS client).
-- **Supabase Cloud Sync:** Realtime cloud PostgreSQL sync across devices (currently utilizes client-side storage with optional Supabase client config).
-
----
-
-## 4. Technology Stack
-
-- **Frontend:** React 18, TypeScript, Vite, React Router v6, Lucide React icons, Web Audio API, Geolocation API, CSS Design Tokens.
-- **Backend:** Python 3.13, Flask 3.1, Flask-CORS, Pillow (PIL), Requests, Python-Dotenv.
-- **Testing:** Vitest for TypeScript business logic, Python `unittest` for backend services.
+| Area | Status | What actually works |
+| :--- | :--- | :--- |
+| Accounts | **Working (server-backed)** | Register, sign in, sign out, session restore, profile edit, password change, account deletion. Passwords are stored as Werkzeug hashes. |
+| Password recovery | **Partial** | Single-use, expiring reset tokens are created. Email delivery is **not configured**; the token is exposed only when `EXPOSE_DEV_RESET_TOKEN=true` for local development. |
+| Dashboard | **Working (local)** | Real active check-in/journey state, siren/SOS shortcuts, local record counts, awareness links. |
+| Physical Safety | **Working with limits** | Offline Web Audio siren, `tel:112` dialer, check-in timer, Journey Guardian waypoints, fake-call pretext, trusted contacts, expiring location-share links. |
+| Trusted contacts | **Working (local)** | Add, edit, delete, and choose which contacts are included in manually prepared SOS/check-in SMS drafts. No automatic sending. |
+| Location sharing | **Working (server-backed)** | Consent-gated, random public token, separate owner secret, 5–1440 minute expiry, manual coordinate updates, revocation, and coordinate clearing. |
+| Journey Guardian | **Working (local + optional share)** | Browser geolocation polling and up to 50 local waypoints; overdue state is informational. It does not alert anyone automatically. |
+| Digital Guardian | **Working (local)** | Transparent keyword screen for blackmail, threats, sexual solicitation, stalking, doxxing, coercion, and impersonation. Not proof of a crime. |
+| Privacy Shield | **Working (local)** | Self-assessment hardening checklist with progress tracking and official guide links. No external scanning. |
+| Deepfake Detective | **Metadata inspection only** | File signature validation, image decode checks, EXIF extraction, and honest `not_determined` authenticity status. Uploaded media is deleted after inspection. |
+| Pathway | **Working (static guidance)** | Situation-based action plans for 10+ scenarios with urgent-danger prompts and checklists. Not a live risk assessment. |
+| HerCircle | **Local planning + sample layouts** | Private support notes, safe-place plan, and document checklist stored in the browser. Listener cards are explicitly fictional layouts. |
+| Legal Support | **Information + sample layouts** | Legal-rights guidance, official NALSA/State Legal Services links, and local consultation notes. Advocate cards are fictional. |
+| Evidence Vault | **Working (local)** | Create, edit, delete, search, and print/PDF-export incident records. Attachment **names** only; files are not uploaded or encrypted. |
+| AI Assistant | **Working (local) / optional external** | Local rule-based guidance by default. Gemini, OpenAI, or Anthropic can be used only if a server key is configured **and** the account enables AI consent. |
+| Safety News | **Evergreen awareness library** | Five general guidance articles with official source links. No fabricated headlines, publishers, or live dates. |
+| Empowerment Hub | **Informational** | Government scheme summaries and official portal links. Eligibility must be confirmed with the scheme provider. |
+| Emergency Directory | **Informational** | Static official helpline numbers with `tel:` links. Numbers can change; verify before relying on them. |
+| Safety Map | **Working (browser-dependent)** | User-triggered geolocation shown in an OpenStreetMap embed. No verified facility pins or live facility feed. |
+| Public share page | **Working** | Token-only view of an active share; shows coordinates only while active, with `noindex` metadata and a 112 link. |
+| Settings | **Working (server-backed preferences)** | Profile, Quick Exit URL, language preference, AI/location/discreet-mode consents, password change, local export/wipe, account deletion. |
 
 ---
 
-## 5. Getting Started & Setup Instructions
+## Architecture in brief
+
+```text
+Browser (React 18 + TypeScript + Vite, port 3000)
+  |  /api proxy in development
+  v
+Flask API (port 5000)
+  |-- SQLite: users, password_resets, location_shares
+  |-- Optional outbound: Gemini / OpenAI / Anthropic
+  `-- Optional outbound: OpenStreetMap tiles (browser)
+```
+
+- **Server-backed:** account identity, password hash, preferences, password-reset tokens, location shares.
+- **Browser-local:** incidents, trusted contacts, check-in/journey state, support notes, legal notes, privacy checklist, saved articles, owner secrets for location shares.
+- **No frontend secrets.** API keys live only in `backend/.env`.
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the full component, data-flow, and API reference.
+
+---
+
+## Quick start
 
 ### Prerequisites
-- Node.js (v18+ recommended)
-- Python (v3.10+ recommended)
 
-### 1. Frontend Setup
+- Node.js 18+ (verified with Node 20.18.0)
+- Python 3.10+ (verified with Python 3.13.14)
+- npm
+
+### 1. Backend
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+# Edit .env: set a stable SECRET_KEY before shared use.
+python app.py
+```
+
+The API starts at `http://localhost:5000`. The SQLite file is created at `backend/nirbhaya_accounts.sqlite3` on first use.
+
+### 2. Frontend
+
+In a second terminal:
+
 ```powershell
 cd frontend
 npm install
-npm run build   # Verify production bundle
-npm test        # Run unit tests
-npm run dev     # Start development server on http://localhost:3000
+npm run dev
 ```
 
-### 2. Backend Setup
+Open `http://localhost:3000`. Vite proxies `/api` to `http://localhost:5000`.
+
+### Exact run command (two terminals)
+
 ```powershell
-cd backend
-pip install -r requirements.txt
-python -m unittest discover -s tests   # Run backend tests
-python app.py                          # Starts API on http://localhost:5000
+# Terminal 1
+cd backend; python app.py
+
+# Terminal 2
+cd frontend; npm run dev
 ```
 
-The SQLite account database is created as `backend/nirbhaya_accounts.sqlite3` after the first registration. For a persistent deployment, set a stable random `SECRET_KEY`, set `SESSION_COOKIE_SECURE=true` when serving over HTTPS, and set `CORS_ORIGINS` to the frontend origin. Do not use the development defaults on a public deployment.
+---
+
+## Build and test
+
+```powershell
+cd frontend
+npm run build     # tsc + vite production build
+npm test          # Vitest: 4 files, 13 tests
+
+cd ..\backend
+python -m unittest discover -s tests -v   # 17 tests
+```
+
+There is no ESLint configuration or `lint` script in this repository. Type checking runs as part of `npm run build`.
+
+Last verified: **2026-10-24** — build passed, 13/13 frontend tests passed, 17/17 backend tests passed. See [TEST_REPORT.md](TEST_REPORT.md).
 
 ---
 
-## 6. Security, Privacy & Safety Notes
+## Configuration
 
-1. **Quick Exit & Browser History:** The Quick-Exit button immediately redirects your browser tab to a neutral site (e.g. AccuWeather). However, web browsers do not allow web applications to wipe browser history for security reasons. Users in high-risk domestic living situations should always access NIRBHAYA in a Private / Incognito window.
-2. **Data Minimization:** No evidence records, journal logs, or pasted harassment texts are ever uploaded to external AI providers unless the user explicitly checks the "Privacy Consent" toggle in Settings or Digital Guardian.
-3. **Emergency Siren Honesty:** The Emergency Siren produces loud local audio to attract bystander attention; it does not automatically dispatch police. The platform explicitly distinguishes siren activation from calling 112.
-4. **Media Retention:** Temporary media uploaded to the Deepfake Detective backend is deleted immediately in a `finally` block to protect user privacy.
-5. **Account Deployment:** Passwords are stored as Werkzeug password hashes, not plaintext. Email/phone ownership verification, password recovery, rate limiting, and production hosting configuration are not implemented; do not treat the local development server as a production identity provider.
-6. **Official Facility Pins:** The Safety Map does not claim nearby facilities are verified. The Mission Shakti portal is linked for official scheme information, but no public nationwide geocoded facility directory was found for placing accurate One Stop Centre pins.
+Copy `backend/.env.example` to `backend/.env`. The important variables are:
+
+| Variable | Purpose |
+| :--- | :--- |
+| `SECRET_KEY` | Stable random session-signing key. Required for sessions to survive restarts. |
+| `CORS_ORIGINS` | Comma-separated allowed frontend origins. |
+| `SESSION_COOKIE_SECURE` | Set `True` only when serving over HTTPS. |
+| `EXPOSE_DEV_RESET_TOKEN` | Development-only reset-token exposure. Set `False` publicly. |
+| `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` | Optional external AI providers. |
+| `DEEPFAKE_DETECTOR_URL` | Optional detector URL; **no adapter transmits media to it in this build**. |
+| `RATE_LIMIT_ENABLED` | In-memory, per-process rate limiting. |
+
+Full details: [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) and [SETUP_GUIDE.md](SETUP_GUIDE.md).
 
 ---
 
-## 7. Hackathon Demo Script
+## Safety and privacy principles used in this build
 
-1. **Home Dashboard:** Showcase active state indicators, one-click SOS (112), and the Emergency Siren.
-2. **Emergency Siren:** Click "Activate Siren" to demonstrate the loud Web Audio synthesis. Show Mute and Stop controls.
-3. **Fake Call Simulation:** In the header, click "Fake Call" to trigger a 3-second delay incoming call pretext with realistic audio and script.
-4. **Digital Guardian:** Paste the sample blackmail scenario (`"Transfer the money into bitcoin or else I will leak your private video"`). Click "Analyze Text Patterns" to view the detected threats, advice, and click "Save to Evidence Vault".
-5. **Deepfake Detective:** Upload a sample image/video to inspect container EXIF metadata, view StopNCII guidelines, and link findings to an incident.
-6. **NIRBHAYA Pathway:** Select "Domestic Abuse" or "Blackmail", complete the urgent safety check, and interact with the action plan.
-7. **Legal Support & Helplines:** Filter female advocates by city and practice area; view verified helplines (112, 1930, 181, 1516).
-8. **Evidence Vault:** View the logged incident, filter records, and click "Export / Print Summary" to generate the printable consultation report.
+1. **Never fake emergency success.** Dialer, SMS, siren, check-in, and location sharing all distinguish "action initiated" from "delivery confirmed".
+2. **Never fake verification.** Lawyer and listener records are labelled fictional samples; official helplines and legal-aid portals are the real route.
+3. **Never fake detection.** The deepfake tool reports `not_determined`; Digital Guardian reports keyword matches, not a verdict.
+4. **Consent before location or external AI.** Location shares require server-side consent; external AI requires account consent and a configured key.
+5. **Data minimisation.** Uploaded media is deleted after inspection. External AI receives only the message and trimmed history the user sends.
+6. **Honest local-storage wording.** The Evidence Vault is a private journal, not a certified or encrypted evidence system.
+
+---
+
+## Documentation
+
+| Document | Contents |
+| :--- | :--- |
+| [NIRBHAYA_AUDIT.md](NIRBHAYA_AUDIT.md) | Baseline findings, severity, repairs, and residual risk |
+| [IMPLEMENTATION_PROGRESS.md](IMPLEMENTATION_PROGRESS.md) | Module-by-module implementation status |
+| [SETUP_GUIDE.md](SETUP_GUIDE.md) | Install, run, demo, and troubleshoot |
+| [ENVIRONMENT_SETUP.md](ENVIRONMENT_SETUP.md) | Variables, ports, data locations, deployment notes |
+| [TEST_REPORT.md](TEST_REPORT.md) | Commands, exact results, coverage, and untested areas |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Components, data flows, API, storage, security model |
+| [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) | Everything the app does not do, and what fixing it would require |
+
+---
+
+## Emergency reminder
+
+If you or someone else is in immediate danger, call **112** (India) or your local emergency number. Do not wait for a web application to summon help. NIRBHAYA is a support tool, not a substitute for emergency services.

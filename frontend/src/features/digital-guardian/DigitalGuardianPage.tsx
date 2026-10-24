@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import {
   ShieldCheck,
-  AlertOctagon,
-  FolderLock,
-  ArrowRight,
-  Info,
-  CheckCircle,
-  Copy,
-  ExternalLink
+  FolderLock
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -19,7 +13,6 @@ import { TextAnalysisResult, IncidentRecord } from '@/types';
 
 export const DigitalGuardianPage: React.FC = () => {
   const [inputText, setInputText] = useState('');
-  const [allowAiCloud, setAllowAiCloud] = useState(false);
   const [result, setResult] = useState<TextAnalysisResult | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -41,7 +34,7 @@ export const DigitalGuardianPage: React.FC = () => {
 
   const handleAnalyze = () => {
     if (!inputText.trim()) return;
-    const res = digitalGuardianService.analyzeText(inputText, allowAiCloud);
+    const res = digitalGuardianService.analyzeText(inputText);
     setResult(res);
     storageService.saveTextAnalysis(res);
     setSaveSuccess(false);
@@ -111,7 +104,7 @@ export const DigitalGuardianPage: React.FC = () => {
             {/* Quick Demo Pre-fill Pills */}
             <div>
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.35rem' }}>
-                Quick Test Samples (Hackathon Demo):
+                Example messages (fictional demo text):
               </span>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {sampleScenarios.map((s, idx) => (
@@ -135,7 +128,7 @@ export const DigitalGuardianPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Privacy & Consent Toggle */}
+            {/* Local-only analysis notice */}
             <div
               style={{
                 display: 'flex',
@@ -147,16 +140,12 @@ export const DigitalGuardianPage: React.FC = () => {
                 border: '1px solid var(--color-info-border)'
               }}
             >
-              <input
-                type="checkbox"
-                id="aiConsentCheck"
-                checked={allowAiCloud}
-                onChange={e => setAllowAiCloud(e.target.checked)}
-                style={{ marginTop: '3px' }}
-              />
-              <label htmlFor="aiConsentCheck" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
-                <strong>Privacy Consent:</strong> Allow optional cloud AI enhancement. By default, NIRBHAYA performs 100% of text checks locally in your browser without uploading message contents.
-              </label>
+              <ShieldCheck size={16} style={{ marginTop: '3px', flexShrink: 0 }} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                <strong>Local analysis only.</strong> The text is checked in this browser with transparent keyword rules.
+                It is not sent to an external AI provider. Pattern matches are not proof of a crime or a psychological
+                assessment of the sender.
+              </p>
             </div>
 
             <Button
@@ -166,7 +155,7 @@ export const DigitalGuardianPage: React.FC = () => {
               onClick={handleAnalyze}
               leftIcon={<ShieldCheck size={20} />}
             >
-              Analyze Text Patterns
+              Run local text screen
             </Button>
           </div>
         </Card>
@@ -174,16 +163,19 @@ export const DigitalGuardianPage: React.FC = () => {
         {/* Instructions / Methodology Card */}
         <Card>
           <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-            Analysis Methodology & Integrity Notice
+            How this screen works
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-            • <strong>Objective Pattern Detection:</strong> The system looks for observable markers of blackmail, violence, unwanted sexual solicitation, cyberstalking, and doxxing.
+            • <strong>Transparent keyword rules:</strong> The screen looks for observable phrases associated with
+            blackmail, threats, sexual solicitation, stalking, doxxing, coercion, and impersonation.
           </p>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45, marginTop: '0.5rem' }}>
-            • <strong>No Unsubstantiated Claims:</strong> Observed phrases do not constitute a psychological diagnosis of the sender or a formal court finding.
+            • <strong>Not a verdict:</strong> A match does not prove a crime, intent, or a psychological diagnosis. A
+            message with no match can still be abusive. Use your judgement and seek human support.
           </p>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45, marginTop: '0.5rem' }}>
-            • <strong>Evidence Readiness:</strong> When severe harassment is detected, you can log the raw unedited text into your Evidence Vault for consultation with an advocate or cyber cell.
+            • <strong>Evidence readiness:</strong> You can save the unedited text and this screen to your local Evidence
+            Vault. Keep the original message and headers separately.
           </p>
         </Card>
       </div>
@@ -195,9 +187,9 @@ export const DigitalGuardianPage: React.FC = () => {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0 }}>
-                  Threat Assessment Report
+                  Heuristic text screen
                 </h2>
-                <Badge variant={result.overallRisk}>{result.overallRisk} Risk</Badge>
+                <Badge variant={result.overallRisk}>{result.overallRisk} indicator</Badge>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Report ID: {result.id} • Analyzed at: {new Date(result.analyzedAt).toLocaleString('en-IN')}
@@ -210,7 +202,7 @@ export const DigitalGuardianPage: React.FC = () => {
               onClick={handleSaveToEvidenceVault}
               leftIcon={<FolderLock size={18} color="var(--color-brand-primary)" />}
             >
-              {saveSuccess ? 'Saved to Evidence Vault!' : 'Save to Evidence Vault'}
+              {saveSuccess ? 'Saved to local Evidence Vault' : 'Save to Evidence Vault'}
             </Button>
           </div>
 
@@ -222,7 +214,7 @@ export const DigitalGuardianPage: React.FC = () => {
           {result.detectedPatterns.length > 0 && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
-                Identified Pattern Breakdown:
+                Matched pattern categories
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {result.detectedPatterns.map((pat, idx) => (
@@ -240,7 +232,7 @@ export const DigitalGuardianPage: React.FC = () => {
                         ⚠️ {pat.category}
                       </strong>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                        Confidence Index: {pat.confidence * 100}%
+                        Keyword match score: {Math.round(pat.confidence * 100)}% (not a probability of guilt)
                       </span>
                     </div>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0' }}>

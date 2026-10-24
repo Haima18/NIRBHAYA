@@ -10,6 +10,8 @@ import {
   TrustedContact,
   PathwayPlan,
   HerCircleRequest,
+  LegalConsultationRequest,
+  SafePlacePlan,
   TextAnalysisResult,
   DeepfakeReport
 } from '@/types';
@@ -22,6 +24,9 @@ const STORAGE_KEYS = {
   CONTACTS: 'nirbhaya_trusted_contacts',
   PATHWAY_PLANS: 'nirbhaya_pathway_plans',
   HERCIRCLE_REQUESTS: 'nirbhaya_hercircle_requests',
+  HERCIRCLE_SAFE_PLAN: 'nirbhaya_hercircle_safe_plan',
+  HERCIRCLE_DOCUMENTS: 'nirbhaya_hercircle_documents',
+  LEGAL_CONSULTATIONS: 'nirbhaya_legal_consultations',
   TEXT_ANALYSES: 'nirbhaya_text_analyses',
   DEEPFAKE_REPORTS: 'nirbhaya_deepfake_reports',
   SAVED_NEWS: 'nirbhaya_saved_news'
@@ -161,6 +166,61 @@ export const storageService = {
     localStorage.setItem(scopedKey(STORAGE_KEYS.HERCIRCLE_REQUESTS), JSON.stringify(list));
   },
 
+  deleteHerCircleRequest(id: string): void {
+    const list = this.getHerCircleRequests().filter(req => req.id !== id);
+    localStorage.setItem(scopedKey(STORAGE_KEYS.HERCIRCLE_REQUESTS), JSON.stringify(list));
+  },
+
+  getSafePlacePlan(): SafePlacePlan | null {
+    try {
+      const data = localStorage.getItem(scopedKey(STORAGE_KEYS.HERCIRCLE_SAFE_PLAN));
+      return data ? JSON.parse(data) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  saveSafePlacePlan(plan: SafePlacePlan | null): void {
+    if (plan) {
+      localStorage.setItem(scopedKey(STORAGE_KEYS.HERCIRCLE_SAFE_PLAN), JSON.stringify(plan));
+    } else {
+      localStorage.removeItem(scopedKey(STORAGE_KEYS.HERCIRCLE_SAFE_PLAN));
+    }
+  },
+
+  getCompletedDocumentIds(): string[] {
+    try {
+      const data = localStorage.getItem(scopedKey(STORAGE_KEYS.HERCIRCLE_DOCUMENTS));
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveCompletedDocumentIds(ids: string[]): void {
+    localStorage.setItem(scopedKey(STORAGE_KEYS.HERCIRCLE_DOCUMENTS), JSON.stringify(ids));
+  },
+
+  getLegalConsultationRequests(): LegalConsultationRequest[] {
+    try {
+      const data = localStorage.getItem(scopedKey(STORAGE_KEYS.LEGAL_CONSULTATIONS));
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveLegalConsultationRequest(request: LegalConsultationRequest): void {
+    const list = this.getLegalConsultationRequests();
+    list.unshift(request);
+    localStorage.setItem(scopedKey(STORAGE_KEYS.LEGAL_CONSULTATIONS), JSON.stringify(list.slice(0, 30)));
+  },
+
+  deleteLegalConsultationRequest(id: string): void {
+    const list = this.getLegalConsultationRequests().filter(request => request.id !== id);
+    localStorage.setItem(scopedKey(STORAGE_KEYS.LEGAL_CONSULTATIONS), JSON.stringify(list));
+  },
+
   getTextAnalyses(): TextAnalysisResult[] {
     try {
       const data = localStorage.getItem(scopedKey(STORAGE_KEYS.TEXT_ANALYSES));
@@ -219,12 +279,15 @@ export const storageService = {
     const backup = {
       exportedAt: new Date().toISOString(),
       platform: 'NIRBHAYA Women Safety Platform',
-      version: '1.0.0',
+      version: '1.1.0',
       profile: this.getProfile(),
       incidents: this.getIncidents(),
       trustedContacts: this.getTrustedContacts(),
       pathwayPlans: this.getPathwayPlans(),
       herCircleRequests: this.getHerCircleRequests(),
+      herCircleSafePlan: this.getSafePlacePlan(),
+      herCircleCompletedDocuments: this.getCompletedDocumentIds(),
+      legalConsultationRequests: this.getLegalConsultationRequests(),
       textAnalyses: this.getTextAnalyses(),
       deepfakeReports: this.getDeepfakeReports()
     };

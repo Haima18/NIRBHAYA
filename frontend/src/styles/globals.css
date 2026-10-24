@@ -123,3 +123,113 @@ input, textarea, select {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* Visible keyboard focus for every interactive element. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Respect users who ask the operating system to reduce motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .butterfly-floating,
+  .twilight-glow,
+  .siren-active-indicator,
+  .animate-fade-in {
+    animation: none !important;
+  }
+}
+
+/* Responsive layout: the desktop sidebar becomes a scrollable top nav. */
+@media (max-width: 960px) {
+  aside {
+    width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color-default);
+    padding: 0.5rem !important;
+    gap: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  aside > div:first-child {
+    display: none !important;
+  }
+
+  aside nav {
+    flex-direction: row !important;
+    gap: 0.25rem !important;
+    flex-wrap: nowrap !important;
+  }
+
+  aside nav a {
+    white-space: nowrap;
+    padding: 0.5rem 0.65rem !important;
+  }
+
+  aside > div:last-child {
+    display: none !important;
+  }
+
+  main {
+    padding: var(--space-4) !important;
+    max-width: 100% !important;
+  }
+
+  header {
+    height: auto !important;
+    min-height: var(--layout-header-height);
+    flex-wrap: wrap !important;
+    gap: 0.5rem;
+    padding: 0.5rem var(--space-4) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
+  }
+
+  header > div:first-child p {
+    display: none;
+  }
+
+  header > div:last-child {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 0.35rem !important;
+  }
+
+  h1 {
+    overflow-wrap: anywhere;
+  }
+
+  /* Prevent fixed two-column grids from forcing horizontal scrolling. */
+  [style*="1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* The chat page uses a fixed viewport height; let it grow on small screens. */
+@media (max-width: 720px) {
+  [style*="height: calc(100vh - 180px)"] {
+    height: auto !important;
+    min-height: 70vh;
+  }
+}

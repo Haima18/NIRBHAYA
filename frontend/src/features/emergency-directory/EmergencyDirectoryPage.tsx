@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
   PhoneCall,
-  ShieldAlert,
   ExternalLink,
   Clock,
-  CheckCircle,
   Search
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
@@ -30,12 +28,18 @@ export const EmergencyDirectoryPage: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <div>
         <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
-          Emergency & Verified Support Directory
+          Emergency & Official Helpline Directory
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-          National toll-free emergency response, 24/7 women’s crisis helplines, and cybercrime reporting portals in India.
+          Official national emergency numbers, women’s helplines, and cybercrime reporting portals in India. Numbers and
+          hours can change; verify with the official source before relying on them.
         </p>
       </div>
+
+      <Alert type="warning" title="Static reference list">
+        This is a hand-maintained list, not a live verified directory. Some numbers operate only in certain states or
+        during certain hours. Confirm the current number and service with the official portal.
+      </Alert>
 
       <Alert type="info">
         <strong>Direct Dialing Notice:</strong> Clicking &ldquo;Call Helpline&rdquo; immediately triggers your device dialer. In urgent life-threatening danger, dial <strong>112</strong> immediately.

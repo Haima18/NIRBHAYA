@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import { ExternalLink, LocateFixed, MapPinned, PhoneCall, ShieldAlert } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from '@/hooks/useAuth';
 import { LatLng, locationService } from '@/services/location/locationService';
 import { useTranslation } from '@/localization/useTranslation';
 
 export const MapPage: React.FC = () => {
-  const { user, updateProfile } = useAuth();
   const { t } = useTranslation();
   const [coords, setCoords] = useState<LatLng | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,9 +22,6 @@ export const MapPage: React.FC = () => {
       }
 
       setCoords(result.coords);
-      if (!user?.locationConsent) {
-        await updateProfile({ locationConsent: true });
-      }
     } catch (locationError) {
       setError(locationError instanceof Error ? locationError.message : 'Unable to retrieve your location.');
     } finally {

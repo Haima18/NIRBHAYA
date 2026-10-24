@@ -18,11 +18,13 @@ describe('Spatial & Location Service', () => {
     expect(url).toContain('https://www.google.com/maps?q=28.6139,77.209');
   });
 
-  it('orders nearby resources by proximity', () => {
+  it('does not invent distances for national helplines', () => {
     const cp = { lat: 28.6315, lng: 77.2167 };
     const resources = locationService.getNearbyResources(cp);
     expect(resources.length).toBeGreaterThan(0);
-    // Nearest should be closest to Connaught place (Sakhi or Parliament street)
-    expect(resources[0].distanceKm).toBeLessThan(resources[resources.length - 1].distanceKm);
+    // No live facility feed is configured, so every distance must stay null
+    // rather than being fabricated.
+    expect(resources.every(resource => resource.distanceKm === null)).toBe(true);
+    expect(resources.every(resource => resource.coords === null)).toBe(true);
   });
 });

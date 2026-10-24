@@ -180,12 +180,13 @@ export const LoginPage: React.FC = () => {
             </h2>
 
             <p style={{ fontSize: '1rem', color: '#decbfe', lineHeight: 1.6, maxWidth: '480px' }}>
-              From emergency dual-tone sirens and real-time journey guardians to transparent digital harassment screening and legal aid, your security is always in your control.
+              From a local emergency siren and manual journey check-ins to transparent text screening and official legal-aid
+              routes, NIRBHAYA keeps its limits visible. It cannot dispatch help or guarantee delivery.
             </p>
 
             <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#ede4ff' }}>
-                <ShieldCheck size={18} color="#c5a3fc" /> 100% Offline Siren & Local Heuristics
+                <ShieldCheck size={18} color="#c5a3fc" /> Offline siren & local heuristics
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#ede4ff' }}>
                 <Heart size={18} color="#f472b6" /> Trauma-Informed & Non-Judgmental

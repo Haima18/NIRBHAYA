@@ -9,14 +9,10 @@ import {
   Compass,
   FileSearch,
   Users,
-  Scale,
   Sparkles,
-  PhoneCall,
-  CheckCircle,
-  AlertTriangle,
-  ArrowRight,
   ShieldCheck,
-  Eye
+  Eye,
+  Info
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -78,7 +74,7 @@ export const DashboardPage: React.FC = () => {
             NIRBHAYA Safety Dashboard
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-            Real-time physical protection, digital harassment shield, and crisis triage.
+            Device-local safety tools, server-backed consent controls, and clearly labelled guidance.
           </p>
         </div>
 
@@ -114,6 +110,26 @@ export const DashboardPage: React.FC = () => {
             EMERGENCY SOS (112)
           </Button>
         </div>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '0.5rem',
+          padding: '0.75rem 1rem',
+          borderRadius: 'var(--radius-md)',
+          backgroundColor: 'var(--color-info-subtle)',
+          border: '1px solid var(--color-info-border)',
+          color: 'var(--text-secondary)',
+          fontSize: '0.8rem'
+        }}
+      >
+        <Info size={16} color="var(--color-info)" style={{ flexShrink: 0, marginTop: '2px' }} />
+        <span>
+          The siren is a local browser sound and the SOS button opens your phone dialer; neither dispatches help.
+          Trusted-contact SMS messages are drafts you must send yourself. Sample directories and unconfigured integrations are labelled.
+        </span>
       </div>
 
       {/* 2. Active Session Banners (Truthful state only!) */}
@@ -194,7 +210,7 @@ export const DashboardPage: React.FC = () => {
                 </h3>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Analyze uploaded images/videos for synthetic artifacts, EXIF metadata tampering, and NCII hash shields.
+                Inspect file signatures and EXIF metadata. This does not detect synthetic media or prove authenticity.
               </p>
             </Card>
           </Link>
@@ -226,7 +242,7 @@ export const DashboardPage: React.FC = () => {
                 </h3>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Audit social media visibility, app permissions, active login sessions, and doxxing protection.
+                Work through a self-assessment checklist for social media visibility, app permissions, sessions, and doxxing.
               </p>
             </Card>
           </Link>
@@ -253,7 +269,7 @@ export const DashboardPage: React.FC = () => {
               title="No Incidents Logged"
               description="Your Evidence Vault is currently empty. You can log harassing texts, threats, or media anytime."
               actionLabel="Create First Incident Log"
-              onAction={() => window.location.href = '/evidence-vault'}
+              onAction={() => { window.location.assign('/evidence-vault'); }}
             />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
@@ -301,7 +317,7 @@ export const DashboardPage: React.FC = () => {
               title="No Active Safety Plans"
               description="Explore the NIRBHAYA Pathway to create an actionable, step-by-step protection plan."
               actionLabel="Generate a Safety Plan"
-              onAction={() => window.location.href = '/pathway'}
+              onAction={() => { window.location.assign('/pathway'); }}
             />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
@@ -344,7 +360,11 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            {contacts.map(c => (
+            {contacts.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                No trusted contacts are stored in this browser. Add one to prepare a manual SMS draft.
+              </p>
+            ) : contacts.map(c => (
               <div
                 key={c.id}
                 style={{
@@ -354,30 +374,31 @@ export const DashboardPage: React.FC = () => {
                   padding: 'var(--space-3)',
                   borderRadius: 'var(--radius-md)',
                   backgroundColor: 'var(--bg-app)',
-                  border: '1px solid var(--border-color-default)'
+                  border: '1px solid var(--border-color-default)',
+                  gap: '0.5rem'
                 }}
               >
                 <div>
                   <h4 style={{ fontSize: '0.9rem', fontWeight: 600, margin: 0 }}>{c.name}</h4>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>{c.relationship} • {c.phone}</p>
                 </div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-success)', fontWeight: 600 }}>
-                  Active Alert
-                </span>
+                <Badge variant={c.notifyOnSOS ? 'info' : 'neutral'}>
+                  {c.notifyOnSOS ? 'In SOS draft' : 'Not in SOS'}
+                </Badge>
               </div>
             ))}
           </div>
         </Card>
 
-        {/* Latest Verified Safety News */}
+        {/* Evergreen awareness content, not a live news feed */}
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Sparkles size={20} color="var(--color-brand-primary)" />
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Latest Safety Awareness</h3>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, margin: 0 }}>Evergreen Safety Awareness</h3>
             </div>
             <Link to="/safety-news" style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              All News
+              Awareness Library
             </Link>
           </div>
 
@@ -396,7 +417,7 @@ export const DashboardPage: React.FC = () => {
                   <h4 style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
                     {article.headline}
                   </h4>
-                  <Badge variant="info">{article.category}</Badge>
+                  <Badge variant="neutral">{article.category}</Badge>
                 </div>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.35 }}>
                   💡 <strong>Safety Lesson:</strong> {article.safetyLesson}

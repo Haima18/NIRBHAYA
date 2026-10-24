@@ -56,7 +56,7 @@ export const SignUpPage: React.FC = () => {
     try {
       const res = await signup(name, email, phone, password);
       if (res.success) {
-        navigate('/map');
+        navigate('/');
       } else {
         setErrorMessage(res.error || 'Registration could not be completed.');
       }
@@ -136,7 +136,7 @@ export const SignUpPage: React.FC = () => {
                   NIRBHAYA
                 </span>
                 <span style={{ fontSize: '0.7rem', color: '#c5a3fc', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-                  Safety ? Sanctuary ? Voice
+                  Safety • Sanctuary • Voice
                 </span>
               </div>
             </Link>
@@ -188,16 +188,16 @@ export const SignUpPage: React.FC = () => {
                 <CheckCircle2 size={16} color="#4ade80" /> Zero data tracking or unconsented cloud uploads
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#ede4ff' }}>
-                <CheckCircle2 size={16} color="#4ade80" /> One-click emergency data wipe for shared devices
+                <CheckCircle2 size={16} color="#4ade80" /> Local data wipe for shared devices
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#ede4ff' }}>
-                <CheckCircle2 size={16} color="#4ade80" /> Confidential safety map and trusted circle access
+                <CheckCircle2 size={16} color="#4ade80" /> Map lookup and trusted circle access
               </div>
             </div>
           </div>
 
           <div style={{ fontSize: '0.75rem', color: '#9d8ac7', position: 'relative', zIndex: 2 }}>
-            ? NIRBHAYA Platform ? Your safety. Your voice. Your choice.
+            © NIRBHAYA Platform · Your safety. Your voice. Your choice.
           </div>
         </div>
 

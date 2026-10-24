@@ -1,7 +1,7 @@
 /**
  * Digital Guardian Text Analyzer Service
- * Transparent, rule-based heuristic pattern detector with optional backend AI enrichment.
- * Works 100% locally and offline without external credentials.
+ * Transparent, rule-based heuristic pattern detector.
+ * Runs in the browser and does not send message text to an external AI provider.
  */
 import { TextAnalysisResult, HarassmentPattern, SeverityLevel } from '@/types';
 
@@ -91,7 +91,7 @@ export const digitalGuardianService = {
   /**
    * Rule-based transparent analysis of input text.
    */
-  analyzeText(text: string, aiConsent = false): TextAnalysisResult {
+  analyzeText(text: string, _aiConsent = false): TextAnalysisResult {
     const sourceText = typeof text === 'string' ? text : '';
     const normalized = sourceText.toLowerCase();
     const detectedPatterns: HarassmentPattern[] = [];
@@ -160,10 +160,8 @@ export const digitalGuardianService = {
       summary,
       detectedPatterns,
       recommendedSteps,
-      aiAssisted: aiConsent,
-      modelNote: aiConsent
-        ? 'Evaluated via NIRBHAYA Heuristic Engine with external AI consent granted.'
-        : 'Evaluated locally via transparent heuristic rule engine. Zero data was transmitted to external servers.'
+      aiAssisted: false,
+      modelNote: 'Evaluated locally via transparent keyword rules. No message content was sent to an external AI provider.'
     };
   }
 };

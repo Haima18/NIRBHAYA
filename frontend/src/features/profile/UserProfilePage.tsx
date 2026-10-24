@@ -2,21 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   User,
-  Shield,
-  ShieldCheck,
-  Lock,
-  Phone,
-  Mail,
   Key,
-  Globe,
   Download,
   LogOut,
-  Sparkles,
-  CheckCircle,
-  EyeOff,
   FolderLock,
   Users,
-  Compass
+  Compass,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  Info
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -38,14 +32,12 @@ export const UserProfilePage: React.FC = () => {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [bio, setBio] = useState(user?.bio || '');
-  const [codeWord, setCodeWord] = useState(user?.emergencyCodeWord || '');
-  const [pin, setPin] = useState(user?.emergencyPin || '');
   const [quickExitUrl, setQuickExitUrl] = useState(user?.quickExitUrl || 'https://www.accuweather.com');
   const [language, setLanguage] = useState(user?.preferredLanguage || 'English');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-  // Stats from application state
+  // Local-first records shown as counts only. These are not synced to the server.
   const incidents = storageService.getIncidents();
   const contacts = storageService.getTrustedContacts();
   const plans = storageService.getPathwayPlans();
@@ -59,8 +51,6 @@ export const UserProfilePage: React.FC = () => {
         email,
         phone,
         bio,
-        emergencyCodeWord: codeWord,
-        emergencyPin: pin,
         quickExitUrl,
         preferredLanguage: language
       });
@@ -92,9 +82,13 @@ export const UserProfilePage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const joinedLabel = user?.joinedDate
+    ? new Date(user.joinedDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    : null;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
-      {/* 1. Serene Lavender Profile Banner with Glowing Butterfly */}
+      {/* Serene lavender profile banner with butterfly motif */}
       <div
         style={{
           borderRadius: '24px',
@@ -107,7 +101,6 @@ export const UserProfilePage: React.FC = () => {
           boxShadow: '0 12px 30px rgba(79, 35, 145, 0.15)'
         }}
       >
-        {/* Ambient Twilight Glow */}
         <div
           style={{
             position: 'absolute',
@@ -124,8 +117,8 @@ export const UserProfilePage: React.FC = () => {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', position: 'relative', zIndex: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            {/* Monogram Avatar with Glowing Ring */}
             <div
+              aria-hidden="true"
               style={{
                 width: '84px',
                 height: '84px',
@@ -141,25 +134,28 @@ export const UserProfilePage: React.FC = () => {
                 color: '#ffffff'
               }}
             >
-              {name.charAt(0).toUpperCase()}
+              {(name || 'N').charAt(0).toUpperCase()}
             </div>
 
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
                 <h1
                   className="font-serif"
                   style={{ fontSize: '2rem', fontWeight: 600, color: '#ffffff', margin: 0 }}
                 >
-                  {name}
+                  {name || 'Your profile'}
                 </h1>
-                <Badge variant="success">Sanctuary Protected</Badge>
+                <Badge variant="success">Signed in</Badge>
               </div>
               <p style={{ fontSize: '0.9rem', color: '#decbfe', margin: 0 }}>
-                {email} • Member since {user?.joinedDate || 'October 2026'}
+                {email}
+                {joinedLabel ? ` • Member since ${joinedLabel}` : ''}
               </p>
-              <p style={{ fontSize: '0.8rem', color: '#c5a3fc', fontStyle: 'italic', marginTop: '4px' }}>
-                &ldquo;{bio}&rdquo;
-              </p>
+              {bio && (
+                <p style={{ fontSize: '0.8rem', color: '#c5a3fc', fontStyle: 'italic', marginTop: '4px' }}>
+                  &ldquo;{bio}&rdquo;
+                </p>
+              )}
             </div>
           </div>
 
@@ -179,14 +175,14 @@ export const UserProfilePage: React.FC = () => {
       </div>
 
       {saveSuccess && (
-        <Alert type="success" title="Profile Saved">
-          Your profile and discretion settings have been successfully updated.
+        <Alert type="success" title="Profile saved">
+          Your profile details were saved to your account.
         </Alert>
       )}
       {profileError && <Alert type="danger" title="Profile update failed">{profileError}</Alert>}
 
-      {/* 2. Security Health & Protection Overview */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+      {/* Local record counts. These stay in this browser. */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'var(--space-4)' }}>
         <Card variant="highlight">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ padding: '10px', borderRadius: '12px', backgroundColor: 'var(--color-brand-primary-light)', color: 'var(--color-brand-primary)' }}>
@@ -194,10 +190,10 @@ export const UserProfilePage: React.FC = () => {
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Trusted Circle
+                Trusted contacts
               </span>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                {contacts.length} Contacts
+                {contacts.length} saved
               </h3>
             </div>
           </div>
@@ -210,10 +206,10 @@ export const UserProfilePage: React.FC = () => {
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Evidence Vault
+                Evidence records
               </span>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                {incidents.length} Records
+                {incidents.length} local
               </h3>
             </div>
           </div>
@@ -226,55 +222,61 @@ export const UserProfilePage: React.FC = () => {
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
-                Active Pathways
+                Pathway plans
               </span>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                {plans.length} Action Plans
+                {plans.length} saved
               </h3>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* 3. Profile Information & Safety Settings Form */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 'var(--space-6)' }}>
-        {/* Personal Details */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-6)' }}>
+        {/* Personal details */}
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <User size={20} color="var(--color-brand-primary)" />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>
-              Personal Details & Identity
+              Personal details
             </h3>
           </div>
 
           <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Input
-              label="Display Name or Confidential Alias"
+              label="Display name or confidential alias"
               value={name}
               onChange={e => setName(e.target.value)}
               required
+              autoComplete="name"
             />
 
             <Input
-              label="Account Email"
+              label="Account email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
 
             <Input
-              label="Primary Phone Number"
+              label="Phone number"
+              type="tel"
               value={phone}
               onChange={e => setPhone(e.target.value)}
+              autoComplete="tel"
+              required
             />
 
             <div>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
-                Personal Bio / Affirmation:
+              <label htmlFor="profile-bio" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                Personal note or affirmation (optional)
               </label>
               <textarea
+                id="profile-bio"
                 rows={2}
+                maxLength={280}
                 value={bio}
                 onChange={e => setBio(e.target.value)}
                 style={{
@@ -283,16 +285,18 @@ export const UserProfilePage: React.FC = () => {
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border-color-default)',
                   backgroundColor: 'var(--bg-surface)',
+                  color: 'var(--text-primary)',
                   fontSize: '0.875rem'
                 }}
               />
             </div>
 
             <div>
-              <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
-                Preferred Interface Language:
+              <label htmlFor="profile-language" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                Preferred interface language
               </label>
               <select
+                id="profile-language"
                 value={language}
                 onChange={e => setLanguage(e.target.value)}
                 style={{
@@ -300,7 +304,8 @@ export const UserProfilePage: React.FC = () => {
                   padding: '0.625rem',
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border-color-default)',
-                  backgroundColor: 'var(--bg-surface)'
+                  backgroundColor: 'var(--bg-surface)',
+                  color: 'var(--text-primary)'
                 }}
               >
                 {INDIAN_LANGUAGES.map(item => (
@@ -315,43 +320,45 @@ export const UserProfilePage: React.FC = () => {
             </div>
 
             <Button variant="primary" type="submit" style={{ marginTop: '0.5rem' }}>
-              Save Profile Information
+              Save profile
             </Button>
           </form>
         </Card>
 
-        {/* Safety & Discretion Controls */}
+        {/* Account & privacy */}
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
             <Key size={20} color="var(--color-brand-primary)" />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, margin: 0 }}>
-              Discretion & Distress Safeguards
+              Account & privacy
             </h3>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <Input
-              label="Secret Distress Code Word"
-              helperText="Harmless phrase to text trusted contacts that secretly signals 'Call 112 for me'."
-              value={codeWord}
-              onChange={e => setCodeWord(e.target.value)}
-            />
-
-            <Input
-              label="Emergency Duress PIN"
-              helperText="Private 4-digit PIN used to authenticate sensitive evidence deletion."
-              value={pin}
-              onChange={e => setPin(e.target.value)}
-            />
-
-            <Input
-              label="Quick Exit URL Target"
-              helperText="The neutral website NIRBHAYA immediately redirects to on ESC or quick exit."
+              label="Quick Exit destination URL"
+              helperText="The neutral site the Quick Exit button opens. It does not erase your history."
               value={quickExitUrl}
               onChange={e => setQuickExitUrl(e.target.value)}
+              type="url"
             />
 
-            <div style={{ marginTop: '0.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color-default)' }}>
+            <Alert type="info" title="What this app does not do">
+              NIRBHAYA has no duress PIN, hidden distress code, or automatic police dispatch. Use the SOS page to prepare a
+              message and call emergency services yourself. Account security depends on the password you choose.
+            </Alert>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => navigate('/settings')}
+                leftIcon={<SettingsIcon size={18} />}
+                style={{ width: '100%' }}
+              >
+                Password, preferences & account deletion
+              </Button>
+
               <Button
                 variant="outline"
                 size="md"
@@ -359,8 +366,24 @@ export const UserProfilePage: React.FC = () => {
                 leftIcon={<Download size={18} />}
                 style={{ width: '100%' }}
               >
-                Download Complete Account Backup (JSON)
+                Download local data backup (JSON)
               </Button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+              <ShieldCheck size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>
+                Your account email, password hash, and preferences are stored on the NIRBHAYA server. Incidents, contacts,
+                and plans stay in this browser&apos;s local storage unless a feature says otherwise.
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start', color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+              <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <span>
+                The local backup contains sensitive safety records. Store it somewhere private, and delete it when you no
+                longer need it.
+              </span>
             </div>
           </div>
         </Card>

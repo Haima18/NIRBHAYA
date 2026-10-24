@@ -10,7 +10,24 @@ interface BotResponse {
   suggestedActions?: { label: string; route: string }[];
 }
 
+export interface AiStatus {
+  externalAiConfigured: boolean;
+  providers: string[];
+  fallback: string;
+  requiresAccountConsent: boolean;
+}
+
 export const aiService = {
+  async getStatus(): Promise<AiStatus | null> {
+    try {
+      const response = await fetch('/api/ai/status', { credentials: 'include' });
+      if (!response.ok) return null;
+      return await response.json() as AiStatus;
+    } catch {
+      return null;
+    }
+  },
+
   /**
    * Generates a thoughtful, structured response to user questions.
    * If backend AI endpoint is accessible and user gave consent, attempts backend call.
@@ -26,6 +43,7 @@ export const aiService = {
       try {
         const response = await fetch('/api/ai/chat', {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: messageText,
@@ -88,7 +106,7 @@ export const aiService = {
           "Key protective steps:\n" +
           "• **Do NOT pay money or send additional media**: Demands almost never stop after payment.\n" +
           "• **Preserve Evidence**: Take clear screenshots showing the perpetrator's handle, phone number, date, and messages before blocking them.\n" +
-          "• **Inspect Media**: Use our **Deepfake Detective** tool to analyze metadata and generate an incident report.\n" +
+          "• **Inspect Media Carefully**: The Deepfake Detective can record container metadata and signatures, but it cannot prove whether media is fake. Keep the original file and report the threat.\n" +
           "• **Stop Intimate Image Spread**: Visit **StopNCII.org** or **TakeItDown.ncmec.org** to generate digital hashes preventing cross-platform sharing.\n" +
           "• **Report to Cyber Crime**: Dial **1930** or file at [cybercrime.gov.in](https://cybercrime.gov.in).",
         suggestedActions: [
@@ -111,8 +129,8 @@ export const aiService = {
           "• **Essential Documents**: Keep Aadhaar, bank details, certificates, and keys in an accessible grab-bag.\n" +
           "• **Confidential Helplines**: Call the Women Helpline **181** (24/7 toll-free) or National Commission for Women **7827170170**.",
         suggestedActions: [
-          { label: 'Connect on HerCircle', route: '/hercircle' },
-          { label: 'Find a Female Lawyer', route: '/legal-support' },
+          { label: 'HerCircle planning tools', route: '/hercircle' },
+          { label: 'Legal aid routes', route: '/legal-support' },
           { label: 'NIRBHAYA Pathway Plan', route: '/pathway' }
         ]
       };
@@ -150,7 +168,7 @@ export const aiService = {
           "  3. What is the fee structure or legal aid eligibility (e.g. through NALSA)?\n\n" +
           "*Notice: I provide legal information, not formal legal advice. Please consult a licensed advocate.*",
         suggestedActions: [
-          { label: 'Search Women Lawyers Directory', route: '/legal-support' },
+          { label: 'Legal aid & sample directory', route: '/legal-support' },
           { label: 'Export Evidence Summary', route: '/evidence-vault' }
         ]
       };

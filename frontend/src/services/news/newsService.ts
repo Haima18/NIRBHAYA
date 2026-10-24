@@ -1,70 +1,89 @@
 /**
- * Women's Safety & Awareness News Service
- * Curated awareness feed with verified lessons and direct links to NIRBHAYA tools.
+ * Evergreen safety-awareness library.
+ *
+ * This is deliberately NOT a live news feed. No news API is configured, so the
+ * app must not present fabricated headlines, publishers, or dates as current
+ * reporting. Each entry is general guidance with a link to an official source
+ * the user can verify.
  */
 import { SafetyNewsArticle } from '@/types';
 
-const CURATED_NEWS_ARTICLES: SafetyNewsArticle[] = [
+const AWARENESS_ARTICLES: SafetyNewsArticle[] = [
   {
-    id: 'news_1',
-    headline: 'Supreme Court of India Directs Prompt Registration of Zero FIRs in Crimes Against Women',
-    summary: 'The Apex Court reaffirmed that any police station must register a Zero FIR irrespective of territorial jurisdiction when a woman reports sexual violence or grave harassment.',
-    publisher: 'Legal Express & Law Commission Updates',
-    date: 'October 18, 2026',
+    id: 'awareness_1',
+    headline: 'Zero FIR: what it means and how to ask for one',
+    summary:
+      'A Zero FIR is a police practice that lets a First Information Report be registered at a police station even when the alleged offence happened outside its jurisdiction. The report is then transferred to the appropriate station.',
+    publisher: 'NIRBHAYA awareness library',
+    date: 'Evergreen guidance',
     category: 'legal_rights',
     sourceUrl: 'https://nalsa.gov.in',
-    safetyLesson: 'You can approach ANY nearby police station to register a Zero FIR immediately, even if the incident occurred elsewhere. They cannot turn you away citing jurisdiction.',
-    relatedFeatureRoute: '/legal-support'
+    safetyLesson:
+      'Ask for a copy of the FIR and note the station and officer details. If a station refuses, you can escalate in writing to the Superintendent of Police and seek help from legal aid. Confirm current procedure with a licensed advocate.',
+    relatedFeatureRoute: '/legal-support',
+    isEvergreen: true
   },
   {
-    id: 'news_2',
-    headline: 'Ministry of Home Affairs Issues Cyber Advisory on AI Deepfake Extortion Rackets',
-    summary: 'Cybercrime units report a rise in bad actors harvesting social media photos to generate non-consensual synthetic media. Authorities emphasize using StopNCII hashes and dialing 1930 within the golden hour.',
-    publisher: 'Cyber Swachhta Kendra',
-    date: 'October 12, 2026',
+    id: 'awareness_2',
+    headline: 'Blackmail using intimate images: preserve evidence before blocking',
+    summary:
+      'Demands for money or more images often continue after payment. Preservation of the original messages, profile identifiers, and timestamps helps later reporting and takedown requests.',
+    publisher: 'NIRBHAYA awareness library',
+    date: 'Evergreen guidance',
     category: 'deepfakes',
     sourceUrl: 'https://cybercrime.gov.in',
-    safetyLesson: 'Never send money or compromise to blackmailers. Report immediately to 1930; financial freeze and URL takedowns are most effective within the first 24 hours.',
-    relatedFeatureRoute: '/deepfake-detective'
+    safetyLesson:
+      'Do not pay or send more media. Save uncropped screenshots and original files, then report at cybercrime.gov.in or call 1930. StopNCII.org can help with hash-based takedown requests for intimate imagery.',
+    relatedFeatureRoute: '/deepfake-detective',
+    isEvergreen: true
   },
   {
-    id: 'news_3',
-    headline: 'CERT-In Issues Guidelines on Securing Messaging Apps Against SIM-Swap and Remote Stalkerware',
-    summary: 'New technical advisory warns against clicking unverified APK files and urges citizens to enable biometric lock and mandatory two-factor authentication on WhatsApp and Telegram.',
-    publisher: 'Indian Computer Emergency Response Team',
-    date: 'September 28, 2026',
+    id: 'awareness_3',
+    headline: 'Check linked devices and app permissions on messaging accounts',
+    summary:
+      'Unrecognised linked devices and broad app permissions can expose messages and location data. Reviewing active sessions is a practical first step when you suspect account compromise or stalkerware.',
+    publisher: 'NIRBHAYA awareness library',
+    date: 'Evergreen guidance',
     category: 'cybercrime',
-    sourceUrl: 'https://cert-in.org.in',
-    safetyLesson: 'Review active device sessions in WhatsApp/Telegram under Linked Devices. Revoke any unrecognized browser or device logins immediately.',
-    relatedFeatureRoute: '/privacy-shield'
+    sourceUrl: 'https://www.cert-in.org.in',
+    safetyLesson:
+      'Open your messaging app settings, review linked devices, and revoke anything you do not recognise. Enable two-factor authentication and change the password from a device you trust.',
+    relatedFeatureRoute: '/privacy-shield',
+    isEvergreen: true
   },
   {
-    id: 'news_4',
-    headline: 'Sakhi One Stop Centres Expand Rapid Response Shelters Across 700 Districts',
-    summary: 'The Ministry of Women & Child Development reports over 800 operational One Stop Centres offering integrated medical, legal, psychological, and temporary shelter under one roof.',
-    publisher: 'Women & Child Development Ministry Release',
-    date: 'September 15, 2026',
+    id: 'awareness_4',
+    headline: 'One Stop Centres (Sakhi): what they are intended to offer',
+    summary:
+      'The One Stop Centre scheme is intended to provide integrated support such as medical assistance, police facilitation, legal aid, counselling, and temporary shelter. Availability and services vary by centre and state.',
+    publisher: 'NIRBHAYA awareness library',
+    date: 'Evergreen guidance',
     category: 'domestic_abuse',
-    sourceUrl: 'https://wcd.nic.in',
-    safetyLesson: 'Sakhi centres provide free shelter, medical assistance, legal counselors, and police assistance in a secure, confidential environment.',
-    relatedFeatureRoute: '/emergency-directory'
+    sourceUrl: 'https://wcd.nic.in/schemes/one-stop-centre-scheme-1',
+    safetyLesson:
+      'Call 181 to ask about a One Stop Centre near you and confirm what it currently offers. NIRBHAYA has no live facility directory and cannot confirm bed availability or opening hours.',
+    relatedFeatureRoute: '/emergency-directory',
+    isEvergreen: true
   },
   {
-    id: 'news_5',
-    headline: 'Understanding Digital Privacy: Why You Should Audit App Location Permissions Regularly',
-    summary: 'Security researchers highlight how seemingly harmless utility and ride apps can leak background location traces that domestic stalkers exploit.',
-    publisher: 'Digital Safety Research Group',
-    date: 'August 30, 2026',
+    id: 'awareness_5',
+    headline: 'Location permissions and photo geotags: a routine privacy check',
+    summary:
+      'Utility, ride, and social apps can retain location history. Photos may also carry location metadata. Reviewing permissions and removing geotags before sharing reduces unintended exposure.',
+    publisher: 'NIRBHAYA awareness library',
+    date: 'Evergreen guidance',
     category: 'advisory',
     sourceUrl: 'https://www.meity.gov.in',
-    safetyLesson: 'Set location permissions to "Only while using app" and audit social media photo geotags before sharing online.',
-    relatedFeatureRoute: '/privacy-shield'
+    safetyLesson:
+      'Set location access to "while using the app" where possible, review the app privacy settings, and remove location metadata before posting images publicly.',
+    relatedFeatureRoute: '/privacy-shield',
+    isEvergreen: true
   }
 ];
 
 export const newsService = {
   getArticles(categoryFilter = 'all', searchQuery = ''): SafetyNewsArticle[] {
-    let list = [...CURATED_NEWS_ARTICLES];
+    let list = [...AWARENESS_ARTICLES];
     if (categoryFilter !== 'all') {
       list = list.filter(item => item.category === categoryFilter);
     }

@@ -2,12 +2,9 @@ import React, { useState, useRef } from 'react';
 import {
   FileSearch,
   UploadCloud,
-  FileCheck,
-  AlertTriangle,
   FolderLock,
   ExternalLink,
-  Shield,
-  HelpCircle
+  Shield
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -68,12 +65,12 @@ export const DeepfakeDetectivePage: React.FC = () => {
     if (!report) return;
     const incident: IncidentRecord = {
       id: `inc_${Date.now()}`,
-      title: `Media Examination: ${report.fileName}`,
-      category: 'Deepfake / Non-Consensual Media Threat',
+      title: `Media metadata inspection: ${report.fileName}`,
+      category: 'Deepfake / Fabricated Media',
       incidentDate: new Date().toISOString().split('T')[0],
       severity: report.authenticityStatus === 'suspicious_artifacts' ? 'high' : 'medium',
-      description: `Inspected file "${report.fileName}" (${report.mediaType}, ${(report.metadata.fileSize / 1024).toFixed(1)} KB). Container status: ${report.authenticityStatus}.`,
-      notes: `Heuristics logged: ${report.heuristics.length} checks performed. Disclaimer recorded.`,
+      description: `Inspected file "${report.fileName}" (${report.mediaType}, ${(report.metadata.fileSize / 1024).toFixed(1)} KB). Container metadata was recorded. Authenticity was not determined.`,
+      notes: `Method: ${report.method || 'container metadata inspection'}. Detector configured: ${report.detectorConfigured ? 'yes' : 'no'}. This report does not prove the media is fake or authentic.`,
       attachmentNames: [report.fileName],
       relatedReportId: report.id,
       createdAt: new Date().toISOString(),
@@ -87,21 +84,29 @@ export const DeepfakeDetectivePage: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <div>
         <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
-          Deepfake Detective — Media Analysis & Extortion Shield
+          Deepfake Detective — Media Metadata Inspector
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-          Inspect media container headers, EXIF metadata, synthetic tool signatures, and access non-consensual imagery takedowns.
+          Inspect file containers, EXIF fields, and known software signatures. This is not a deepfake detector and does
+          not determine whether media is real or synthetic.
         </p>
       </div>
+
+      <Alert type="warning" title="No AI detector is configured">
+        NIRBHAYA can read metadata and signature clues, but it cannot prove that an image, video, or audio file is a
+        deepfake. Missing metadata is common and does not prove manipulation; present metadata does not prove
+        authenticity. Preserve the original file and report threats through official channels.
+      </Alert>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 'var(--space-6)' }}>
         {/* Upload & Drag Drop Card */}
         <Card>
           <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Inspect Image, Video, or Audio
+            Inspect image, video, or audio metadata
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.4 }}>
-            Upload suspicious media you received or suspect was fabricated. Maximum 50MB safe inspection limit.
+            The file is sent to your NIRBHAYA backend for container inspection only. Maximum size is 50 MB. Original
+            files are not retained by this app.
           </p>
 
           <input
@@ -152,7 +157,7 @@ export const DeepfakeDetectivePage: React.FC = () => {
                 isLoading={isAnalyzing}
                 leftIcon={<FileSearch size={18} />}
               >
-                Start Forensic Inspection
+                Start metadata inspection
               </Button>
             </div>
           )}
@@ -192,7 +197,8 @@ export const DeepfakeDetectivePage: React.FC = () => {
             <div style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-app)', border: '1px solid var(--border-color-default)' }}>
               <strong style={{ fontSize: '0.85rem', color: 'var(--color-info)' }}>2. National Cyber Crime Helpline (1930)</strong>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '2px 0 6px' }}>
-                Report extortion and deepfakes immediately under Section 67/67A of the Indian Information Technology Act.
+                Report extortion and suspected fabricated media at 1930 or cybercrime.gov.in. You do not need to prove
+                the media is fake before reporting a threat.
               </p>
               <a href="https://cybercrime.gov.in" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: 'var(--color-info)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                 Visit Cyber Crime Portal <ExternalLink size={12} />
@@ -207,16 +213,20 @@ export const DeepfakeDetectivePage: React.FC = () => {
         <Card variant="highlight">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid var(--border-color-default)', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0 }}>
-                  Media Inspection Report
+                  Media metadata report
                 </h2>
-                <Badge variant={report.authenticityStatus === 'suspicious_artifacts' ? 'critical' : 'neutral'}>
-                  {report.authenticityStatus.replace(/_/g, ' ')}
+                <Badge variant="neutral">
+                  Authenticity not determined
                 </Badge>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Target: <strong>{report.fileName}</strong> • Inspected: {new Date(report.analyzedAt).toLocaleString('en-IN')}
+              </p>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
+                Method: {report.method || 'container metadata inspection'} • Detector configured:{' '}
+                {report.detectorConfigured ? 'yes' : 'no'}
               </p>
             </div>
 
@@ -226,12 +236,12 @@ export const DeepfakeDetectivePage: React.FC = () => {
               onClick={handleSaveToEvidence}
               leftIcon={<FolderLock size={18} color="var(--color-brand-primary)" />}
             >
-              {savedSuccess ? 'Saved to Evidence Vault!' : 'Save Report to Evidence Vault'}
+              {savedSuccess ? 'Saved to local Evidence Vault' : 'Save report to Evidence Vault'}
             </Button>
           </div>
 
           {/* Mandatory Critical Disclaimer */}
-          <Alert type="warning" title="Forensic Integrity Notice">
+          <Alert type="warning" title="What this report can and cannot say">
             {report.disclaimer}
           </Alert>
 
@@ -257,12 +267,36 @@ export const DeepfakeDetectivePage: React.FC = () => {
                 <p style={{ fontWeight: 600, margin: 0, fontSize: '0.85rem' }}>{report.metadata.durationSeconds} seconds</p>
               </div>
             )}
+            {report.metadata.software && (
+              <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Software tag:</span>
+                <p style={{ fontWeight: 600, margin: 0, fontSize: '0.85rem' }}>{report.metadata.software}</p>
+              </div>
+            )}
+            {report.metadata.deviceModel && (
+              <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Device tag:</span>
+                <p style={{ fontWeight: 600, margin: 0, fontSize: '0.85rem' }}>{report.metadata.deviceModel}</p>
+              </div>
+            )}
+            <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>EXIF present:</span>
+              <p style={{ fontWeight: 600, margin: 0, fontSize: '0.85rem' }}>{report.metadata.hasExif ? 'Yes' : 'No'}</p>
+            </div>
+            {report.metadata.signatureMatchesExtension !== undefined && (
+              <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>File signature:</span>
+                <p style={{ fontWeight: 600, margin: 0, fontSize: '0.85rem' }}>
+                  {report.metadata.signatureMatchesExtension ? 'Matches extension' : 'Does not match extension'}
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Forensic Heuristics Checks */}
+          {/* Container checks */}
           <div style={{ marginTop: '1.5rem' }}>
             <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.75rem' }}>
-              Forensic Container & Heuristic Tests:
+              Container and metadata checks (not authenticity tests)
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {report.heuristics.map((h, idx) => (

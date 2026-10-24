@@ -4,45 +4,71 @@ import {
   Bot,
   Send,
   User,
-  ShieldAlert,
-  Sparkles,
   Info,
-  ArrowRight
+  ArrowRight,
+  Cpu
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { aiService } from '@/services/ai/aiService';
-import { storageService } from '@/services/storage/storageService';
+import { aiService, AiStatus } from '@/services/ai/aiService';
 import { ChatMessage } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 export const AiAssistantPage: React.FC = () => {
-  const profile = storageService.getProfile();
+  const { user, updatePreferences } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init',
       role: 'assistant',
       content:
-        'Hello, I am the **NIRBHAYA AI Assistant**.\n\n' +
-        'I am designed to provide immediate safety guidance, help you document incidents, evaluate digital threats, and prepare for legal or counselor consultations.\n\n' +
-        '**How can I assist you today?**',
+        'Hello, I am the **NIRBHAYA guidance assistant**.\n\n' +
+        'I can share general safety steps, help you think through documentation, and point you to official helplines. I am not a lawyer, therapist, or emergency dispatcher, and I cannot contact anyone for you.\n\n' +
+        '**What would you like help with?**',
       timestamp: Date.now(),
       suggestedActions: [
         { label: 'Steps for online harassment', route: '/digital-guardian' },
-        { label: 'Blackmail / Deepfake defense', route: '/deepfake-detective' },
-        { label: 'Emergency Helplines', route: '/emergency-directory' }
+        { label: 'Blackmail / deepfake guidance', route: '/deepfake-detective' },
+        { label: 'Emergency helplines', route: '/emergency-directory' }
       ]
     }
   ]);
 
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [cloudConsent, setCloudConsent] = useState(profile.aiProcessingConsent);
+  const [cloudConsent, setCloudConsent] = useState(Boolean(user?.aiProcessingConsent));
+  const [aiStatus, setAiStatus] = useState<AiStatus | null>(null);
+  const [consentError, setConsentError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    let mounted = true;
+    void aiService.getStatus().then(status => {
+      if (mounted) setAiStatus(status);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (user) setCloudConsent(Boolean(user.aiProcessingConsent));
+  }, [user]);
+
+  const handleConsentChange = async (checked: boolean) => {
+    setCloudConsent(checked);
+    setConsentError(null);
+    try {
+      await updatePreferences({ aiProcessingConsent: checked });
+    } catch (error) {
+      setCloudConsent(!checked);
+      setConsentError(error instanceof Error ? error.message : 'Unable to update AI consent.');
+    }
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +90,16 @@ export const AiAssistantPage: React.FC = () => {
       const assistantMsg = await aiService.sendMessage(input, nextHistory, cloudConsent);
       setMessages([...nextHistory, assistantMsg]);
     } catch {
-      // fallback
+      setMessages([
+        ...nextHistory,
+        {
+          id: `msg_error_${Date.now()}`,
+          role: 'assistant',
+          content:
+            'I could not reach the guidance service. If you are in immediate danger, call 112. For non-emergency support, call 181 or 1930.',
+          timestamp: Date.now()
+        }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -78,22 +113,20 @@ export const AiAssistantPage: React.FC = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', height: 'calc(100vh - 180px)' }}>
       <div>
         <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
-          NIRBHAYA AI Assistant
+          NIRBHAYA Guidance Assistant
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-          Trauma-informed conversational guide for threat response, privacy audit preparation, and legal consultation summaries.
+          General safety guidance and resource signposting. Not legal advice, therapy, or emergency response.
         </p>
       </div>
 
-      {/* Consent & Safety Banner */}
+      {/* Consent & safety banner */}
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
+          flexDirection: 'column',
           gap: '0.5rem',
-          padding: '0.6rem 1rem',
+          padding: '0.75rem 1rem',
           borderRadius: 'var(--radius-md)',
           backgroundColor: 'var(--color-info-subtle)',
           border: '1px solid var(--color-info-border)',
@@ -101,24 +134,42 @@ export const AiAssistantPage: React.FC = () => {
           color: 'var(--text-secondary)'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <Info size={16} color="var(--color-info)" />
           <span>
-            <strong>Disclaimer:</strong> Automated assistant provides safety guidance; it is not a lawyer, therapist, or emergency dispatcher.
+            <strong>Disclaimer:</strong> This assistant gives general guidance. It is not a lawyer, therapist, or
+            emergency dispatcher, and it cannot send an SOS or contact anyone for you.
           </span>
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <Cpu size={16} color="var(--text-muted)" />
+          <span>
+            <strong>Provider:</strong>{' '}
+            {aiStatus
+              ? aiStatus.externalAiConfigured
+                ? `External provider configured (${aiStatus.providers.join(', ')})`
+                : 'No external provider configured — local guidance engine only'
+              : 'Provider status unavailable'}
+          </span>
+        </div>
+
         <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontWeight: 600 }}>
           <input
             type="checkbox"
             checked={cloudConsent}
-            onChange={e => {
-              setCloudConsent(e.target.checked);
-              storageService.saveProfile({ ...profile, aiProcessingConsent: e.target.checked });
-            }}
+            onChange={e => void handleConsentChange(e.target.checked)}
           />
-          Cloud AI Sync Enabled (Default: Offline Heuristic Engine)
+          Allow external AI processing (saved to your account)
         </label>
+        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+          When no provider key is configured, enabling this does not create a connection; the local guidance engine is
+          used. Messages may contain sensitive details, so enable this only if you understand the provider&apos;s data
+          handling.
+        </span>
       </div>
+
+      {consentError && <Alert type="danger" title="Consent update failed">{consentError}</Alert>}
 
       {/* Chat Messages Container */}
       <Card
@@ -226,7 +277,7 @@ export const AiAssistantPage: React.FC = () => {
         })}
         {loading && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-            <Bot size={16} /> NIRBHAYA Assistant is analyzing guidance...
+            <Bot size={16} /> Preparing guidance...
           </div>
         )}
         <div ref={messagesEndRef} />

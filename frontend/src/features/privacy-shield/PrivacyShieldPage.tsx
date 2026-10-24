@@ -30,13 +30,13 @@ export const PrivacyShieldPage: React.FC = () => {
           Privacy Shield — Personal Defense Center
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-          Step-by-step personal hardening checklist to audit social accounts, revoke stalker permissions, and secure private records.
+          A step-by-step checklist for reviewing social accounts, app permissions, and private records yourself. NIRBHAYA does not scan or change your accounts.
         </p>
       </div>
 
       {/* Distinction Alert */}
       <Alert type="info">
-        <strong>Self-Assessment Scope Notice:</strong> NIRBHAYA guides your personal hardening through verified security practices. It does not perform illegal external hacking scans or promise total erasure from the entire internet.
+        <strong>Self-Assessment Scope Notice:</strong> NIRBHAYA guides your personal hardening through established security practices. It does not perform illegal external hacking scans or promise total erasure from the entire internet.
       </Alert>
 
       {/* Progress Card */}
@@ -44,14 +44,14 @@ export const PrivacyShieldPage: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-brand-primary)', margin: 0 }}>
-              Privacy Hardening Progress: {percentage}%
+              Checklist progress: {percentage}%
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0 }}>
-              {completed} of {total} protective safeguards completed.
+              {completed} of {total} checklist items marked complete. Completion is self-reported, not verified.
             </p>
           </div>
           <Badge variant={percentage === 100 ? 'success' : percentage > 50 ? 'medium' : 'high'}>
-            {percentage === 100 ? 'Shield Fully Hardened' : `${total - completed} Actions Remaining`}
+            {percentage === 100 ? 'Checklist complete' : `${total - completed} Actions Remaining`}
           </Badge>
         </div>
 

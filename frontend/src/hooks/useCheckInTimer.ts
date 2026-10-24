@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CheckInSession } from '@/types';
 import { storageService } from '@/services/storage/storageService';
-import { notificationService } from '@/services/notifications/notificationService';
 
 export function useCheckInTimer() {
   const [session, setSession] = useState<CheckInSession | null>(() => storageService.getCheckIn());
@@ -10,7 +9,21 @@ export function useCheckInTimer() {
 
   // Recalculate remaining seconds
   const tick = useCallback(() => {
-    if (!session || session.status !== 'active') {
+    if (!session) {
+      setRemainingSeconds(0);
+      setIsExpired(false);
+      return;
+    }
+
+    // A persisted expired session must remain visible after a reload. Do not
+    // reset the expired flag just because the timer is no longer ticking.
+    if (session.status === 'expired') {
+      setRemainingSeconds(0);
+      setIsExpired(true);
+      return;
+    }
+
+    if (session.status !== 'active') {
       setRemainingSeconds(0);
       setIsExpired(false);
       return;
@@ -22,24 +35,15 @@ export function useCheckInTimer() {
 
     if (remaining <= 0) {
       setIsExpired(true);
-      if (session.status === 'active') {
-        const expiredSession: CheckInSession = {
-          ...session,
-          status: 'expired'
-        };
-        storageService.saveCheckIn(expiredSession);
-        setSession(expiredSession);
+      const expiredSession: CheckInSession = {
+        ...session,
+        status: 'expired'
+      };
+      storageService.saveCheckIn(expiredSession);
+      setSession(expiredSession);
 
-        // Notify if not already notified
-        if (!session.contactsNotified) {
-          const contacts = storageService.getTrustedContacts().filter(c => c.notifyOnCheckInMissed);
-          notificationService.draftTrustedContactsAlert(
-            contacts,
-            null,
-            'Check-in timer deadline was missed. Please check on me.'
-          );
-        }
-      }
+      // No automatic SMS is opened. The UI surfaces a manual escalation
+      // control so the user can review the recipient list and message first.
     }
   }, [session]);
 

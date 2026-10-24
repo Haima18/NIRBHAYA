@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, createBrowserRouter } from 'react-router-dom';
+import { Navigate, createBrowserRouter, useLocation } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { PhysicalSafetyPage } from '@/features/physical-safety/PhysicalSafetyPage';
@@ -17,23 +17,51 @@ import { EmergencyDirectoryPage } from '@/features/emergency-directory/Emergency
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { SignUpPage } from '@/features/auth/SignUpPage';
+import { ForgotPasswordPage } from '@/features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/features/auth/ResetPasswordPage';
 import { UserProfilePage } from '@/features/profile/UserProfilePage';
 import { MapPage } from '@/features/map/MapPage';
+import { WelcomePage } from '@/features/welcome/WelcomePage';
+import { PublicSharePage } from '@/features/location-share/PublicSharePage';
 import { useAuth } from '@/hooks/useAuth';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/signup" replace />;
+  const location = useLocation();
+  return isAuthenticated
+    ? <>{children}</>
+    : <Navigate to="/login" replace state={{ from: location.pathname }} />;
+};
+
+const PublicOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
 };
 
 export const router = createBrowserRouter([
   {
+    path: '/welcome',
+    element: <WelcomePage />
+  },
+  {
     path: '/login',
-    element: <LoginPage />
+    element: <PublicOnlyRoute><LoginPage /></PublicOnlyRoute>
   },
   {
     path: '/signup',
-    element: <SignUpPage />
+    element: <PublicOnlyRoute><SignUpPage /></PublicOnlyRoute>
+  },
+  {
+    path: '/forgot-password',
+    element: <PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>
+  },
+  {
+    path: '/reset-password',
+    element: <PublicOnlyRoute><ResetPasswordPage /></PublicOnlyRoute>
+  },
+  {
+    path: '/share/:token',
+    element: <PublicSharePage />
   },
   {
     path: '/',
@@ -43,7 +71,7 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Navigate to="/map" replace /> },
+      { index: true, element: <DashboardPage /> },
       { path: 'map', element: <MapPage /> },
       { path: 'profile', element: <UserProfilePage /> },
       { path: 'physical-safety', element: <PhysicalSafetyPage /> },
@@ -60,5 +88,9 @@ export const router = createBrowserRouter([
       { path: 'emergency-directory', element: <EmergencyDirectoryPage /> },
       { path: 'settings', element: <SettingsPage /> }
     ]
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" replace />
   }
 ]);

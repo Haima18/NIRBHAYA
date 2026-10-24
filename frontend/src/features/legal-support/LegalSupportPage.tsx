@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import {
   Scale,
-  Search,
-  Filter,
-  CheckCircle,
+  FileText,
   HelpCircle,
   Phone,
-  Video,
-  FileText,
-  AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  Save,
+  Info,
+  Trash2
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -19,108 +17,179 @@ import { Alert } from '@/components/ui/Alert';
 import { Tabs } from '@/components/ui/Tabs';
 import { Modal } from '@/components/ui/Modal';
 import { resourcesService } from '@/services/api/resourcesService';
-import { LawyerProfile } from '@/types';
+import { storageService } from '@/services/storage/storageService';
+import { LawyerProfile, LegalConsultationRequest } from '@/types';
 
 export const LegalSupportPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('directory');
   const [cityFilter, setCityFilter] = useState('all');
   const [areaFilter, setAreaFilter] = useState('all');
   const [selectedLawyer, setSelectedLawyer] = useState<LawyerProfile | null>(null);
-  const [consultationBooked, setConsultationBooked] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
+
+  const [contactName, setContactName] = useState('');
+  const [contactDetails, setContactDetails] = useState('');
+  const [preferredMode, setPreferredMode] = useState('Phone call');
+  const [notes, setNotes] = useState('');
+  const [savedRequests, setSavedRequests] = useState<LegalConsultationRequest[]>(
+    () => storageService.getLegalConsultationRequests()
+  );
 
   const lawyers = resourcesService.getLawyers(cityFilter, areaFilter);
+
+  const openPrepNote = (lawyer: LawyerProfile) => {
+    setSelectedLawyer(lawyer);
+    setSavedNotice(false);
+  };
+
+  const handleSaveRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedLawyer) return;
+    const request: LegalConsultationRequest = {
+      id: `legal_${Date.now()}`,
+      lawyerId: selectedLawyer.id,
+      lawyerName: selectedLawyer.name,
+      contactName,
+      contactDetails,
+      preferredMode,
+      notes,
+      status: 'saved_locally',
+      createdAt: new Date().toISOString()
+    };
+    storageService.saveLegalConsultationRequest(request);
+    setSavedRequests(prev => [request, ...prev].slice(0, 30));
+    setSavedNotice(true);
+    setNotes('');
+  };
+
+  const handleDeleteRequest = (id: string) => {
+    if (!window.confirm('Delete this locally saved consultation note?')) return;
+    storageService.deleteLegalConsultationRequest(id);
+    setSavedRequests(prev => prev.filter(req => req.id !== id));
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       <div>
         <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
-          Women’s Legal Support & Advocates Directory
+          Legal Information & Official Legal Aid
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: '4px' }}>
-          Searchable directory of female cyber and domestic rights lawyers, free NALSA legal aid, and consultation preparation tools.
+          General legal information, official free-aid routes, and a private consultation-preparation tool. NIRBHAYA
+          does not provide legal representation or a verified lawyer network.
         </p>
       </div>
 
-      <Alert type="info">
-        <strong>Information Disclaimer:</strong> NIRBHAYA connects you with empanelled advocates and free NALSA aid. The directory provides general legal information and does not substitute for an attorney-client relationship.
+      <Alert type="info" title="Not legal advice">
+        This page provides general information, not legal advice, and does not create a lawyer-client relationship. The
+        advocate cards are layout samples, not real practitioners. For free legal aid, call NALSA at{' '}
+        <a href="tel:1516" style={{ color: 'inherit', fontWeight: 600 }}>1516</a> or contact your State Legal Services
+        Authority.
       </Alert>
 
       <Tabs
         tabs={[
-          { id: 'directory', label: 'Advocate Directory', icon: <Scale size={16} /> },
-          { id: 'guides', label: 'Legal Rights & Zero FIR Guides', icon: <FileText size={16} /> },
-          { id: 'prep', label: 'Consultation Preparation Checklist', icon: <HelpCircle size={16} /> }
+          { id: 'directory', label: 'Sample Directory & Aid', icon: <Scale size={16} /> },
+          { id: 'guides', label: 'Legal Rights Guides', icon: <FileText size={16} /> },
+          { id: 'prep', label: 'Consultation Preparation', icon: <HelpCircle size={16} /> }
         ]}
         activeTab={activeTab}
         onChange={setActiveTab}
       />
 
-      {/* TAB 1: ADVOCATE DIRECTORY */}
+      {/* TAB 1: DIRECTORY + OFFICIAL AID */}
       {activeTab === 'directory' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-          {/* Filters Bar */}
+          <Card style={{ border: '1px solid var(--color-brand-primary-light)' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              Real free-legal-aid routes
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.5 }}>
+              Under Section 12 of the Legal Services Authorities Act, 1987, women are entitled to free legal services.
+              Eligibility and scope are determined by the legal services authority, not by NIRBHAYA.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <a href="tel:1516" style={{ textDecoration: 'none' }}>
+                <Button variant="primary" size="sm" leftIcon={<Phone size={16} />}>NALSA 1516</Button>
+              </a>
+              <a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm" leftIcon={<ExternalLink size={16} />}>NALSA portal</Button>
+              </a>
+              <a href="https://dslsa.org" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm" leftIcon={<ExternalLink size={16} />}>Delhi SLSA (example)</Button>
+              </a>
+              <a href="https://ncw.nic.in" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" size="sm" leftIcon={<ExternalLink size={16} />}>NCW</Button>
+              </a>
+            </div>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: '0.75rem 0 0' }}>
+              Find your State Legal Services Authority through the NALSA portal. NIRBHAYA cannot confirm which office is
+              nearest to you.
+            </p>
+          </Card>
+
           <Card style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ flex: 1, minWidth: '180px' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
-                Filter by City:
+              <label htmlFor="legal-city" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                Filter sample layouts by city
               </label>
               <select
+                id="legal-city"
                 value={cityFilter}
                 onChange={e => setCityFilter(e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
-                <option value="all">All Cities (India)</option>
+                <option value="all">All sample cities</option>
                 <option value="New Delhi">New Delhi</option>
                 <option value="Mumbai">Mumbai</option>
                 <option value="Bengaluru">Bengaluru</option>
-                <option value="Kolkata">Kolkata</option>
               </select>
             </div>
 
             <div style={{ flex: 1, minWidth: '220px' }}>
-              <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
-                Practice Area:
+              <label htmlFor="legal-area" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
+                Practice area
               </label>
               <select
+                id="legal-area"
                 value={areaFilter}
                 onChange={e => setAreaFilter(e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
               >
-                <option value="all">All Practice Areas</option>
+                <option value="all">All practice areas</option>
                 <option value="Cybercrime">Cybercrime & IT Act</option>
                 <option value="Domestic Violence">Domestic Violence (PWDVA)</option>
-                <option value="Harassment">Online Harassment</option>
+                <option value="Online Harassment">Online Harassment</option>
                 <option value="Non-Consensual Imagery">Non-Consensual Imagery (NCII)</option>
               </select>
             </div>
 
             <div style={{ alignSelf: 'flex-end' }}>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => { setCityFilter('all'); setAreaFilter('all'); }}
-              >
-                Reset Filters
+              <Button variant="outline" size="md" onClick={() => { setCityFilter('all'); setAreaFilter('all'); }}>
+                Reset filters
               </Button>
             </div>
           </Card>
 
-          {/* Lawyer Profile Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-6)' }}>
+          <Alert type="warning" title="These are not real lawyers">
+            Each card below is an illustrative layout. The names, bar-council entries, and organizations are fictional.
+            NIRBHAYA has not verified, employed, or partnered with any advocate. Do not send money or personal documents
+            based on these cards.
+          </Alert>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-6)' }}>
             {lawyers.map(lawyer => (
               <Card key={lawyer.id}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <div>
                     <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
                       {lawyer.name}
                     </h3>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0' }}>
-                      {lawyer.city}, {lawyer.state} • {lawyer.experienceYears} Years Bar Experience
+                      {lawyer.city}, {lawyer.state}
                     </p>
                   </div>
-                  <Badge variant={lawyer.feeType === 'pro_bono' ? 'success' : 'info'}>
-                    {lawyer.feeType.replace('_', ' ')}
-                  </Badge>
+                  <Badge variant="neutral">Sample layout</Badge>
                 </div>
 
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.45, margin: '0.5rem 0' }}>
@@ -128,7 +197,7 @@ export const LegalSupportPage: React.FC = () => {
                 </p>
 
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                  <div><strong>Bar Council Reg:</strong> {lawyer.barCouncilNumber}</div>
+                  <div><strong>Registration:</strong> {lawyer.barCouncilNumber}</div>
                   <div><strong>Languages:</strong> {lawyer.languages.join(', ')}</div>
                 </div>
 
@@ -141,60 +210,106 @@ export const LegalSupportPage: React.FC = () => {
                 </div>
 
                 <Button
-                  variant="primary"
+                  variant="outline"
                   size="sm"
                   style={{ width: '100%' }}
-                  onClick={() => { setSelectedLawyer(lawyer); setConsultationBooked(false); }}
+                  onClick={() => openPrepNote(lawyer)}
                 >
-                  Request Consultation
+                  Prepare a local consultation note
                 </Button>
               </Card>
             ))}
           </div>
+
+          <Card>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              Saved consultation notes ({savedRequests.length})
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              These notes are stored only in this browser. They are not sent to any advocate or legal-aid office.
+            </p>
+            {savedRequests.length === 0 ? (
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No consultation notes saved yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {savedRequests.map(req => (
+                  <div key={req.id} style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-app)', border: '1px solid var(--border-color-default)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', alignItems: 'flex-start' }}>
+                      <div>
+                        <strong style={{ fontSize: '0.9rem' }}>{req.lawyerName}</strong>
+                        <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                          {req.preferredMode} • {new Date(req.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={`Delete consultation note for ${req.lawyerName}`}
+                        onClick={() => handleDeleteRequest(req.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px' }}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    {req.notes && (
+                      <p style={{ margin: '0.4rem 0 0', fontSize: '0.82rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                        &ldquo;{req.notes}&rdquo;
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
         </div>
       )}
 
       {/* TAB 2: LEGAL GUIDES */}
       {activeTab === 'guides' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 'var(--space-6)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-6)' }}>
           <Card>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-brand-primary)', marginBottom: '0.5rem' }}>
-              Zero FIR Rights in India
+              Zero FIR — general information
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              A <strong>Zero FIR</strong> can be filed at <em>any police station</em> across India, irrespective of where the crime occurred.
+              A Zero FIR is a police practice that allows a First Information Report to be registered at a police station
+              even when the alleged offence happened outside that station&apos;s jurisdiction. The report is then
+              transferred to the appropriate station.
             </p>
             <ul style={{ margin: '0.5rem 0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              <li>The police station cannot decline registration citing jurisdiction.</li>
-              <li>Once registered, the station transfers the case to the appropriate jurisdiction police station.</li>
-              <li>Under Section 166A IPC / BNS, police officers refusing to register FIR for offences against women face criminal penalty.</li>
+              <li>Ask for a copy of the FIR and note the station and officer details.</li>
+              <li>If a station refuses, you can escalate in writing to the Superintendent of Police and seek help from legal aid.</li>
+              <li>Procedural rules come from the Bharatiya Nagarik Suraksha Sanhita, 2023 and state directions. Confirm current practice with a licensed advocate or legal-aid office.</li>
             </ul>
           </Card>
 
           <Card>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-brand-primary)', marginBottom: '0.5rem' }}>
-              Free Legal Aid (NALSA Section 12)
+              Free legal aid under NALSA
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              Under <strong>Section 12 of the Legal Services Authorities Act, 1987</strong>, EVERY woman in India is entitled to completely free legal representation in court, regardless of income.
+              Section 12 of the Legal Services Authorities Act, 1987 lists categories of people entitled to free legal
+              services, including women. The relevant State or District Legal Services Authority decides eligibility and
+              assigns an advocate.
             </p>
             <ul style={{ margin: '0.5rem 0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              <li>Covers fees of advocate, court fees, typing charges, and appeal costs.</li>
-              <li>Call toll-free helpline <strong>1516</strong> or visit <a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer">nalsa.gov.in</a>.</li>
+              <li>Free legal aid can cover representation and related court fees, subject to the authority&apos;s rules.</li>
+              <li>Call <strong>1516</strong> or use <a href="https://nalsa.gov.in" target="_blank" rel="noopener noreferrer">nalsa.gov.in</a> to find your State Legal Services Authority.</li>
+              <li>NIRBHAYA does not decide eligibility and cannot fast-track an application.</li>
             </ul>
           </Card>
 
           <Card>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--color-brand-primary)', marginBottom: '0.5rem' }}>
-              Protection of Women from Domestic Violence Act (PWDVA)
+              Protection of Women from Domestic Violence Act, 2005
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              Provides civil remedies without immediate divorce proceedings:
+              The PWDVA provides civil remedies that can be sought separately from criminal proceedings:
             </p>
             <ul style={{ margin: '0.5rem 0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-              <li><strong>Protection Orders (Section 18):</strong> Restraining the abuser from entering your workplace or communicating.</li>
-              <li><strong>Residence Orders (Section 19):</strong> Right to reside in the shared household without eviction.</li>
-              <li><strong>Monetary Relief (Section 20):</strong> Expenses and maintenance for self and children.</li>
+              <li><strong>Protection orders:</strong> restrain specified conduct, communication, or entry.</li>
+              <li><strong>Residence orders:</strong> address a woman&apos;s right to reside in a shared household.</li>
+              <li><strong>Monetary relief:</strong> address maintenance, medical expenses, and related losses.</li>
+              <li>A Protection Officer or service provider can help with the application process. Confirm details with a licensed advocate or legal-aid office.</li>
             </ul>
           </Card>
         </div>
@@ -204,69 +319,103 @@ export const LegalSupportPage: React.FC = () => {
       {activeTab === 'prep' && (
         <Card>
           <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-            Consultation Preparation Questionnaire
+            Consultation preparation questions
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1.25rem', lineHeight: 1.45 }}>
-            Prepare these answers before speaking with an advocate to maximize legal clarity:
+            Write down what you can before speaking with a licensed advocate or legal-aid officer. Keep originals and
+            unedited copies of evidence where possible.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
-              '1. What is the chronological timeline of incidents? (Dates, places, medium)',
-              '2. What electronic evidence is currently secured? (Uncropped screenshots, audio recordings, email headers)',
-              '3. Has an informal complaint or police call (112 / 1091) been placed previously?',
-              '4. What immediate relief is desired? (Cease contact, restraining order, custody, or cyber takedown?)',
-              '5. Are there shared children, bank accounts, or residential lease agreements?'
+              'What is the chronological timeline of events? Include dates, places, and how contact was made.',
+              'What evidence do you already have? Keep uncropped screenshots, original files, and message headers where possible.',
+              'Have you contacted police, a helpline, or a Protection Officer before? Note dates and reference numbers.',
+              'What immediate outcome do you want: no contact, a protection order, residence safety, or a cyber takedown?',
+              'Are there shared children, finances, tenancy, or immigration issues a lawyer should know about?'
             ].map((q, idx) => (
               <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'var(--bg-app)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)' }}>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{q}</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{idx + 1}. {q}</strong>
               </div>
             ))}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginTop: '1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+            <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <span>
+              You can save your answers as a local consultation note from any sample card in the directory tab. Notes are
+              never transmitted.
+            </span>
           </div>
         </Card>
       )}
 
-      {/* Consultation Request Modal */}
+      {/* Consultation preparation modal */}
       {selectedLawyer && (
         <Modal
           isOpen={!!selectedLawyer}
           onClose={() => setSelectedLawyer(null)}
-          title={`Consultation with ${selectedLawyer.name}`}
+          title="Local consultation preparation note"
         >
-          {consultationBooked ? (
-            <div style={{ textAlign: 'center', padding: '1rem 0' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--color-success-light)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-                <CheckCircle size={28} />
-              </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                Consultation Request Submitted
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Your confidential request has been logged. In the live platform, the advocate’s chamber contacts your provided email/phone within 24 hours.
+          {savedNotice ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <Alert type="success" title="Saved on this device">
+                This note was stored in your browser. It was not sent to {selectedLawyer.name} or any legal-aid office.
+              </Alert>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                To contact a real legal-aid office, call NALSA at <a href="tel:1516">1516</a> or use your State Legal
+                Services Authority. For immediate danger, call 112.
               </p>
-              <Button variant="primary" style={{ marginTop: '1rem' }} onClick={() => setSelectedLawyer(null)}>
-                Close
-              </Button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="primary" onClick={() => setSelectedLawyer(null)}>Close</Button>
+              </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                Consultation Type: <strong>{selectedLawyer.feeType.replace('_', ' ')}</strong> • Preferred City: <strong>{selectedLawyer.city}</strong>
-              </p>
+            <form onSubmit={handleSaveRequest} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <Alert type="warning" title="Sample card — no real advocate">
+                {selectedLawyer.name} is a layout sample. Use this form only to prepare your own notes. Nothing is
+                delivered.
+              </Alert>
 
-              <Input label="Your Contact Name / Alias" defaultValue="Devika" />
-              <Input label="Email or Secure Phone" defaultValue="confidential.client@nirbhaya.internal" />
-              <Input label="Preferred Mode (e.g. Secure Video Call or In-Person)" defaultValue="Secure Video Call" />
+              <Input
+                label="Your name or alias (optional)"
+                value={contactName}
+                onChange={e => setContactName(e.target.value)}
+              />
+              <Input
+                label="Contact detail you want to remember (optional)"
+                value={contactDetails}
+                onChange={e => setContactDetails(e.target.value)}
+              />
+              <Input
+                label="Preferred consultation mode"
+                value={preferredMode}
+                onChange={e => setPreferredMode(e.target.value)}
+              />
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <Button variant="outline" onClick={() => setSelectedLawyer(null)}>
+              <div>
+                <label htmlFor="legal-notes" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.35rem' }}>
+                  Your questions or timeline
+                </label>
+                <textarea
+                  id="legal-notes"
+                  rows={4}
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="What do you want to ask? What dates and evidence matter?"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <Button variant="outline" type="button" onClick={() => setSelectedLawyer(null)}>
                   Cancel
                 </Button>
-                <Button variant="primary" onClick={() => setConsultationBooked(true)}>
-                  Confirm Consultation Request
+                <Button variant="primary" type="submit" leftIcon={<Save size={16} />}>
+                  Save note on this device
                 </Button>
               </div>
-            </div>
+            </form>
           )}
         </Modal>
       )}

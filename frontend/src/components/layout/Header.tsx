@@ -155,7 +155,8 @@ export const Header: React.FC = () => {
               fontSize: '0.875rem'
             }}
           >
-            <strong>Emergency 112 Call:</strong> Tapping confirm will immediately launch your phone dialer to connect with the National Emergency Response Support System (112).
+            <strong>Emergency 112 Call:</strong> Tapping confirm opens your phone dialer with 112 filled in. You must
+            press the call button yourself; NIRBHAYA cannot place the call or confirm that anyone answers.
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
             Only use this if you need immediate police, medical, or fire response. Never fake an emergency call.
