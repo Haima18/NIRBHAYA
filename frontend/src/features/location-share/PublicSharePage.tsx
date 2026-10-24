@@ -153,7 +153,7 @@ export const PublicSharePage: React.FC = () => {
           <Button variant="outline" onClick={() => void load()} isLoading={loading} leftIcon={<RefreshCw size={16} />}>
             Refresh now
           </Button>
-          <a href="tel:112" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-danger)', color: '#fff', fontWeight: 700 }}>
+          <a href="tel:112" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-danger-solid)', color: '#fff', fontWeight: 700 }}>
             Call 112 if someone is in immediate danger
           </a>
         </div>

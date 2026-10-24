@@ -3,7 +3,7 @@
 **Audit date:** 2026-10-24  
 **Baseline commit:** `7319d2b` — *Baseline snapshot before audit repairs*  
 **Scope:** Existing React/Flask/SQLite application, all feature modules, API routes, data flows, safety claims, and documentation.  
-**Outcome:** The application was repaired in place, then visually redesigned as *The Living Lavender Sanctuary*. The React + Flask + SQLite architecture, all routes, API contracts, and safety logic were preserved.
+**Outcome:** The application was repaired in place, then visually redesigned twice — first as *The Living Lavender Sanctuary*, finally as an app-wide MAREN editorial system. The React + Flask + SQLite architecture, all routes, API contracts, and safety logic were preserved.
 
 > This was a product, safety-claim, and application-security review performed by reading the source and running the test suites. It was **not** a formal penetration test, dependency CVE audit, load test, or legal compliance review.
 
@@ -247,7 +247,7 @@ The public landing was replaced with a one-screen editorial hero using the suppl
 - `/welcome` is now a single 1155x767 frame scaled to the viewport below the Quick Exit bar: full-bleed portrait, thin white grid, mixed sans/serif headline, peach "Always open" star, right-hand introduction and entry control, tilted polaroid, and a giant italic `NIRBHAYA` watermark.
 - The supplied CloudFront photo, polaroid, and 4.04 s loop are used directly. Two alternating muted videos crossfade the last second into the first, so the loop never jumps or reverses. The video fades in once ready and is hidden for reduced motion.
 - The previous `ed-*` landing markup, overlay menu, scroll reveals, side words, and long-form sections were removed. `styles/landing.css` now owns the `mh-*` hero; `styles/sanctuary.css` keeps the loader, auth, and shared sanctuary styles.
-- `Reveal.tsx`, `ButterflyScene.tsx`, and `ValleyBackdrop.tsx` are no longer imported by the landing. `three` remains installed but is not in the production bundle.
+- `Reveal.tsx`, `ButterflyScene.tsx`, and `ValleyBackdrop.tsx` were no longer imported by the landing at this point. (They, `ButterflyMotif.tsx`, the butterfly image, and the `three` dependency were removed entirely in section 12.)
 
 ### What did not change
 
@@ -273,3 +273,43 @@ The public landing was replaced with a one-screen editorial hero using the suppl
 2. The media is not licensed for redistribution and should be replaced with owned assets before production.
 3. Real OS reduced-motion settings, screen readers, and physical devices were not exercised.
 4. The one-screen hero removes the previous long-form feature sections; feature discovery now relies on the header links and the right-hand copy.
+
+---
+
+## 12. App-wide editorial redesign (2026-10-24)
+
+The MAREN language from section 11 was extended to every authenticated page, the auth screens, and the startup loader. This replaces the butterfly/valley/light-sage presentation completely; no `ed-*`, valley, butterfly, or Three.js code remains. It does not change the audit conclusions above.
+
+### What changed
+
+- `styles/tokens.css` is now **Editorial Nightfall**: aubergine canvas, lilac/peach accents, inverted neutrals, hairline rules, and shared photo/polaroid media tokens.
+- Added `styles/editorial.css` (loaded after `globals.css`) for the shell, header, sidebar, footer, buttons, cards, forms, tabs, alerts, badges, modal, empty state, dashboard hero, feature tiles, Quick Exit, and profile banner.
+- `styles/sanctuary.css` was reduced to the floating SOS, loader, and auth frame; the old landing/valley/butterfly CSS was deleted. `styles/landing.css` still owns the public hero.
+- Header and auth brand use an italic serif `N` monogram. The dashboard hero and profile banner reuse the supplied portrait with dark veils and thin grids.
+- Auth keeps a portrait story panel, a tilted polaroid, and the SOS shortcut **above the card in normal flow** so it is visible even on the long signup form. Login was compacted to fit a 1062x670 window.
+- Removed `ButterflyScene.tsx`, `ButterflyFallback.tsx`, `ValleyBackdrop.tsx`, `Reveal.tsx`, `ButterflyMotif.tsx`, `public/assets/butterfly-glow.jpg`, and the `three` / `@types/three` dependencies.
+- Alert titles are now paragraphs rather than `h4`; the empty-state title is an `h2`.
+
+### Safety and accessibility
+
+- SOS, siren, Quick Exit, and the fake-call screen keep their handlers and z-order. Photo layers, grids, and glows are pointer-events-none.
+- Contrast fixes: AI user bubbles/avatars, Digital Guardian phrase chips, Empowerment/Privacy Shield selected filters, and the public-share 112 link now use opaque brand/danger tokens.
+- Reduced motion disables loader/auth entrances, the dashboard glow, and all decorative animation; the public hero renders the photo only.
+
+### Verification
+
+| Check | Result |
+| :--- | :--- |
+| `cd frontend && npm run build` | **Passed** - TypeScript clean; 2,013 modules; CSS 64.17 kB (13.45 kB gzip); main JS 523.83 kB (147.36 kB gzip); chunk-size warning only. |
+| Frontend tests | **Passed** - 4 files / 13 tests. |
+| Lighthouse (`/`, `/login`, `/welcome`) | **Passed** - Accessibility 100, Best Practices 100, SEO 100, zero failing audits. |
+| Lighthouse (app pages) | **98 accessibility** - only a pre-existing `heading-order` skip; every contrast audit passes. |
+| Desktop visual QA | **Passed** - dashboard, all 16 feature routes, settings, profile, login, signup, forgot/reset password, public share, SOS modal, fake-call screen. |
+| Mobile 390x844 | **Passed** - login, signup, dashboard, Physical Safety, Profile; no horizontal overflow; hero and actions reflow. |
+| Reduced motion | **Passed** - public hero renders zero `<video>` elements and a static photo. |
+
+### Residual risks
+
+1. The portrait, polaroid, and loop are third-party CloudFront media; license and self-host before production.
+2. Four app pages retain a pre-existing heading-order skip; re-leveling section headings was outside the visual pass.
+3. Manual QA only; no Playwright/Cypress visual-regression suite, screen-reader traversal, or physical-device test.

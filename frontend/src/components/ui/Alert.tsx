@@ -19,7 +19,7 @@ export const Alert: React.FC<AlertProps> = ({ type = 'info', title, children }) 
     <div className={`ui-alert ui-alert-${type}`} role={type === 'danger' ? 'alert' : undefined}>
       <div className="ui-alert__icon" style={{ color: config.color }}>{config.icon}</div>
       <div className="ui-alert__body">
-        {title && <h4 className="ui-alert__title">{title}</h4>}
+        {title && <p className="ui-alert__title">{title}</p>}
         <div>{children}</div>
       </div>
     </div>

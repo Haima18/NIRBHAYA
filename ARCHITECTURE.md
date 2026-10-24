@@ -6,7 +6,7 @@ NIRBHAYA is a two-process web application with a local-first data model.
 - **Backend:** Flask 3, Flask-CORS, SQLite, Pillow, Requests, python-dotenv.
 - **Optional outbound:** Gemini / OpenAI / Anthropic (AI), OpenStreetMap (maps).
 
-The architecture was preserved during the audit and the later visual passes. No framework migration was performed; the redesign changed presentation, not routes, API contracts, storage, or safety logic.
+The architecture was preserved during the audit and the later visual passes, including the final app-wide MAREN editorial redesign. No framework migration was performed; the redesign changed presentation, not routes, API contracts, storage, or safety logic.
 
 ---
 
@@ -68,7 +68,7 @@ frontend/src/
 │   └── router.tsx            # Public/protected routes
 ├── components/
 │   ├── layout/               # PageLayout, Header, Sidebar, Footer, QuickExitBar, AuthShell
-│   ├── sanctuary/            # ButterflyScene, ButterflyFallback, ValleyBackdrop, Reveal
+│   ├── sanctuary/            # SanctuaryLoader
 │   └── ui/                   # Button, Card, Input, Modal, Tabs, Alert, Badge, ...
 ├── features/
 │   ├── auth/                 # Login, SignUp, ForgotPassword, ResetPassword
@@ -102,7 +102,7 @@ frontend/src/
 │   ├── notifications/        # tel/sms/browser notification helpers
 │   ├── storage/              # scoped localStorage
 │   └── audio/                # Web Audio helpers
-├── styles/                   # tokens.css, sanctuary.css, globals.css
+├── styles/                   # tokens.css, globals.css, editorial.css, sanctuary.css, landing.css
 ├── tests/                    # Vitest unit tests
 ├── types/                    # shared TypeScript types
 └── utils/                    # printable incident summary
@@ -121,13 +121,14 @@ Session state is held by `authService` and exposed through `useAuth`. On load, `
 
 ### Design system
 
-- `styles/tokens.css` contains colors, spacing, radii, shadows, typography, and layout dimensions. Typography is Playfair Display for headings/italic accents and Inter Tight for navigation, controls, forms, and safety information, with system fallbacks.
-- `styles/sanctuary.css` owns the loader, auth frame, and shared sanctuary styles. `styles/landing.css` owns the public `mh-*` hero: the full-bleed scene, grid, nav, headline, polaroid, watermark, and responsive/reduced-motion rules.
-- `styles/globals.css` imports the token, sanctuary, and landing layers, then defines the application shell, shared primitives, and the fill-up hover used by the standard `.btn` family.
+- `styles/tokens.css` contains the **Editorial Nightfall** palette, spacing, radii, shadows, typography, layout dimensions, and the shared editorial photo/polaroid media tokens. Typography is Playfair Display for display headings, italic accents, and the `N` monogram; Inter Tight for navigation, controls, forms, and safety information, with system fallbacks.
+- `styles/globals.css` imports the token, sanctuary, and landing layers, then defines the application shell, shared primitives, and base component styles.
+- `styles/editorial.css` is imported after `globals.css` and restyles the authenticated product with the MAREN language: header, sidebar, footer, buttons, cards, forms, tabs, alerts, badges, modal, empty state, dashboard hero, feature tiles, Quick Exit, and profile banner.
+- `styles/sanctuary.css` owns only the floating SOS, the startup loader, and the auth frame. `styles/landing.css` owns the public `mh-*` hero: the full-bleed scene, grid, nav, headline, polaroid, watermark, and responsive/reduced-motion rules.
 - `PageLayout` owns the navigation shell; feature pages render through `<Outlet />`.
 - UI primitives in `components/ui/` are reusable across modules.
-- `components/sanctuary/` still holds the Three.js butterfly, SVG valley, and `Reveal` wrapper, but the landing no longer imports them. The loader uses the butterfly image directly.
-- The public landing is a one-screen editorial hero over a supplied portrait; the authenticated application stays light and high-contrast for safety readability. Responsive rules, `:focus-visible`, and reduced-motion handling apply to both.
+- `components/sanctuary/` holds only `SanctuaryLoader`; the butterfly scene, valley backdrop, reveal helper, and motif were removed with the final editorial pass.
+- The public landing and the authenticated application share the same editorial language. Forms and safety data keep high-contrast night surfaces; responsive rules, `:focus-visible`, and reduced-motion handling apply everywhere.
 
 ### Landing and motion boundaries
 
@@ -135,8 +136,8 @@ Session state is held by `authService` and exposed through `useAuth`. On load, `
 - The hero uses the supplied CloudFront photo, polaroid, and 4.04 s loop. Two muted videos alternate and crossfade the last second into the first so the loop never jumps or reverses.
 - The video fades in once its first frame is ready and is removed entirely for reduced motion, leaving the photo.
 - The frame is scaled from a 1155x767 composition with `--u = min(100vw/1155, (100svh - Quick Exit)/767)`; phones use the full viewport below the Quick Exit bar with no scrolling.
-- SOS (`tel:112`), the siren, and Quick Exit never route through decorative motion, and they keep their own z-index above the hero.
-- The landing imports no Three.js scene, so the main bundle does not wait for one.
+- SOS (`tel:112`), the siren, and Quick Exit never route through decorative motion, and they keep their own z-index above the hero and above the app-wide photo layers.
+- No Three.js scene is imported or bundled; the `three` dependency was removed.
 
 ---
 
@@ -429,9 +430,9 @@ The current repository only includes the development topology: Vite on 3000 and 
 
 The original separation-of-concerns design remains:
 
-1. **Tokens** — `styles/tokens.css` controls colors, spacing, typography, radii, shadows.
+1. **Tokens** — `styles/tokens.css` controls colors, spacing, typography, radii, shadows, and editorial media.
 2. **Layout shell** — `components/layout/` controls navigation and page chrome.
 3. **UI primitives** — `components/ui/` controls buttons, cards, inputs, modals, tabs, alerts, badges.
 4. **Feature pages** — consume services/hooks and render into `<Outlet />`.
 
-A visual redesign can therefore be done without changing backend contracts or feature logic.
+`styles/editorial.css` is a thin override layer over the shell and primitives, which is why the MAREN redesign could replace the entire presentation without touching feature logic. A visual redesign can therefore be done without changing backend contracts or feature logic.

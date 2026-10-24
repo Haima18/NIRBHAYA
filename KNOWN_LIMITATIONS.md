@@ -137,16 +137,17 @@ This document lists what the application does not do. If a limitation could affe
 
 ## 10. Presentation and motion
 
-The public landing page is a one-screen editorial hero with an external photo, polaroid, and video loop. The authenticated interface stays light and high-contrast. None of the landing decoration is load-bearing for safety.
+The public landing page is a one-screen editorial hero with an external photo, polaroid, and video loop. The authenticated interface now shares the same dark editorial language — aubergine canvas, lilac/peach accents, hairline rules, and serif display type — while forms and safety data keep high-contrast surfaces. None of the decoration is load-bearing for safety.
 
 | Limitation | Impact | What would be required |
 | :--- | :--- | :--- |
 | The grid, peach star, polaroid, watermark, and entrance sequence are decorative only. | If a decorative layer fails to render, the page is plainer but every control and route still works. | Nothing for safety; treat decoration as optional. |
-| The hero photo, polaroid, and 4 s loop load from a third-party CloudFront host. | A block, outage, or offline use leaves the flat `#3B2F5C` background; every control still works. | License the media and host it locally with a bundled fallback. |
+| The hero photo, polaroid, and 4 s loop load from a third-party CloudFront host. The same portrait is reused behind the dashboard hero, auth story panel, profile banner, and loader. | A block, outage, or offline use leaves the flat aubergine background; every control still works. | License the media and host it locally with a bundled fallback. |
 | Autoplay may be blocked, and the loop is streamed rather than bundled. | The hero falls back to the still photo, which is also the reduced-motion state. | None; the photo is the fallback. |
 | Reduced motion is handled in CSS and `matchMedia` and was checked with headless Chrome, not a real OS setting or screen reader. | Motion-sensitive users may still see some animation until an assistive-setting audit is done. | Test with OS reduced-motion enabled and with screen readers. |
 | The one-screen hero omits the previous long-form feature, principle, and step sections. | Feature discovery relies on the header links and the right-hand copy; every route still exists. | Add a separate overview page if long-form discovery is needed. |
 | The floating SOS overlaps the lower-right of the hero. | It is deliberately above every decorative layer and remains tappable; on phones it is icon-only. | Keep emergency controls above any decorative overlay. |
+| Some app pages still skip a heading level (`h1` to `h3`) in their section markup. | Lighthouse accessibility is 98 rather than 100 on those pages; visual contrast still passes. | Re-level page section headings to `h2` in a dedicated accessibility pass. |
 | Fonts are loaded from Google Fonts. | Offline or blocked-font environments fall back to system serif/sans faces. | Self-host the font files. |
 | The video loop and entrance motion are not benchmarked on low-end hardware. | Frame rate may drop on older devices; reduced motion removes the video. | Profile on representative low-end devices and lower the media weight. |
 

@@ -17,7 +17,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Alert } from '@/components/ui/Alert';
-import { ButterflyMotif } from '@/components/ui/ButterflyMotif';
 import { useAuth } from '@/hooks/useAuth';
 import { storageService } from '@/services/storage/storageService';
 import { INDIAN_LANGUAGES } from '@/constants/languages';
@@ -88,17 +87,13 @@ export const UserProfilePage: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
-      {/* Serene lavender profile banner with butterfly motif */}
+      {/* Editorial portrait banner */}
       <div
+        className="profile-banner"
         style={{
-          borderRadius: '24px',
-          background: 'linear-gradient(135deg, #1f143d 0%, #2e1856 50%, #421d74 100%)',
+          borderRadius: 'var(--radius-xl)',
           padding: 'var(--space-8)',
-          color: '#ffffff',
-          position: 'relative',
-          overflow: 'hidden',
-          border: '1px solid rgba(222, 203, 254, 0.25)',
-          boxShadow: '0 12px 30px rgba(79, 35, 145, 0.15)'
+          color: '#ffffff'
         }}
       >
         <div
@@ -119,19 +114,16 @@ export const UserProfilePage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <div
               aria-hidden="true"
+              className="profile-monogram"
               style={{
                 width: '84px',
                 height: '84px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #a876f8 0%, #7434d8 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 0 24px rgba(197, 163, 252, 0.6)',
-                border: '3px solid #ede4ff',
                 fontSize: '2.2rem',
-                fontWeight: 700,
-                color: '#ffffff'
+                fontWeight: 400
               }}
             >
               {(name || 'N').charAt(0).toUpperCase()}
@@ -147,12 +139,12 @@ export const UserProfilePage: React.FC = () => {
                 </h1>
                 <Badge variant="success">Signed in</Badge>
               </div>
-              <p style={{ fontSize: '0.9rem', color: '#decbfe', margin: 0 }}>
+              <p style={{ fontSize: '0.9rem', color: 'rgba(243, 235, 252, 0.82)', margin: 0 }}>
                 {email}
                 {joinedLabel ? ` • Member since ${joinedLabel}` : ''}
               </p>
               {bio && (
-                <p style={{ fontSize: '0.8rem', color: '#c5a3fc', fontStyle: 'italic', marginTop: '4px' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-brand-secondary)', fontStyle: 'italic', marginTop: '4px' }}>
                   &ldquo;{bio}&rdquo;
                 </p>
               )}
@@ -160,7 +152,6 @@ export const UserProfilePage: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <ButterflyMotif size={68} glowColor="rgba(222, 203, 254, 0.8)" />
             <Button
               variant="outline"
               size="md"

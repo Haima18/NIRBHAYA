@@ -245,8 +245,8 @@ export const DigitalGuardianPage: React.FC = () => {
                           key={pIdx}
                           style={{
                             display: 'inline-block',
-                            backgroundColor: '#fee2e2',
-                            color: '#991b1b',
+                            backgroundColor: 'var(--color-danger-light)',
+                            color: 'var(--color-danger-hover)',
                             padding: '1px 6px',
                             borderRadius: '4px',
                             marginRight: '4px',

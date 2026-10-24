@@ -16,9 +16,6 @@ export const SanctuaryLoader: React.FC<SanctuaryLoaderProps> = ({ error, onRetry
     <div className="sanctuary-loader__sky" aria-hidden="true" />
     <div className="sanctuary-loader__grid" aria-hidden="true" />
     <div className="sanctuary-loader__content">
-      <div className="sanctuary-loader__halo" aria-hidden="true">
-        <img src="/assets/butterfly-glow.jpg" alt="" className="sanctuary-loader__butterfly" draggable={false} />
-      </div>
       <p className="sanctuary-loader__eyebrow">A living sanctuary</p>
       <h1 className="sanctuary-loader__wordmark">NIRBHAYA</h1>
       <p className="sanctuary-loader__tagline">Your safety. Your voice. Your choice.</p>

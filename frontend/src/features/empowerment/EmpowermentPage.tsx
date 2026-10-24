@@ -49,7 +49,7 @@ export const EmpowermentPage: React.FC = () => {
               borderRadius: 'var(--radius-full)',
               fontSize: '0.8rem',
               fontWeight: category === cat.id ? 600 : 500,
-              backgroundColor: category === cat.id ? 'var(--color-brand-primary)' : 'var(--bg-surface)',
+              backgroundColor: category === cat.id ? 'var(--color-brand-solid)' : 'var(--bg-surface)',
               color: category === cat.id ? '#ffffff' : 'var(--text-secondary)',
               border: '1px solid var(--border-color-default)',
               cursor: 'pointer'

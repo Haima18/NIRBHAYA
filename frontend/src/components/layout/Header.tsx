@@ -6,7 +6,6 @@ import { notificationService } from '@/services/notifications/notificationServic
 import { FakeCallModal } from '@/features/physical-safety/FakeCallModal';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { ButterflyMotif } from '@/components/ui/ButterflyMotif';
 import { useTranslation } from '@/localization/useTranslation';
 
 export const Header: React.FC = () => {
@@ -23,9 +22,9 @@ export const Header: React.FC = () => {
   return (
     <>
       <header className="app-header">
-        <Link to="/" className="app-brand" aria-label="NIRBHAYA dashboard">
-          <span className="app-brand__mark">
-            <ButterflyMotif size={27} glowColor="rgba(118, 84, 180, .4)" />
+        <Link to="/" className="app-brand">
+          <span className="app-brand__mark" aria-hidden="true">
+            <span className="app-brand__monogram">N</span>
           </span>
           <span>
             <span className="app-brand__name">NIRBHAYA</span>

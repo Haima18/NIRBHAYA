@@ -76,7 +76,7 @@ export const PrivacyShieldPage: React.FC = () => {
               borderRadius: 'var(--radius-full)',
               fontSize: '0.8rem',
               fontWeight: categoryFilter === cat.id ? 600 : 500,
-              backgroundColor: categoryFilter === cat.id ? 'var(--color-brand-primary)' : 'var(--bg-surface)',
+              backgroundColor: categoryFilter === cat.id ? 'var(--color-brand-solid)' : 'var(--bg-surface)',
               color: categoryFilter === cat.id ? '#ffffff' : 'var(--text-secondary)',
               border: '1px solid var(--border-color-default)'
             }}

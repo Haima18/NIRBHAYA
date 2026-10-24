@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-10-24  
 **Baseline:** `7319d2b`  
-**Scope:** Audit repairs, the â€œLiving Lavender Sanctuaryâ€ visual redesign, and the editorial motion integration of the existing NIRBHAYA platform. No framework migration; all routes, API contracts, data, and safety logic were preserved.
+**Scope:** Audit repairs, then two visual passes — the “Living Lavender Sanctuary” and the final app-wide MAREN editorial redesign. No framework migration; all routes, API contracts, data, and safety logic were preserved.
 
 This document distinguishes **implemented**, **partial**, **sample/demo**, and **not available**. A feature is only "implemented" when the code path exists and the stated outcome is real.
 
@@ -26,12 +26,12 @@ This document distinguishes **implemented**, **partial**, **sample/demo**, and *
 | **Accounts & auth** | **Implemented** | Register, login, logout, session restore, profile edit, password change, password-confirmed deletion. SQLite + Werkzeug hashes + HttpOnly cookie. | No email/phone ownership verification; no session revocation list. |
 | **Password recovery** | **Partial** | Single-use SHA-256-hashed token, 30-minute default TTL, earlier tokens invalidated. Reset form works. | No email delivery. Token appears in the API response only when `EXPOSE_DEV_RESET_TOKEN=true` (development only). |
 | **Dashboard** | **Implemented** | Real check-in/journey banners, siren/SOS shortcuts, local counts, awareness links, honest notices. | Depends on local state; no server-side monitoring. |
-| **Physical Safety â€” siren** | **Implemented** | Web Audio modulated tone, start/stop/mute, blocked-audio notice. | Local speaker only; not a monitored alarm. |
-| **Physical Safety â€” SOS** | **Implemented** | Opens `tel:112`, optionally attaches device coordinates, prepares an SMS draft for enabled contacts. | No automatic call, SMS, or dispatch; delivery never confirmed. |
-| **Physical Safety â€” check-in** | **Implemented** | 5/15/30/60-minute timers, persistence, extend, confirm-safe, manual missed-deadline alert draft. | Closed tab stops the timer; no automatic escalation. |
+| **Physical Safety — siren** | **Implemented** | Web Audio modulated tone, start/stop/mute, blocked-audio notice. | Local speaker only; not a monitored alarm. |
+| **Physical Safety — SOS** | **Implemented** | Opens `tel:112`, optionally attaches device coordinates, prepares an SMS draft for enabled contacts. | No automatic call, SMS, or dispatch; delivery never confirmed. |
+| **Physical Safety — check-in** | **Implemented** | 5/15/30/60-minute timers, persistence, extend, confirm-safe, manual missed-deadline alert draft. | Closed tab stops the timer; no automatic escalation. |
 | **Journey Guardian** | **Implemented** | Start journey with destination/ETA, browser geolocation polling every 20s, up to 50 local waypoints, overdue notice, arrival/cancel. | Browser-only; overdue is informational; sharing is a separate explicit action. |
 | **Trusted contacts** | **Implemented** | Local CRUD, relationship, per-contact SOS and missed-check-in toggles. | Stored in `localStorage`; no server sync; no delivery. |
-| **Location sharing** | **Implemented** | Consent-gated create, random public token, owner secret in `sessionStorage`, authenticated-owner check on update/stop, 5â€“1440 min expiry, coordinate update, stop and clear, public page with 30s refresh. | Recipient link must be sent by the user; coordinates are device estimates; owner secret is lost if session storage is cleared. |
+| **Location sharing** | **Implemented** | Consent-gated create, random public token, owner secret in `sessionStorage`, authenticated-owner check on update/stop, 5–1440 min expiry, coordinate update, stop and clear, public page with 30s refresh. | Recipient link must be sent by the user; coordinates are device estimates; owner secret is lost if session storage is cleared. |
 | **Digital Guardian** | **Implemented** | Local transparent keyword rules across 7 categories, risk level, matched phrases, advice, save-to-vault. | Keyword matching, not a verdict or psychological assessment. No external AI. |
 | **Privacy Shield** | **Implemented** | Five-category hardening checklist, progress, official guide links, local persistence. | Self-assessment only; no scanning, hacking, or guaranteed takedown. |
 | **Deepfake Detective** | **Implemented (inspection only)** | Extension allow-list, 50 MB cap, signature vs. extension check, image decode/pixel cap, EXIF extraction, video/audio container notice, guidance, temp-file deletion. | Authenticity is `not_determined`; no neural detector; metadata can be stripped or forged. |
@@ -90,13 +90,13 @@ This document distinguishes **implemented**, **partial**, **sample/demo**, and *
 
 | Check | Status | Detail |
 | :--- | :--- | :--- |
-| TypeScript build | **Passed** | `tsc && vite build`; 2,013 modules; CSS 68.48 kB (15.01 kB gzip); main JS 527.12 kB (148.41 kB gzip); no separate 3D chunk. |
+| TypeScript build | **Passed** | `tsc && vite build`; 2,013 modules; CSS 64.17 kB (13.45 kB gzip); main JS 523.83 kB (147.36 kB gzip); no separate 3D chunk. |
 | Frontend tests | **Passed** | 4 files / 13 tests (analyzer 5, location 3, notifications 2, pathway 3). |
 | Backend tests | **Passed** | 17 tests (12 auth/API, 5 services). |
-| Lighthouse (landing, dev server) | **Passed** | Accessibility 100, Best Practices 100, SEO 100. Not a production performance benchmark. |
-| Browser visual QA | **Passed (manual)** | Desktop 1440x960 and 390x844 one-screen hero, video crossfade, reduced-motion hero, dashboard, auth, Physical Safety, Evidence Vault, Settings; siren toggle; protected-route redirect. |
+| Lighthouse (public + auth + app) | **Passed** | `/`, `/login`, `/welcome`: Accessibility 100, Best Practices 100, SEO 100. App pages: 98 accessibility from a pre-existing heading-order skip. Not a production performance benchmark. |
+| Browser visual QA | **Passed (manual)** | Desktop 1440x960 / 1062x670 and 390x844: one-screen hero, video crossfade, reduced motion, dashboard, auth, Physical Safety, Evidence Vault, Settings, Profile, Map, AI Assistant, HerCircle, Legal Support, Safety News, Deepfake Detective, Digital Guardian, Privacy Shield, Empowerment, Emergency Directory, Pathway, reset-password, public share, SOS modal, fake-call screen; siren toggle; protected-route redirect. |
 | Deepfake retention | **Passed** | `mediaRetained: false`, `authenticityStatus: not_determined`. |
-| Location share lifecycle | **Passed** | Create â†’ public read â†’ stop â†’ coordinates cleared. |
+| Location share lifecycle | **Passed** | Create → public read → stop → coordinates cleared. |
 | Account deletion purge | **Passed** | Shares return 404 after deletion. |
 | AI consent enforcement | **Passed** | 403 before consent, 200 after consent. |
 | Lint | **Not run** | No ESLint config or `lint` script exists. |
@@ -126,6 +126,8 @@ See [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md) for user-facing detail.
 ---
 
 ## 6. Sanctuary redesign (2026-10-24)
+
+> **Superseded by sections 8 and 9.** The butterfly scene, valley backdrop, reveal helper, and butterfly motif described here were removed in the final app-wide editorial pass. This section is kept as a record of the earlier work.
 
 The application was re-skinned and re-composed as **The Living Lavender Sanctuary** without changing its data model, routes, API contracts, or safety behaviour.
 
@@ -174,7 +176,7 @@ The application was re-skinned and re-composed as **The Living Lavender Sanctuar
 ### Redesign limitations
 
 - Only the butterfly reference image was available locally; the valley is an original SVG composition, not the supplied photograph.
-- The 3D scene adds a ~516 kB lazy chunk (â‰ˆ132 kB gzip). It never blocks the safety UI, but it is not free on slow connections.
+- The 3D scene adds a ~516 kB lazy chunk (≈132 kB gzip). It never blocks the safety UI, but it is not free on slow connections.
 - The decorative layer is intentionally not load-bearing: if it fails, the product remains fully usable.
 
 ---
@@ -187,8 +189,8 @@ The landing page was re-composed a second time, using the supplied editorial/mot
 
 ### Landing composition
 
-- `/welcome` now uses a fixed, scroll-aware navigation bar, a full-screen overlay menu, a mixed sans/serif hero, a peach â€œAlways openâ€ star, a tilted polaroid, vertical side words, a scroll cue, and a giant italic `NIRBHAYA` watermark.
-- The hero remains one clear composition: headline, tagline, honest introduction, primary entry button, a secondary â€œexplore supportâ€ control, reassurance, and the three trust statements.
+- `/welcome` now uses a fixed, scroll-aware navigation bar, a full-screen overlay menu, a mixed sans/serif hero, a peach “Always open” star, a tilted polaroid, vertical side words, a scroll cue, and a giant italic `NIRBHAYA` watermark.
+- The hero remains one clear composition: headline, tagline, honest introduction, primary entry button, a secondary “explore support” control, reassurance, and the three trust statements.
 - Feature groups, principles, three steps, closing statement, footer, and the floating `tel:112` shortcut keep their existing content and destinations.
 - The overlay menu is a real dialog: it traps Tab, closes on Escape where the global Quick Exit does not take priority, locks background scrolling, restores focus to the trigger, and includes an immediate `tel:112` route.
 - `components/sanctuary/Reveal.tsx` adds a small IntersectionObserver reveal for the content sections. It only animates opacity/transform, observes once, and becomes a visible no-op for reduced motion or missing `IntersectionObserver`.
@@ -204,21 +206,21 @@ The landing page was re-composed a second time, using the supplied editorial/mot
 - The overlay menu sits below the Quick Exit bar and below the floating SOS in z-order; both remain visible and clickable while the menu is open.
 - SOS, siren, Quick Exit, auth, and every route work independently of the atmosphere, polaroid, reveal observer, and 3D scene.
 - The mobile layout keeps the SOS icon beside the menu button, hides only decorative side words and the polaroid at narrow widths, and reflows the hero into a readable single column.
-- Reduced motion disables the atmosphere, pulse, and scroll-line animations, forces reveal content visible, and skips smooth scrolling in the â€œexplore supportâ€ handler.
-- The heroâ€™s decorative copy is honest: â€œMove closer. The light responds.â€ is replaced with the still-artwork notice when WebGL is unavailable.
+- Reduced motion disables the atmosphere, pulse, and scroll-line animations, forces reveal content visible, and skips smooth scrolling in the “explore support” handler.
+- The hero’s decorative copy is honest: “Move closer. The light responds.” is replaced with the still-artwork notice when WebGL is unavailable.
 
 ### Verification
 
 - `npm run build` passed; TypeScript clean; 2,019 modules; CSS 75.98 kB; main JS 550.41 kB; lazy butterfly chunk 516.39 kB; only the chunk-size warning remains.
 - Frontend 13/13 tests and backend 17/17 tests passed after the integration.
 - Lighthouse on `/welcome` (development server): Accessibility 100, Best Practices 100, SEO 100.
-- Manual checks at 1440Ã—960 and 390 px: hero composition, overlay menu and focus handoff, section reveals, mobile nav grouping, auth pages, dashboard, siren start/stop, WebGL fallback, and protected-route redirect.
+- Manual checks at 1440×960 and 390 px: hero composition, overlay menu and focus handoff, section reveals, mobile nav grouping, auth pages, dashboard, siren start/stop, WebGL fallback, and protected-route redirect.
 - Not verified at runtime: a real OS-level reduced-motion setting, screen-reader traversal, and physical mobile devices.
 
 ### Integration limitations
 
 - No licensed hero photograph or video matching the references is available locally, and the third-party fashion/portfolio media was deliberately not hotlinked. The existing `butterfly-glow.jpg`, the original SVG valley, and the Three.js butterfly carry the atmosphere instead.
-- The landing remains a long page below the first screen; the references were one-screen heroes, but NIRBHAYAâ€™s feature, principle, and step content must remain reachable.
+- The landing remains a long page below the first screen; the references were one-screen heroes, but NIRBHAYA’s feature, principle, and step content must remain reachable.
 - The 3D scene is still a ~516 kB lazy chunk. It is decorative and never blocks safety controls.
 
 ---
@@ -263,3 +265,69 @@ The public landing was replaced a third time as a one-screen editorial hero buil
 - The hero depends on the supplied CloudFront host; if it is unavailable the page falls back to its `#3B2F5C` background and still renders every control.
 - The media is third-party and unlicensed for redistribution; host and license it before production.
 - Real OS reduced-motion settings, screen readers, and physical phones were not exercised.
+
+---
+
+## 9. App-wide editorial redesign (2026-10-24)
+
+The MAREN hero language from section 8 was extended to the **entire authenticated product, the auth screens, and the loader**. This was a replacement, not a theme toggle: the old butterfly/valley/light-sage presentation is gone, and no `ed-*`, valley, butterfly, or Three.js code remains in the tree. Every route, API path, auth rule, storage key, and safety flow is unchanged.
+
+### Design language
+
+- `styles/tokens.css` now defines **Editorial Nightfall**: a deep aubergine canvas, lilac and peach accents, inverted neutrals, hairline white rules, and shared media tokens (`--editorial-photo`, `--editorial-polaroid`).
+- Playfair Display carries display headings, italic accents, and the `N` monogram; Inter Tight carries navigation, controls, forms, and safety data.
+- Radii are restrained (2–14 px), shadows are deep but soft, and motion uses one `cubic-bezier(0.22, 1, 0.36, 1)` family.
+- `styles/editorial.css` is imported after `globals.css` and restyles the shell, header, sidebar, footer, buttons, cards, forms, tabs, alerts, badges, modal, empty state, dashboard hero, feature tiles, Quick Exit, and profile banner.
+- `styles/sanctuary.css` was reduced to the floating SOS, the startup loader, and the auth frame; the old landing/valley/butterfly CSS was deleted.
+- `styles/landing.css` is unchanged and still owns the one-screen public hero.
+
+### Application shell
+
+- Header: italic serif `N` monogram and `NIRBHAYA` wordmark replace the butterfly motif; Fake Call, siren start/stop, and SOS 112 keep their order, handlers, and opaque safety styling.
+- Sidebar: peach hairline for the active destination, uppercase micro-labels, and a translucent aubergine panel.
+- Footer, Quick Exit bar, cards, tabs, badges, alerts, and modals all use the night surfaces; the Quick Exit control stays solid crimson.
+- Primary buttons use the MAREN warm-white pill with dark ink text; danger and emergency buttons stay opaque crimson with a stronger shadow.
+
+### Dashboard and profile
+
+- The dashboard hero uses the supplied portrait as a full-bleed background with a dark editorial veil, a thin white grid, and a peach glow. The headline is italic Playfair; the siren/SOS actions sit above the photo.
+- Feature tiles use peach-outlined circular icons and hairline top rules.
+- The profile banner reuses the portrait with a deeper veil and a glass `N` monogram; the bio remains peach italic.
+
+### Auth and loader
+
+- `AuthShell` is a two-column editorial frame: the portrait story panel with a hairline grid, a tilted polaroid captioned “Yours to control”, and the `N` monogram.
+- The auth card is translucent aubergine glass. The SOS shortcut sits **above the card in normal flow**, so it is visible immediately even on the long registration form; the “cannot place calls” note follows the card.
+- Login was compacted to fit a 1062×670 viewport with the SOS and note visible; signup keeps the SOS above the fold.
+- `SanctuaryLoader` uses the portrait scene, grid, italic wordmark, a hairline progress line, and an immediate `tel:112` shortcut. No fake percentage is shown.
+
+### Safety guardrails
+
+- SOS, siren, Quick Exit, and the fake-call screen keep their own z-index and handlers. Decorative photo layers, grids, and glows are pointer-events-none and never intercept a safety control.
+- The fake-call overlay remains a full-viewport safety surface above the Quick Exit bar by design.
+- `prefers-reduced-motion: reduce` disables loader/auth entrances, the dashboard glow, and all decorative animation; the public hero renders the photo only.
+- Text tokens were chosen for WCAG AA on the darkest surface. Contrast regressions found during QA were fixed: AI user bubbles/avatars, Digital Guardian phrase chips, Empowerment/Privacy Shield selected filters, and the public-share 112 link now use opaque brand/danger tokens.
+- Alert titles are now paragraphs (not headings) and the empty-state title is an `h2`, removing two invalid heading levels.
+
+### Preserved behaviour
+
+- Every route, API path, request/response shape, auth rule, storage key, and safety flow is unchanged.
+- Honest wording is unchanged: the siren is local, SOS opens a dialer, SMS drafts are manual, sample directories are labelled, deepfake results remain `not_determined`, and no unconfigured integration is presented as live.
+- The public landing remains one screen with no scrolling; phones reflow and keep the face-safe crop.
+
+### Verification
+
+- `npm run build` passed; TypeScript clean; 2,013 modules; CSS 64.17 kB (13.45 kB gzip); main JS 523.83 kB (147.36 kB gzip); only the >500 kB chunk warning remains.
+- Frontend 13/13 tests passed after the redesign.
+- Lighthouse (development server): `/`, `/login`, and `/welcome` each scored **Accessibility 100, Best Practices 100, SEO 100** with zero failing audits.
+- App pages (`/physical-safety`, `/settings`, `/profile`, `/evidence-vault`) scored **98** accessibility; the only failure is a pre-existing `heading-order` skip in page markup, not a contrast regression. All contrast audits pass.
+- Manual desktop QA at 1440×960 and the available 1062×670 window: dashboard, Physical Safety, Evidence Vault, Settings, Profile, Map, AI Assistant, HerCircle, Legal Support, Safety News, Deepfake Detective, Digital Guardian, Privacy Shield, Empowerment, Emergency Directory, Pathway, login, signup, forgot-password, reset-password, public share, SOS confirmation modal, and the fake-call screen.
+- Mobile QA at 390×844: login, signup, dashboard, Physical Safety, and Profile. `scrollWidth` never exceeded the viewport (390/377 vs 390/377); the dashboard hero stacks, action buttons wrap, and section titles reflow.
+- Reduced motion was verified on the public hero with headless Chrome `--force-prefers-reduced-motion` (zero `<video>` elements).
+
+### Limitations
+
+- The portrait, polaroid, and loop are supplied CloudFront media, third-party and unlicensed for redistribution. Host and license them before production; the UI degrades to its aubergine background if the host is unavailable.
+- The four app pages above still have a pre-existing heading-order skip; fixing it requires re-leveling page section headings and was left out of the visual pass.
+- Real OS reduced-motion settings, screen readers, and physical phones were not exercised.
+- The app-wide visual QA was manual; there is no Playwright/Cypress visual-regression suite.

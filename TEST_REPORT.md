@@ -3,7 +3,7 @@
 **Report date:** 2026-10-24  
 **Audit baseline:** `7319d2b`  
 **Redesign/motion starting point:** `dd63065`  
-**Post-repair state:** working tree / audit repair commits plus the sanctuary and editorial-motion passes  
+**Post-repair state:** working tree / audit repair commits plus the sanctuary, editorial-motion, MAREN hero, and app-wide editorial passes  
 **Environment:** Windows, Node.js 20.18.0, npm 10.8.2, Python 3.13.14
 
 This report records what was actually executed. It does not claim tests that were not run.
@@ -17,8 +17,8 @@ This report records what was actually executed. It does not claim tests that wer
 | Frontend production build + type check | `cd frontend && npm run build` | **PASS** |
 | Frontend unit tests | `cd frontend && npm test` | **PASS** — 4 files, 13 tests |
 | Backend unit/API tests | `cd backend && python -m unittest discover -s tests -v` | **PASS** — 17 tests |
-| Lighthouse (landing, development server) | Browser audit of `/welcome` | **PASS** — Accessibility 100, Best Practices 100, SEO 100 |
-| Manual browser visual QA | Desktop 1440x960 and 390x844 one-screen landing, video crossfade, reduced motion, dashboard, auth, Physical Safety, Evidence Vault, Settings | **PASS (manual)** |
+| Lighthouse (public, auth, app) | Browser audit of `/`, `/login`, `/welcome`, and four app pages | **PASS** — Accessibility 100, Best Practices 100, SEO 100 on public/auth; app pages 98 from a pre-existing heading-order skip |
+| Manual browser visual QA | Desktop 1440x960 / 1062x670 and 390x844: one-screen landing, video crossfade, reduced motion, dashboard, all feature routes, auth, SOS modal, fake-call screen | **PASS (manual)** |
 | Live API smoke test | Start `python app.py`; `GET /api/health`, `GET /api/status` | **PASS** |
 | Lint | — | **NOT RUN** — no ESLint config/script |
 | Browser E2E / visual regression | — | **NOT RUN** — no Playwright/Cypress suite |
@@ -46,18 +46,18 @@ Actual output (abridged):
 vite v5.4.21 building for production...
 2013 modules transformed.
 dist/index.html                 1.37 kB  gzip:   0.77 kB
-dist/assets/index-*.css        68.48 kB  gzip:  15.01 kB
-dist/assets/index-*.js        527.12 kB  gzip: 148.41 kB
+dist/assets/index-*.css        64.17 kB  gzip:  13.45 kB
+dist/assets/index-*.js        523.83 kB  gzip: 147.36 kB
 
 (!) Some chunks are larger than 500 kB after minification.
-built in 3.88s
+built in 3.17s
 ```
 
 Interpretation:
 
 - `tsc` completed with no TypeScript errors.
 - Vite produced a production bundle.
-- The landing no longer imports Three.js, so there is no separate scene chunk.
+- No Three.js scene is bundled; the butterfly scene and `three` dependency were removed.
 
 ---
 
@@ -291,13 +291,31 @@ The visual layer was verified separately from the automated safety tests.
 
 The supplied CloudFront photo, polaroid, and loop are used directly. No local copies are bundled. The previous `ed-*` landing, overlay menu, scroll reveals, and long-form sections are gone.
 
+### App-wide editorial verification (2026-10-24)
+
+| Check | Result |
+| :--- | :--- |
+| Build | 2,013 modules; CSS 64.17 kB (13.45 kB gzip); main JS 523.83 kB (147.36 kB gzip); TypeScript clean. |
+| Frontend tests | 4 files / 13 tests passed. |
+| Lighthouse `/` (dashboard) | Accessibility 100, Best Practices 100, SEO 100, zero failures. |
+| Lighthouse `/login` | Accessibility 100, Best Practices 100, SEO 100, zero failures. |
+| Lighthouse `/welcome` | Accessibility 100, Best Practices 100, SEO 100, zero failures. |
+| Lighthouse app pages | `/physical-safety`, `/settings`, `/profile`, `/evidence-vault`: 98 accessibility; only `heading-order` (pre-existing). All contrast audits pass. |
+| Desktop visual QA | Dashboard, Physical Safety, Evidence Vault, Settings, Profile, Map, AI Assistant, HerCircle, Legal Support, Safety News, Deepfake Detective, Digital Guardian, Privacy Shield, Empowerment, Emergency Directory, Pathway, login, signup, forgot/reset password, public share, SOS modal, fake-call screen. |
+| Mobile 390x844 | Login, signup, dashboard, Physical Safety, Profile; `scrollWidth` 390/377 vs viewport 390; no horizontal overflow; hero and actions reflow. |
+| Auth fit | Login fits 1062x670 with SOS + note visible; signup keeps the SOS above the fold on an 800 px document. |
+| Reduced motion | Public hero: zero `<video>` elements and a static photo under `--force-prefers-reduced-motion`; loader/auth/dashboard decoration disabled in CSS. |
+| Console | No errors; only the pre-existing React Router v7 future-flag warning. |
+
+The editorial photo, polaroid, and loop remain supplied CloudFront media. `ButterflyScene`, `ButterflyFallback`, `ValleyBackdrop`, `Reveal`, `ButterflyMotif`, `butterfly-glow.jpg`, and the `three` dependency were removed.
+
 ---
 
 ## 8. Known warnings and non-failures
 
 | Warning | Meaning | Action |
 | :--- | :--- | :--- |
-| `Some chunks are larger than 500 kB` | Main JS is 527.12 kB minified; there is no separate 3D chunk. | Optional code-splitting; not a build failure. |
+| `Some chunks are larger than 500 kB` | Main JS is 523.83 kB minified; there is no separate 3D chunk. | Optional code-splitting; not a build failure. |
 | `SECRET_KEY is not configured` during tests | Test environment leaves it unset. | Expected; production must set it. |
 | PowerShell exit code 1 with no output | Often caused by `Get-NetTCPConnection` finding no listener. | Check the actual command output, not only `$LASTEXITCODE`. |
 | Git LF→CRLF warnings | Windows line-ending normalization. | Harmless. |
@@ -337,6 +355,6 @@ Open `http://localhost:3000`.
 
 ## 10. Bottom line
 
-The repaired code **builds, type-checks, and passes all existing automated tests**. The tested safety-critical behaviours are: auth/consent enforcement, password change, account deletion purge, location-share lifecycle, deepfake `not_determined` reporting, and temp-media non-retention. The redesigned landing also passes Lighthouse accessibility/best-practices/SEO audits and the manual desktop/phone checks listed in §7.
+The repaired code **builds, type-checks, and passes all existing automated tests**. The tested safety-critical behaviours are: auth/consent enforcement, password change, account deletion purge, location-share lifecycle, deepfake `not_determined` reporting, and temp-media non-retention. The public landing, auth screens, and dashboard pass Lighthouse accessibility/best-practices/SEO audits; the app-wide editorial redesign was checked manually on desktop and phone as listed in §7.
 
 The application is **not fully tested** for every browser interaction, screen-reader traversal, load, or production security. Those gaps are listed above and in [KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md).

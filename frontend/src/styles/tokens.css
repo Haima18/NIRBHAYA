@@ -1,103 +1,123 @@
 /**
- * NIRBHAYA Design Tokens — The Living Lavender Sanctuary
+ * NIRBHAYA Design Tokens — Editorial Nightfall
  *
- * The visual system is intentionally separate from feature logic. Feature
- * pages consume these tokens and the shared UI components; changing the
- * palette or typography later does not require rewriting safety behavior.
+ * The app now shares the MAREN editorial language of the public hero: a deep
+ * aubergine canvas, thin white rules, lilac glass, peach light, and a mix of
+ * Inter Tight with italic Playfair Display.
+ *
+ * The visual system stays separate from feature logic. Feature pages consume
+ * these tokens and the shared UI components, so the palette can change without
+ * touching safety behaviour, API contracts, or stored data.
+ *
+ * Contrast rule: every text token below is chosen to clear WCAG AA on the
+ * darkest surface it is used on. Safety actions keep solid, opaque fills.
  */
 
 :root {
-  /* Core lavender / periwinkle identity */
-  --color-brand-primary: #7654b4;
-  --color-brand-primary-hover: #5f419a;
-  --color-brand-primary-light: #ece2fa;
-  --color-brand-primary-subtle: #f8f3fd;
-  --color-brand-primary-dark: #3b245d;
+  /* Editorial palette */
+  --color-brand-primary: #d3b4f5;        /* lilac — icons, links, emphasis */
+  --color-brand-primary-hover: #e8d8fb;
+  --color-brand-primary-light: rgba(211, 180, 245, 0.14);
+  --color-brand-primary-subtle: rgba(211, 180, 245, 0.07);
+  --color-brand-primary-dark: #f6eeff;   /* headings on dark surfaces */
+  --color-brand-solid: #7b4fb0;          /* opaque lilac for filled controls */
 
-  --color-brand-secondary: #9578c2;
-  --color-brand-secondary-hover: #7b5da8;
-  --color-brand-secondary-light: #f2eafb;
-  --color-brand-secondary-subtle: #fcf9ff;
+  --color-brand-secondary: #f4b8a2;      /* peach */
+  --color-brand-secondary-hover: #ffd0be;
+  --color-brand-secondary-light: rgba(244, 184, 162, 0.16);
+  --color-brand-secondary-subtle: rgba(244, 184, 162, 0.08);
 
-  --color-brand-accent: #b5446e;
-  --color-brand-accent-light: #fbe4eb;
-  --color-brand-accent-subtle: #fff5f8;
+  --color-brand-accent: #ffb38f;
+  --color-brand-accent-light: rgba(255, 179, 143, 0.16);
+  --color-brand-accent-subtle: rgba(255, 179, 143, 0.08);
 
   /* Atmospheric accents */
-  --color-peach: #e9b39f;
-  --color-peach-soft: #f8ddd2;
-  --color-cyan: #75d8e8;
-  --color-cyan-soft: #ddf7fa;
-  --color-twilight: #17102b;
-  --color-twilight-soft: #2a1c45;
+  --color-peach: #f4b8a2;
+  --color-peach-soft: #ffd9cb;
+  --color-cyan: #9ad9e8;
+  --color-cyan-soft: rgba(154, 217, 232, 0.16);
+  --color-twilight: #120c1e;
+  --color-twilight-soft: #241b36;
   --color-rose-soft: #f3b7c8;
 
-  /* Lavender glows and gradients */
-  --color-lavender-glow: rgba(160, 116, 216, 0.24);
-  --color-lavender-border: rgba(190, 158, 224, 0.42);
-  --bg-twilight-gradient: linear-gradient(145deg, #120c23 0%, #241640 48%, #3c235f 100%);
-  --bg-lavender-dream: linear-gradient(150deg, #fcf9ff 0%, #f5eefb 52%, #eee3f8 100%);
+  /* Lilac glows and gradients */
+  --color-lavender-glow: rgba(190, 148, 235, 0.22);
+  --color-lavender-border: rgba(211, 180, 245, 0.26);
+  --bg-twilight-gradient: linear-gradient(150deg, #100a1c 0%, #1d1430 48%, #2c1c48 100%);
+  --bg-lavender-dream: linear-gradient(150deg, #241b36 0%, #2b2140 52%, #33244c 100%);
   --bg-app-gradient:
-    radial-gradient(ellipse at 12% -10%, rgba(196, 164, 236, 0.2), transparent 42%),
-    radial-gradient(ellipse at 92% 4%, rgba(245, 196, 202, 0.16), transparent 38%),
-    linear-gradient(180deg, #faf7fd 0%, #f6f1fa 48%, #f3edf8 100%);
-  --glass-surface: rgba(255, 253, 255, 0.78);
-  --glass-border: rgba(213, 192, 235, 0.55);
-  --glass-shadow: 0 18px 50px -24px rgba(76, 44, 112, 0.28), 0 4px 14px -8px rgba(76, 44, 112, 0.12);
+    radial-gradient(ellipse at 10% -12%, rgba(174, 124, 226, 0.22), transparent 44%),
+    radial-gradient(ellipse at 96% 2%, rgba(244, 184, 162, 0.12), transparent 38%),
+    radial-gradient(ellipse at 46% 108%, rgba(120, 74, 170, 0.18), transparent 52%),
+    linear-gradient(178deg, #191126 0%, #171023 52%, #130d1e 100%);
+  --glass-surface: rgba(45, 34, 68, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 24px 60px -28px rgba(5, 2, 12, 0.8), 0 6px 18px -10px rgba(5, 2, 12, 0.5);
 
-  /* Neutral scale, warmed slightly toward lilac */
+  /* Editorial primitives shared with the public hero */
+  --editorial-line: rgba(255, 255, 255, 0.24);
+  --editorial-line-soft: rgba(255, 255, 255, 0.1);
+  --editorial-glass: rgba(112, 84, 150, 0.34);
+  --editorial-peach: #f4b8a2;
+  --editorial-ink: #241b36;
+  --editorial-photo: url('https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/8c8bd1ea-b9f8-4755-b2db-ca972fa9a381.jpg');
+  --editorial-polaroid: url('https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/4612f265-40f3-4fc9-af4c-b03c289c2b75.jpg');
+
+  /* Neutral scale, inverted for the night canvas */
   --color-neutral-0: #ffffff;
-  --color-neutral-50: #faf8fc;
-  --color-neutral-100: #f4eff8;
-  --color-neutral-200: #e9e1f0;
-  --color-neutral-300: #d8cbe3;
-  --color-neutral-400: #b3a4c2;
-  --color-neutral-500: #8b7d9a;
-  --color-neutral-600: #6a5d79;
-  --color-neutral-700: #4f445d;
-  --color-neutral-800: #352b43;
-  --color-neutral-900: #241b38;
-  --color-neutral-950: #140e22;
+  --color-neutral-50: rgba(255, 255, 255, 0.04);
+  --color-neutral-100: rgba(255, 255, 255, 0.06);
+  --color-neutral-200: rgba(255, 255, 255, 0.1);
+  --color-neutral-300: rgba(255, 255, 255, 0.16);
+  --color-neutral-400: #9385a9;
+  --color-neutral-500: #b0a3c4;
+  --color-neutral-600: #c8bdd8;
+  --color-neutral-700: #ded6ea;
+  --color-neutral-800: #eee8f6;
+  --color-neutral-900: #f8f4fd;
+  --color-neutral-950: #ffffff;
 
-  /* Semantic status */
-  --color-danger: #b4234f;
-  --color-danger-hover: #92163e;
-  --color-danger-light: #fbe2ea;
-  --color-danger-subtle: #fff5f8;
-  --color-danger-border: #eeb1c4;
+  /* Semantic status — text is light, fills stay translucent */
+  --color-danger: #ff8fa8;
+  --color-danger-hover: #ffb0c2;
+  --color-danger-light: rgba(255, 143, 168, 0.18);
+  --color-danger-subtle: rgba(180, 35, 79, 0.16);
+  --color-danger-border: rgba(255, 143, 168, 0.4);
+  --color-danger-solid: #b4234f;
+  --color-danger-solid-hover: #cf2f5e;
 
-  --color-warning: #97601c;
-  --color-warning-light: #fbefd8;
-  --color-warning-subtle: #fffaf0;
-  --color-warning-border: #eccf9c;
+  --color-warning: #f3c77e;
+  --color-warning-light: rgba(243, 199, 126, 0.16);
+  --color-warning-subtle: rgba(151, 96, 28, 0.16);
+  --color-warning-border: rgba(243, 199, 126, 0.36);
 
-  --color-success: #25705a;
-  --color-success-light: #dcf3eb;
-  --color-success-subtle: #f2fbf7;
-  --color-success-border: #a9dccb;
+  --color-success: #8fe3c2;
+  --color-success-light: rgba(143, 227, 194, 0.16);
+  --color-success-subtle: rgba(37, 112, 90, 0.18);
+  --color-success-border: rgba(143, 227, 194, 0.34);
 
-  --color-info: #3b6fa8;
-  --color-info-light: #e2eefb;
-  --color-info-subtle: #f4f9ff;
-  --color-info-border: #b6d3ef;
+  --color-info: #a8cbf2;
+  --color-info-light: rgba(168, 203, 242, 0.16);
+  --color-info-subtle: rgba(59, 111, 168, 0.16);
+  --color-info-border: rgba(168, 203, 242, 0.32);
 
   /* Canvas and surfaces */
-  --bg-app: #f7f2fb;
-  --bg-surface: #fffdfd;
-  --bg-surface-elevated: #ffffff;
-  --bg-surface-muted: #f4eef9;
-  --bg-surface-overlay: rgba(23, 16, 43, 0.58);
+  --bg-app: #191126;
+  --bg-surface: rgba(45, 34, 68, 0.72);
+  --bg-surface-elevated: #2b2140;
+  --bg-surface-muted: rgba(255, 255, 255, 0.05);
+  --bg-surface-overlay: rgba(9, 5, 16, 0.74);
 
-  --text-primary: #241b38;
-  --text-secondary: #5d5270;
-  --text-muted: #7c718d;
-  --text-inverted: #fffaff;
-  --text-link: #6d4ba8;
+  --text-primary: #fbf7ff;
+  --text-secondary: #d9cfe6;
+  --text-muted: #b0a3c4;
+  --text-inverted: #241b36;
+  --text-link: #f4b8a2;
 
-  --border-color-default: #e7ddf1;
-  --border-color-muted: #f0e9f6;
-  --border-color-active: #cfc0df;
-  --border-color-focus: #7654b4;
+  --border-color-default: rgba(255, 255, 255, 0.14);
+  --border-color-muted: rgba(255, 255, 255, 0.08);
+  --border-color-active: rgba(255, 255, 255, 0.28);
+  --border-color-focus: #f4b8a2;
 
   /* Typography */
   --font-family-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
@@ -136,25 +156,25 @@
   --space-12: 3rem;
   --space-16: 4rem;
 
-  /* Radii */
+  /* Radii — restrained, editorial */
   --radius-none: 0px;
-  --radius-xs: 5px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
-  --radius-2xl: 32px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(57, 34, 86, 0.04);
-  --shadow-sm: 0 2px 8px -2px rgba(57, 34, 86, 0.08), 0 1px 2px rgba(57, 34, 86, 0.04);
-  --shadow-md: 0 8px 24px -12px rgba(57, 34, 86, 0.18), 0 2px 6px -2px rgba(57, 34, 86, 0.06);
-  --shadow-lg: 0 20px 48px -20px rgba(57, 34, 86, 0.24), 0 6px 16px -8px rgba(57, 34, 86, 0.08);
-  --shadow-xl: 0 34px 80px -30px rgba(40, 22, 66, 0.32), 0 10px 24px -12px rgba(40, 22, 66, 0.12);
-  --shadow-soft: 0 16px 42px -24px rgba(83, 50, 124, 0.24);
-  --shadow-glow: 0 0 0 1px rgba(196, 164, 236, 0.28), 0 18px 46px -20px rgba(120, 82, 180, 0.32);
-  --shadow-emergency: 0 0 0 4px rgba(180, 35, 79, 0.16), 0 12px 28px -10px rgba(146, 22, 62, 0.4);
+  --shadow-xs: 0 1px 2px rgba(4, 2, 10, 0.4);
+  --shadow-sm: 0 3px 10px -3px rgba(4, 2, 10, 0.5);
+  --shadow-md: 0 12px 30px -16px rgba(4, 2, 10, 0.72), 0 3px 8px -3px rgba(4, 2, 10, 0.4);
+  --shadow-lg: 0 26px 60px -26px rgba(4, 2, 10, 0.82), 0 8px 20px -10px rgba(4, 2, 10, 0.5);
+  --shadow-xl: 0 40px 96px -36px rgba(2, 1, 6, 0.9), 0 12px 28px -14px rgba(2, 1, 6, 0.6);
+  --shadow-soft: 0 22px 54px -30px rgba(4, 2, 10, 0.8);
+  --shadow-glow: 0 0 0 1px rgba(244, 184, 162, 0.28), 0 20px 48px -22px rgba(244, 184, 162, 0.22);
+  --shadow-emergency: 0 0 0 4px rgba(255, 143, 168, 0.18), 0 14px 32px -12px rgba(180, 35, 79, 0.62);
 
   /* Layout */
   --layout-sidebar-width: 272px;

@@ -215,7 +215,7 @@ export const AiAssistantPage: React.FC = () => {
 
               <div
                 style={{
-                  backgroundColor: isUser ? 'var(--color-brand-primary)' : 'var(--bg-surface)',
+                  backgroundColor: isUser ? 'var(--color-brand-solid)' : 'var(--bg-surface)',
                   color: isUser ? '#ffffff' : 'var(--text-primary)',
                   padding: '0.85rem 1.15rem',
                   borderRadius: 'var(--radius-lg)',
@@ -261,7 +261,7 @@ export const AiAssistantPage: React.FC = () => {
                     width: '32px',
                     height: '32px',
                     borderRadius: '50%',
-                    backgroundColor: 'var(--color-neutral-800)',
+                    backgroundColor: 'var(--color-brand-solid)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',

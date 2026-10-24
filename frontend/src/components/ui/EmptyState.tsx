@@ -19,7 +19,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => (
   <div className="ui-empty">
     <div className="ui-empty__icon">{icon || <ShieldAlert size={26} />}</div>
-    <h3 className="ui-empty__title">{title}</h3>
+    <h2 className="ui-empty__title">{title}</h2>
     <p className="ui-empty__text">{description}</p>
     {onAction && actionLabel && (
       <Button variant="outline" size="sm" onClick={onAction} className="ui-empty__action">
