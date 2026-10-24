@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+__pycache__/
+*.py[cod]
+*.sqlite3
+temp_uploads/
+.env
+.env.local
+.DS_Store
+Thumbs.db
