@@ -46,6 +46,7 @@ export const LoginPage: React.FC = () => {
 
   return (
     <AuthShell
+      variant="aurevon"
       eyebrow="Welcome back"
       title={<>Return to your <em>sanctuary.</em></>}
       description="Your tools, records, and choices are waiting exactly where you left them. Sign in only on a device you trust."

@@ -11,7 +11,16 @@ import secrets
 import threading
 import time
 import uuid
+import math
+import json
+import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from collections import defaultdict, deque
+from urllib.error import URLError
+from urllib.parse import urlencode, urlparse
+from urllib.request import Request, urlopen
 
 from flask import Flask, jsonify, request, session
 from flask_cors import CORS
@@ -40,6 +49,7 @@ from services.location_share_service import (
     update_share,
 )
 from services.text_analyzer import analyze_message_text
+from services.sms_service import SmsDeliveryError, is_sms_configured, send_sms
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -70,7 +80,11 @@ _RATE_WINDOWS = {
     'ai': (30, 60),
     'media': (10, 60),
     'location_create': (20, 60),
+    'public_data': (20, 60),
+    'sms': (5, 60),
 }
+_PUBLIC_DATA_CACHE = {}
+_PUBLIC_DATA_CACHE_LOCK = threading.Lock()
 
 
 def _rate_limit(bucket: str):
@@ -374,6 +388,316 @@ def integration_status():
 
 
 # ---------------------------------------------------------------------------
+# Public safety information (authenticated, bounded third-party lookups)
+# ---------------------------------------------------------------------------
+def _valid_http_url(value):
+    if not isinstance(value, str) or len(value) > 2000:
+        return False
+    parsed = urlparse(value)
+    return parsed.scheme in {'http', 'https'} and bool(parsed.netloc)
+
+
+def _external_article(url, title, publisher, date):
+    if not _valid_http_url(url) or not isinstance(title, str) or not title.strip():
+        return None
+    return {
+        'url': url,
+        'title': title.strip()[:500],
+        'domain': publisher[:200] if isinstance(publisher, str) and publisher else urlparse(url).hostname,
+        'seendate': date[:100] if isinstance(date, str) else '',
+    }
+
+
+def _fetch_gdelt_articles():
+    now = datetime.now(timezone.utc)
+    start = (now - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    params = urlencode({
+        'query': '("violence against women" OR "gender-based violence" OR "women safety")',
+        'mode': 'ArtList',
+        'format': 'json',
+        'maxrecords': 10,
+        'sort': 'DateDesc',
+        'startdatetime': start.strftime('%Y%m%d%H%M%S'),
+        'enddatetime': now.strftime('%Y%m%d%H%M%S'),
+    })
+    request = Request(
+        f'https://api.gdeltproject.org/api/v2/doc/doc?{params}',
+        headers={'User-Agent': 'NIRBHAYA/1.0 (global safety news feed)', 'Accept': 'application/json'},
+    )
+    with urlopen(request, timeout=6) as response:
+        payload = json.loads(response.read())
+    raw_articles = payload.get('articles', []) if isinstance(payload, dict) else []
+    if not isinstance(raw_articles, list):
+        raise ValueError('GDELT returned an unexpected response.')
+    articles = []
+    for item in raw_articles[:10]:
+        if not isinstance(item, dict):
+            continue
+        article = _external_article(item.get('url'), item.get('title'), item.get('domain', ''), item.get('seendate', ''))
+        if article:
+            articles.append(article)
+    return articles
+
+
+def _fetch_un_women_articles():
+    return _fetch_rss_articles('https://www.unwomen.org/en/rss.xml', 'UN Women')
+
+
+def _fetch_rss_articles(feed_url, publisher):
+    external_request = Request(
+        feed_url,
+        headers={'User-Agent': 'NIRBHAYA/1.0 (recent women-focused news feed)', 'Accept': 'application/rss+xml, application/xml;q=0.9, */*;q=0.8'},
+    )
+    with urlopen(external_request, timeout=6) as response:
+        root = ET.fromstring(response.read())
+    articles = []
+    for item in root.findall('./channel/item')[:30]:
+        article = _external_article(
+            item.findtext('link', default='').strip(),
+            item.findtext('title', default='').strip(),
+            publisher,
+            item.findtext('pubDate', default='').strip(),
+        )
+        if article:
+            articles.append(article)
+    return articles
+
+
+def _fetch_the_19th_articles():
+    return _fetch_rss_articles('https://19thnews.org/feed/', 'The 19th')
+
+
+def _fetch_fuller_articles():
+    return _fetch_rss_articles('https://fullerproject.org/feed/', 'The Fuller Project')
+
+
+def _fetch_un_news_articles():
+    articles = _fetch_rss_articles(
+        'https://news.un.org/feed/subscribe/en/news/all/rss.xml',
+        'UN News',
+    )
+    women_topics = (
+        'women', 'woman', 'girl', 'girls', 'gender', 'maternal', 'feminist',
+        'sexual violence', 'gender-based', 'child marriage', 'female',
+    )
+    return [
+        article for article in articles
+        if any(topic in article['title'].lower() for topic in women_topics)
+    ]
+
+
+def _get_cached_news():
+    with _PUBLIC_DATA_CACHE_LOCK:
+        cached = _PUBLIC_DATA_CACHE.get('news')
+        if cached:
+            ttl = 120 if cached[1].get('articles') else 15
+            if time.monotonic() - cached[0] < ttl:
+                return cached[1]
+    return None
+
+
+def _is_news_from_today_or_yesterday(value):
+    if not isinstance(value, str) or not value.strip():
+        return False
+    try:
+        if len(value) == 15 and value[8] == 'T':
+            published = datetime.strptime(value.rstrip('Z'), '%Y%m%dT%H%M%S').replace(tzinfo=timezone.utc)
+        else:
+            published = parsedate_to_datetime(value)
+            if published.tzinfo is None:
+                published = published.replace(tzinfo=timezone.utc)
+        published_date = published.astimezone(timezone.utc).date()
+    except (TypeError, ValueError, OverflowError):
+        try:
+            published_date = datetime.fromisoformat(value.replace('Z', '+00:00')).date()
+        except ValueError:
+            return False
+    today = datetime.now(timezone.utc).date()
+    return published_date in {today, today - timedelta(days=1)}
+
+
+def _store_cached_news(payload):
+    with _PUBLIC_DATA_CACHE_LOCK:
+        _PUBLIC_DATA_CACHE['news'] = (time.monotonic(), payload)
+
+
+@app.route('/api/news/headlines', methods=['GET'])
+def news_headlines():
+    user, error_response = _require_user()
+    if error_response:
+        return error_response
+    limited = _rate_limit('public_data')
+    if limited:
+        return limited
+
+    cached = _get_cached_news()
+    if cached:
+        return jsonify(cached)
+
+    articles = []
+    warnings = []
+    successful_sources = 0
+    feed_sources = (
+        ('GDELT', _fetch_gdelt_articles),
+        ('UN Women', _fetch_un_women_articles),
+        ('The 19th', _fetch_the_19th_articles),
+        ('The Fuller Project', _fetch_fuller_articles),
+        ('UN News', _fetch_un_news_articles),
+    )
+    with ThreadPoolExecutor(max_workers=len(feed_sources)) as executor:
+        pending = {
+            executor.submit(fetcher): source_name
+            for source_name, fetcher in feed_sources
+        }
+        for future in as_completed(pending):
+            source_name = pending[future]
+            try:
+                articles.extend(future.result())
+                successful_sources += 1
+            except (URLError, TimeoutError, ValueError, ET.ParseError):
+                warnings.append(f'{source_name} headlines are temporarily unavailable.')
+
+    if successful_sources == 0:
+        return jsonify({'error': 'Live news sources are temporarily unavailable. Please try again later.'}), 503
+
+    deduplicated = {}
+    for article in articles:
+        if not isinstance(article, dict):
+            continue
+        if not _is_news_from_today_or_yesterday(article.get('seendate')):
+            continue
+        safe_article = _external_article(
+            article.get('url'),
+            article.get('title'),
+            article.get('domain', ''),
+            article.get('seendate', ''),
+        )
+        if safe_article:
+            deduplicated.setdefault(safe_article['url'], safe_article)
+    result = {'articles': list(deduplicated.values())[:15], 'warnings': warnings}
+    _store_cached_news(result)
+    return jsonify(result)
+
+
+def _nearby_place_category(tags):
+    if tags.get('railway') in {'station', 'halt'} or tags.get('public_transport') == 'station' and tags.get('station') == 'train':
+        return 'railway_station'
+    if tags.get('highway') == 'bus_stop' or tags.get('amenity') == 'bus_station':
+        return 'bus_stop'
+    if tags.get('amenity') == 'taxi':
+        return 'taxi'
+    if tags.get('tourism') in {'hotel', 'hostel', 'guest_house'}:
+        return 'hotel'
+    amenity = tags.get('amenity')
+    if amenity == 'police':
+        return 'police'
+    if amenity == 'hospital':
+        return 'hospital'
+    if amenity in {'clinic', 'doctors'}:
+        return 'clinic'
+    if tags.get('social_facility') == 'shelter' or amenity == 'shelter':
+        return 'shelter'
+    if tags.get('office') == 'lawyer':
+        return 'legal'
+    return None
+
+
+@app.route('/api/location/nearby', methods=['GET'])
+def nearby_places():
+    user, error_response = _require_user()
+    if error_response:
+        return error_response
+    limited = _rate_limit('public_data')
+    if limited:
+        return limited
+
+    try:
+        lat = float(request.args.get('lat', ''))
+        lng = float(request.args.get('lng', ''))
+        radius = int(request.args.get('radius', '5000'))
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Latitude, longitude, and radius must be numeric.'}), 400
+    if not math.isfinite(lat) or not -90 <= lat <= 90 or not math.isfinite(lng) or not -180 <= lng <= 180:
+        return jsonify({'error': 'A valid latitude and longitude are required.'}), 400
+    radius = min(10000, max(1000, radius))
+
+    query = (
+        '[out:json][timeout:20];('
+        f'nwr(around:{radius},{lat},{lng})["amenity"~"^(police|hospital|clinic|doctors|shelter)$"];'
+        f'nwr(around:{radius},{lat},{lng})["social_facility"="shelter"];'
+        f'nwr(around:{radius},{lat},{lng})["office"="lawyer"];'
+        f'nwr(around:{radius},{lat},{lng})["railway"~"^(station|halt)$"];'
+        f'nwr(around:{radius},{lat},{lng})["public_transport"="station"]["station"="train"];'
+        f'nwr(around:{radius},{lat},{lng})["highway"="bus_stop"];'
+        f'nwr(around:{radius},{lat},{lng})["amenity"="bus_station"];'
+        f'nwr(around:{radius},{lat},{lng})["amenity"="taxi"];'
+        f'nwr(around:{radius},{lat},{lng})["tourism"~"^(hotel|hostel|guest_house)$"];'
+        ');out center tags;'
+    )
+    try:
+        overpass_url = 'https://overpass-api.de/api/interpreter?' + urlencode({'data': query})
+        external_request = Request(
+            overpass_url,
+            headers={'User-Agent': 'NIRBHAYA/1.0 (consented nearby service lookup)', 'Accept': 'application/json'},
+        )
+        with urlopen(external_request, timeout=25) as response:
+            payload = json.loads(response.read())
+    except (URLError, TimeoutError, ValueError):
+        return jsonify({'error': 'OpenStreetMap nearby services are temporarily unavailable. Your map is still available; try again later.'}), 503
+
+    elements = payload.get('elements', []) if isinstance(payload, dict) else []
+    if not isinstance(elements, list):
+        return jsonify({'error': 'OpenStreetMap returned an unexpected response.'}), 502
+
+    places = []
+    for element in elements:
+        if not isinstance(element, dict):
+            continue
+        tags = element.get('tags')
+        if not isinstance(tags, dict):
+            continue
+        category = _nearby_place_category(tags)
+        center = element.get('center', {})
+        place_lat = element.get('lat', center.get('lat') if isinstance(center, dict) else None)
+        place_lng = element.get('lon', center.get('lon') if isinstance(center, dict) else None)
+        if (
+            category is None
+            or not isinstance(place_lat, (int, float))
+            or not isinstance(place_lng, (int, float))
+            or not -90 <= place_lat <= 90
+            or not -180 <= place_lng <= 180
+        ):
+            continue
+        if not math.isfinite(place_lat) or not math.isfinite(place_lng):
+            continue
+        distance_lat = math.radians(place_lat - lat)
+        distance_lng = math.radians(place_lng - lng)
+        haversine = (
+            math.sin(distance_lat / 2) ** 2
+            + math.cos(math.radians(lat)) * math.cos(math.radians(place_lat)) * math.sin(distance_lng / 2) ** 2
+        )
+        haversine = min(1, max(0, haversine))
+        distance_km = round(6371 * 2 * math.atan2(math.sqrt(haversine), math.sqrt(1 - haversine)), 2)
+        street = ' '.join(str(tags[key]) for key in ('addr:housenumber', 'addr:street') if isinstance(tags.get(key), str))
+        locality = ', '.join(str(tags[key]) for key in ('addr:city', 'addr:state') if isinstance(tags.get(key), str))
+        address = ', '.join(part for part in (street, locality) if part) or 'Address not listed'
+        name = tags.get('name')
+        places.append({
+            'id': f"{element.get('type', 'place')}_{element.get('id', '')}",
+            'name': name.strip() if isinstance(name, str) and name.strip() else f'{category.title()} service',
+            'category': category,
+            'address': address,
+            'phone': tags.get('phone') or tags.get('contact:phone'),
+            'distanceKm': distance_km,
+            'coords': {'lat': place_lat, 'lng': place_lng},
+            'mapUrl': f'https://www.google.com/maps?q={place_lat},{place_lng}',
+        })
+
+    places.sort(key=lambda place: place['distanceKm'])
+    return jsonify({'places': places[:50]})
+
+
+# ---------------------------------------------------------------------------
 # Location sharing (token protected, expiring, revocable)
 # ---------------------------------------------------------------------------
 def _location_payload(data: dict):
@@ -487,6 +811,50 @@ def public_location_share(token: str):
 # ---------------------------------------------------------------------------
 # Digital Guardian and AI Assistant
 # ---------------------------------------------------------------------------
+@app.route('/api/alerts/sms', methods=['POST'])
+def send_sms_alert():
+    user, error_response = _require_user()
+    if error_response:
+        return error_response
+    limited = _rate_limit('sms')
+    if limited:
+        return limited
+    if not is_sms_configured():
+        return jsonify({'error': 'SMS delivery is not configured. Use the manual SMS draft instead.'}), 503
+
+    data = _json_object()
+    if data is None:
+        return jsonify({'error': 'Request body must be a JSON object.'}), 400
+    recipients = data.get('recipients')
+    message = data.get('message')
+    if not isinstance(recipients, list) or not recipients or len(recipients) > 5:
+        return jsonify({'error': 'Choose between 1 and 5 trusted contacts.'}), 400
+    if any(not isinstance(number, str) or not number.startswith('+') or not number[1:].isdigit() or not 8 <= len(number[1:]) <= 15 for number in recipients):
+        return jsonify({'error': 'Each trusted contact number must use international format, such as +919876543210.'}), 400
+    if len(set(recipients)) != len(recipients):
+        return jsonify({'error': 'Duplicate recipient numbers are not allowed.'}), 400
+    if not isinstance(message, str) or not message.strip() or len(message) > 1000:
+        return jsonify({'error': 'Alert text must contain 1 to 1,000 characters.'}), 400
+
+    accepted = 0
+    failures = 0
+    for number in recipients:
+        try:
+            send_sms(number, message.strip())
+            accepted += 1
+        except SmsDeliveryError:
+            failures += 1
+
+    if accepted == 0:
+        return jsonify({'error': 'The SMS provider did not accept any alert messages.', 'acceptedCount': 0, 'failedCount': failures}), 502
+    return jsonify({
+        'acceptedCount': accepted,
+        'failedCount': failures,
+        'deliveryConfirmed': False,
+        'message': 'Accepted by the SMS provider; final delivery is not confirmed.' if failures == 0 else 'Some messages were accepted; others failed. Final delivery is not confirmed.'
+    })
+
+
 @app.route('/api/digital-guardian/analyze', methods=['POST'])
 def analyze_text():
     data = _json_object()

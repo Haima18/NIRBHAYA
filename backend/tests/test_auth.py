@@ -57,6 +57,31 @@ class TestAccountEndpoints(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
+    def test_local_vite_fallback_origin_is_allowed_but_unknown_origin_is_rejected(self):
+        payload = {
+            'name': 'Asha Rao',
+            'email': 'asha@example.com',
+            'phone': '+91 98765 43210',
+            'password': 'SafePass123'
+        }
+        allowed = self.client.post(
+            '/api/auth/register',
+            json=payload,
+            headers={'Origin': 'http://127.0.0.1:3001'}
+        )
+        self.assertEqual(allowed.status_code, 201)
+        self.assertEqual(
+            allowed.headers.get('Access-Control-Allow-Origin'),
+            'http://127.0.0.1:3001'
+        )
+
+        rejected = self.client.post(
+            '/api/auth/register',
+            json={**payload, 'email': 'other@example.com'},
+            headers={'Origin': 'http://127.0.0.1:3002'}
+        )
+        self.assertEqual(rejected.status_code, 403)
+
     def test_login_rejects_wrong_password_and_accepts_correct_password(self):
         self.client.post('/api/auth/register', json={
             'name': 'Asha Rao',

@@ -134,9 +134,11 @@ export const HerCirclePage: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
           <Alert type="warning" title="These inquiries are not delivered">
             NIRBHAYA has no case-management backend or counselor network. A support inquiry is saved only in this
-            browser. It is never sent to a listener, NGO, or government office. For real help, call the Women Helpline
+            browser. It is never sent to a listener, NGO, or government office. In India, call the Women Helpline
             at <a href="tel:181" style={{ color: 'inherit', fontWeight: 600 }}>181</a> or KIRAN at{' '}
             <a href="tel:18005990019" style={{ color: 'inherit', fontWeight: 600 }}>1800-599-0019</a>.
+            For help outside India, use your local services or{' '}
+            <a href="https://lila.help/" target="_blank" rel="noopener noreferrer" style={{ color: 'inherit', fontWeight: 600 }}>Lila.help</a>.
           </Alert>
 
           <Card style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
@@ -225,11 +227,12 @@ export const HerCirclePage: React.FC = () => {
           <Card style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <PhoneCall size={18} color="var(--color-brand-primary)" />
             <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-              Real support lines:
+              India support lines:
             </span>
             <a href="tel:181" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Women Helpline 181</a>
             <a href="tel:18005990019" style={{ fontSize: '0.9rem', fontWeight: 600 }}>KIRAN 1800-599-0019</a>
             <a href="tel:112" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Emergency 112</a>
+            <a href="https://lila.help/" target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', fontWeight: 600 }}>Global support directory</a>
           </Card>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-6)' }}>

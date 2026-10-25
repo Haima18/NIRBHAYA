@@ -1,0 +1,743 @@
+.app-shell--creative {
+  --creative-accent: #f598f2;
+  --creative-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --layout-header-height: 82px;
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: clip;
+  background: #050505;
+  color: #fff;
+  font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
+}
+
+.app-shell--creative::before {
+  display: none;
+}
+
+.app-shell--creative :where(h1, h2, h3, h4, p, a, button, input, textarea, select) {
+  font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
+}
+
+.app-shell--creative :where(h1, h2, h3, h4) {
+  color: #fff;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.app-ambient {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  background: #050505;
+  pointer-events: none;
+}
+
+.app-ambient__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1200ms ease-in-out;
+}
+
+.app-ambient__video.is-active {
+  opacity: 1;
+  animation: appVideoFadeIn 800ms var(--creative-ease) both;
+}
+
+.app-ambient__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.38) 35%, rgba(0, 0, 0, 0.72)),
+    rgba(0, 0, 0, 0.28);
+}
+
+.app-shell--creative .quick-exit-bar {
+  background: rgba(5, 5, 5, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.app-shell--creative .quick-exit-bar__copy strong {
+  color: #fff;
+}
+
+.app-shell--creative .quick-exit-bar__copy span {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.app-shell--creative .quick-exit-bar__button {
+  background: #f04468;
+  box-shadow: none;
+}
+
+.app-shell--creative .app-header {
+  min-height: 82px;
+  padding: 0.8rem clamp(1rem, 3vw, 2.5rem);
+  background: rgba(5, 5, 5, 0.76);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+.app-shell--creative .app-brand {
+  gap: 0.85rem;
+  color: #fff;
+}
+
+.app-shell--creative .app-brand__mark {
+  width: 42px;
+  height: 42px;
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+}
+
+.app-shell--creative .app-brand__monogram {
+  color: #fff;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-style: italic;
+  font-size: 1.3rem;
+  font-weight: 400;
+  transform: none;
+}
+
+.app-shell--creative .app-brand__name {
+  color: #fff;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 1.18rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.13em;
+}
+
+.app-shell--creative .app-brand__tagline {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.app-shell--creative .app-header__actions {
+  gap: 0.55rem;
+}
+
+.app-shell--creative .app-header__actions .btn {
+  border-radius: 999px;
+}
+
+.app-shell--creative .app-body {
+  min-height: 0;
+  background: transparent;
+}
+
+.app-shell--creative .app-sidebar {
+  width: 264px;
+  padding: 1.3rem 1rem 1.5rem;
+  background: rgba(5, 5, 5, 0.68);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+
+.app-shell--creative .app-sidebar__group + .app-sidebar__group {
+  margin-top: 1.4rem;
+}
+
+.app-shell--creative .app-sidebar__label {
+  font-family: "Instrument Serif", Georgia, serif;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.app-shell--creative .app-sidebar__nav {
+  gap: 0.18rem;
+}
+
+.app-shell--creative .app-nav-link {
+  font-family: "Instrument Serif", Georgia, serif;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 1.12rem;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  transition: background-color 220ms ease, color 220ms ease, transform 220ms var(--creative-ease);
+}
+
+.app-shell--creative .app-nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+.app-shell--creative .app-nav-link::after {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.28rem;
+  left: 2.7rem;
+  height: 1px;
+  background: var(--creative-accent);
+  content: "";
+  opacity: 0.75;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 320ms var(--creative-ease);
+}
+
+.app-shell--creative .app-nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.app-shell--creative .app-nav-link.active {
+  color: #fff;
+  background: rgba(245, 152, 242, 0.16);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+}
+
+.app-shell--creative .app-nav-link.active::before {
+  left: -1rem;
+  width: 2px;
+  background: var(--creative-accent);
+  box-shadow: 0 0 14px rgba(245, 152, 242, 0.56);
+}
+
+.app-shell--creative .app-nav-link.active .app-nav-link__inner svg,
+.app-shell--creative .app-nav-link:hover .app-nav-link__inner svg {
+  color: var(--creative-accent);
+  opacity: 1;
+}
+
+.app-shell--creative .app-nav-link__inner > span[aria-hidden="true"] {
+  display: grid !important;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid rgba(245, 152, 242, 0.22);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(245, 152, 242, 0.13), rgba(255, 255, 255, 0.035));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
+  transition: border-color 220ms ease, background-color 220ms ease, box-shadow 220ms ease, transform 220ms var(--creative-ease);
+}
+
+.app-shell--creative .app-nav-link__inner svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.7;
+  color: rgba(255, 220, 252, 0.82);
+  opacity: 0.9;
+}
+
+.app-shell--creative .app-nav-link.active .app-nav-link__inner > span[aria-hidden="true"],
+.app-shell--creative .app-nav-link:hover .app-nav-link__inner > span[aria-hidden="true"] {
+  border-color: rgba(245, 152, 242, 0.32);
+  background: linear-gradient(145deg, rgba(245, 152, 242, 0.26), rgba(245, 152, 242, 0.08));
+  box-shadow: 0 0 18px rgba(245, 152, 242, 0.12), inset 0 1px rgba(255, 255, 255, 0.12);
+  transform: scale(1.06) rotate(-3deg);
+}
+
+.app-shell--creative .app-sidebar__emergency {
+  border-color: rgba(255, 104, 141, 0.32);
+  border-radius: 12px;
+  background: rgba(142, 23, 57, 0.2);
+}
+
+.app-shell--creative .app-sidebar__emergency p,
+.app-shell--creative .app-sidebar__emergency strong {
+  font-family: "Instrument Serif", Georgia, serif;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.app-shell--creative .app-sidebar__emergency p:first-child {
+  font-family: "Instrument Serif", Georgia, serif;
+  color: #ff9db5;
+  font-size: 1.08rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.app-shell--creative .app-main {
+  max-width: 1440px;
+  padding: clamp(1.2rem, 3vw, 2.8rem);
+}
+
+.app-shell--creative .route-page h1 {
+  font-family: "Instrument Serif", Georgia, serif !important;
+  font-size: clamp(2.35rem, 4vw, 3.35rem) !important;
+  font-weight: 400 !important;
+  font-style: normal;
+  line-height: 1.06;
+  letter-spacing: -0.025em !important;
+}
+
+.app-shell--creative .route-page > div > p,
+.app-shell--creative .route-page > div > div > p {
+  font-size: 1.05rem !important;
+  line-height: 1.7 !important;
+}
+
+.app-shell--creative .route-page .ui-card p {
+  font-size: 1rem !important;
+  line-height: 1.72 !important;
+}
+
+.app-shell--creative .route-page .ui-card h2,
+.app-shell--creative .route-page .ui-card h3 {
+  font-family: "Instrument Serif", Georgia, serif !important;
+  font-size: 1.35rem !important;
+  font-weight: 400 !important;
+  line-height: 1.34;
+  letter-spacing: -0.015em;
+}
+
+.app-shell--creative .route-page .ui-label,
+.app-shell--creative .route-page .ui-help,
+.app-shell--creative .route-page .ui-error {
+  font-size: 0.95rem !important;
+}
+
+.app-shell--creative .route-page .ui-input,
+.app-shell--creative .route-page select,
+.app-shell--creative .route-page textarea {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+}
+
+.app-shell--creative .route-page svg {
+  stroke-width: 1.7;
+  transition: color 220ms ease, filter 220ms ease, transform 220ms var(--creative-ease);
+}
+
+.app-shell--creative .route-page a:hover svg,
+.app-shell--creative .route-page button:hover:not(:disabled) svg {
+  filter: drop-shadow(0 0 5px rgba(245, 152, 242, 0.42));
+}
+
+.app-shell--creative .route-page {
+  animation: appRevealUp 650ms var(--creative-ease) both;
+}
+
+.app-shell--creative .route-page > div > h1,
+.app-shell--creative .route-page > div > div > h1 {
+  font-family: "Instrument Serif", Georgia, serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.025em !important;
+}
+
+.app-shell--creative .ui-card {
+  border-radius: 14px;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  transition: border-color 240ms ease, background-color 240ms ease, transform 240ms var(--creative-ease);
+}
+
+.app-shell--creative .ui-card-default {
+  background: rgba(8, 8, 10, 0.68);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+}
+
+.app-shell--creative .ui-card-default:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background-color: rgba(8, 8, 10, 0.78);
+}
+
+.app-shell--creative .ui-card-elevated {
+  background: rgba(8, 8, 10, 0.82);
+  box-shadow: 0 22px 72px rgba(0, 0, 0, 0.3);
+}
+
+.app-shell--creative .ui-card-highlight {
+  background: linear-gradient(135deg, rgba(245, 152, 242, 0.15), rgba(0, 0, 0, 0.64));
+  border-color: rgba(245, 152, 242, 0.34);
+}
+
+.app-shell--creative .ui-card-danger {
+  background: linear-gradient(135deg, rgba(180, 35, 79, 0.2), rgba(0, 0, 0, 0.66));
+}
+
+.app-shell--creative .btn {
+  min-height: 2.8rem;
+  padding: 0.62rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.98rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease, transform 220ms var(--creative-ease);
+}
+
+.app-shell--creative .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.app-shell--creative .btn > svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 1.8;
+}
+
+.app-shell--creative .btn:not(.btn-danger):not(.btn-emergency) > svg {
+  color: var(--creative-accent);
+}
+
+.app-shell--creative .btn-primary {
+  background: #fff;
+  color: #090909;
+  box-shadow: none;
+}
+
+.app-shell--creative .btn-primary:hover:not(:disabled) {
+  background: var(--creative-accent);
+  color: #090909;
+  box-shadow: none;
+}
+
+.app-shell--creative .btn-outline,
+.app-shell--creative .btn-ghost {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.24);
+  color: #fff;
+}
+
+.app-shell--creative .btn-outline:hover:not(:disabled),
+.app-shell--creative .btn-ghost:hover:not(:disabled) {
+  border-color: var(--creative-accent);
+  background: rgba(245, 152, 242, 0.12);
+  color: #fff;
+}
+
+.app-shell--creative .btn-secondary {
+  background: rgba(245, 152, 242, 0.15);
+  border-color: rgba(245, 152, 242, 0.36);
+  color: #ffe8ff;
+}
+
+.app-shell--creative .ui-input,
+.app-shell--creative select,
+.app-shell--creative textarea {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 9px;
+  background-color: rgba(0, 0, 0, 0.48) !important;
+  color: #fff;
+}
+
+.app-shell--creative .ui-input:focus,
+.app-shell--creative select:focus,
+.app-shell--creative textarea:focus {
+  border-color: var(--creative-accent);
+  box-shadow: 0 0 0 3px rgba(245, 152, 242, 0.18);
+}
+
+.app-shell--creative .ui-tabs {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.app-shell--creative .ui-tab.active {
+  background: #fff;
+  color: #080808;
+  box-shadow: none;
+}
+
+.app-shell--creative .ui-modal-backdrop {
+  background: rgba(0, 0, 0, 0.78);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.app-shell--creative .ui-modal {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  background: #101012;
+  color: #fff;
+}
+
+.app-shell--creative .ui-modal__head {
+  border-bottom-color: rgba(255, 255, 255, 0.12);
+}
+
+.app-shell--creative .ui-modal__title {
+  color: #fff;
+  font-family: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 500;
+}
+
+.app-shell--creative .ui-modal__close:hover {
+  background: rgba(245, 152, 242, 0.14);
+  color: var(--creative-accent);
+}
+
+.app-shell--creative .dashboard-hero {
+  min-height: clamp(260px, 32vw, 370px);
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.46) 70%, rgba(0, 0, 0, 0.6)),
+    rgba(0, 0, 0, 0.36);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.3);
+}
+
+.app-shell--creative .dashboard-hero::before {
+  display: none;
+}
+
+.app-shell--creative .dashboard-hero::after {
+  top: auto;
+  right: -5rem;
+  bottom: -8rem;
+  width: 24rem;
+  height: 24rem;
+  background: radial-gradient(circle, rgba(245, 152, 242, 0.12), transparent 68%);
+}
+
+.app-shell--creative .dashboard-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--creative-accent);
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+}
+
+.app-shell--creative .dashboard-hero__eyebrow::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--creative-accent);
+  box-shadow: 0 0 12px rgba(245, 152, 242, 0.68);
+  content: "";
+  animation: appDotPulse 1.6s ease-in-out infinite;
+}
+
+.app-shell--creative .dashboard-hero h1 {
+  max-width: 13ch;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(3rem, 5.5vw, 4.7rem);
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: -0.035em;
+  line-height: 0.94;
+  text-shadow: none;
+}
+
+.app-shell--creative .dashboard-hero p {
+  max-width: 54ch;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 1.08rem;
+  font-weight: 400;
+}
+
+.app-shell--creative .dashboard-note {
+  border-color: rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.56);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.96rem;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.app-shell--creative .dashboard-section-title h2 {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-style: normal;
+  font-size: clamp(1.9rem, 2.8vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.app-shell--creative .feature-tile {
+  min-height: 170px;
+  border-radius: 14px;
+  background: rgba(5, 5, 7, 0.72);
+}
+
+.app-shell--creative .feature-tile::before {
+  background: linear-gradient(90deg, var(--creative-accent), rgba(245, 152, 242, 0.12) 72%, transparent);
+}
+
+.app-shell--creative .feature-tile__icon {
+  width: 52px;
+  height: 52px;
+  border-color: rgba(245, 152, 242, 0.38);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(245, 152, 242, 0.2), rgba(255, 255, 255, 0.035));
+  color: var(--creative-accent);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.app-shell--creative .feature-tile__icon svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 1.65;
+}
+
+.app-shell--creative .feature-tile h3 {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.app-shell--creative .feature-tile p {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.98rem;
+}
+
+.app-shell--creative .profile-banner {
+  background-image: linear-gradient(110deg, rgba(0, 0, 0, 0.88), rgba(0, 0, 0, 0.42)) !important;
+  background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+.app-shell--creative .app-footer {
+  border-top-color: rgba(255, 255, 255, 0.12);
+  background: rgba(5, 5, 5, 0.72);
+  color: rgba(255, 255, 255, 0.52);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.app-shell--creative .app-footer strong {
+  color: #fff;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: 1.08rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.app-shell--creative .quick-exit-bar {
+  font-size: 0.76rem;
+}
+
+.app-shell--creative .app-header__actions .btn {
+  font-size: 0.82rem;
+}
+
+.app-shell--creative .app-sidebar__emergency p {
+  font-size: 1rem;
+}
+
+.app-shell--creative .app-sidebar__emergency p:first-child {
+  font-size: 1.08rem;
+}
+
+.app-shell--creative .app-footer {
+  font-size: 0.86rem;
+}
+
+.app-shell--creative a:not(.app-brand):not(.app-nav-link) {
+  text-decoration-color: rgba(245, 152, 242, 0.48);
+  text-underline-offset: 3px;
+}
+
+@keyframes appVideoFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes appRevealUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes appDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(1.45); }
+}
+
+@media (max-width: 960px) {
+  .app-shell--creative .app-sidebar {
+    width: 100%;
+    top: auto;
+    height: auto;
+    position: relative;
+    background: rgba(5, 5, 5, 0.86);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .app-shell--creative .app-nav-link.active {
+    background: rgba(245, 152, 242, 0.16);
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell--creative .app-header {
+    min-height: 0;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .app-shell--creative .app-header__actions {
+    width: auto;
+    justify-content: flex-end;
+  }
+
+  .app-shell--creative .app-header__actions .btn {
+    min-height: 2.2rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.66rem;
+  }
+
+  .app-shell--creative .app-main {
+    padding: 1.25rem 1rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell--creative .app-header {
+    align-items: flex-start;
+  }
+
+  .app-shell--creative .app-brand__mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-shell--creative .app-header__actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .app-shell--creative .app-main {
+    padding: 1rem 0.85rem;
+  }
+
+  .app-shell--creative .dashboard-hero {
+    gap: 1.25rem;
+  }
+
+  .app-shell--creative .dashboard-hero h1 {
+    font-size: clamp(2.3rem, 12vw, 3.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell--creative .app-ambient__video {
+    display: none;
+    animation: none;
+    transition: none;
+  }
+
+  .app-shell--creative .route-page {
+    animation: none;
+  }
+
+  .app-shell--creative .dashboard-hero__eyebrow::before {
+    animation: none;
+  }
+}

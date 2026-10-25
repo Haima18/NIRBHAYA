@@ -334,3 +334,20 @@ export interface EmergencyContact {
   operationalHours: string;
   website: string;
 }
+
+// Module N: Secure Document Vault
+export type DocumentType = 'aadhaar' | 'pan' | 'bank' | 'passport' | 'voter_id' | 'driving_license' | 'other';
+
+export interface DocumentRecord {
+  id: string;
+  title: string;
+  documentType: DocumentType;
+  documentNumber?: string;
+  issuingAuthority?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  notes?: string;
+  fileName?: string;
+  createdAt: string;
+  updatedAt: string;
+}

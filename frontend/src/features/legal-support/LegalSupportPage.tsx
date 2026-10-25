@@ -20,8 +20,22 @@ import { resourcesService } from '@/services/api/resourcesService';
 import { storageService } from '@/services/storage/storageService';
 import { LawyerProfile, LegalConsultationRequest } from '@/types';
 
+const LAWYER_DIRECTORIES = {
+  india: [
+    { label: 'NALSA — State and District Legal Services Authorities', url: 'https://nalsa.gov.in/' },
+    { label: 'Bar Council of India', url: 'https://www.barcouncilofindia.org/' }
+  ],
+  'england-wales': [
+    { label: 'Solicitors Regulation Authority — Solicitors Register', url: 'https://www.sra.org.uk/consumers/register/' }
+  ],
+  other: [
+    { label: 'International Bar Association — bar associations by country', url: 'https://www.ibanet.org/bar-associations' }
+  ]
+} as const;
+
 export const LegalSupportPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('directory');
+  const [jurisdiction, setJurisdiction] = useState<keyof typeof LAWYER_DIRECTORIES>('other');
   const [cityFilter, setCityFilter] = useState('all');
   const [areaFilter, setAreaFilter] = useState('all');
   const [selectedLawyer, setSelectedLawyer] = useState<LawyerProfile | null>(null);
@@ -82,14 +96,15 @@ export const LegalSupportPage: React.FC = () => {
 
       <Alert type="info" title="Not legal advice">
         This page provides general information, not legal advice, and does not create a lawyer-client relationship. The
-        advocate cards are layout samples, not real practitioners. For free legal aid, call NALSA at{' '}
+        legal guides and NALSA resources are India-specific. The advocate cards are layout samples, not real practitioners.
+        For free legal aid in India, call NALSA at{' '}
         <a href="tel:15100" style={{ color: 'inherit', fontWeight: 600 }}>15100</a> or contact your State Legal Services
         Authority.
       </Alert>
 
       <Tabs
         tabs={[
-          { id: 'directory', label: 'Sample Directory & Aid', icon: <Scale size={16} /> },
+          { id: 'directory', label: 'Find Legal Help', icon: <Scale size={16} /> },
           { id: 'guides', label: 'Legal Rights Guides', icon: <FileText size={16} /> },
           { id: 'prep', label: 'Consultation Preparation', icon: <HelpCircle size={16} /> }
         ]}
@@ -102,10 +117,49 @@ export const LegalSupportPage: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
           <Card style={{ border: '1px solid var(--color-brand-primary-light)' }}>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-              Real free-legal-aid routes
+              Find a regulator or legal-aid service
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.8rem', lineHeight: 1.5 }}>
+              There is no single reliable global register of currently licensed lawyers. Choose a jurisdiction and check
+              a regulator’s own register before sharing sensitive information or paying anyone.
+            </p>
+            <label htmlFor="legal-jurisdiction" style={{ fontSize: '0.8rem', fontWeight: 600, display: 'block', marginBottom: '0.3rem' }}>
+              Jurisdiction
+            </label>
+            <select
+              id="legal-jurisdiction"
+              value={jurisdiction}
+              onChange={event => setJurisdiction(event.target.value as keyof typeof LAWYER_DIRECTORIES)}
+              style={{ width: '100%', maxWidth: '360px', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color-default)', backgroundColor: 'var(--bg-surface)', color: 'var(--text-primary)', marginBottom: '0.8rem' }}
+            >
+              <option value="other">Other countries / regions</option>
+              <option value="india">India</option>
+              <option value="england-wales">England & Wales</option>
+            </select>
+            <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+              {LAWYER_DIRECTORIES[jurisdiction].map(directory => (
+                <a key={directory.url} href={directory.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-info)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                  {directory.label} <ExternalLink size={14} />
+                </a>
+              ))}
+              <a href="https://lila.help/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-info)', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                Lila.help — global gender-based violence support directory <ExternalLink size={14} />
+              </a>
+            </div>
+            <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: '0.8rem 0 0' }}>
+              The International Bar Association lists bar associations; it is not a lawyer licensing register. For other
+              jurisdictions, use that country’s official regulator or legal-aid authority. Lila.help is a support directory,
+              not a lawyer directory.
+            </p>
+          </Card>
+
+          <Card style={{ border: '1px solid var(--color-brand-primary-light)' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+              India: free legal-aid routes
             </h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.5 }}>
-              Under Section 12 of the Legal Services Authorities Act, 1987, women are entitled to free legal services.
+              In India, Section 12 of the Legal Services Authorities Act, 1987 includes women among those entitled to
+              free legal services.
               Eligibility and scope are determined by the legal services authority, not by NIRBHAYA.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
@@ -131,7 +185,7 @@ export const LegalSupportPage: React.FC = () => {
           <Card style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap', alignItems: 'center' }}>
             <div style={{ flex: 1, minWidth: '180px' }}>
               <label htmlFor="legal-city" style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.25rem' }}>
-                Filter sample layouts by city
+                Filter sample profiles by city
               </label>
               <select
                 id="legal-city"
@@ -171,10 +225,10 @@ export const LegalSupportPage: React.FC = () => {
             </div>
           </Card>
 
-          <Alert type="warning" title="These are not real lawyers">
-            Each card below is an illustrative layout. The names, bar-council entries, and organizations are fictional.
+          <Alert type="warning" title="Fictional profile examples for note preparation only">
+            The cards below are mock examples, not a lawyer directory. The names, bar-council entries, and organizations are fictional.
             NIRBHAYA has not verified, employed, or partnered with any advocate. Do not send money or personal documents
-            based on these cards.
+            based on these cards. Use the regulator links above to find and independently verify a real practitioner.
           </Alert>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-6)' }}>

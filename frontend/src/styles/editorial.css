@@ -538,32 +538,47 @@ input[type='radio'] {
 /* -------------------------------- Modal ---------------------------------- */
 
 .ui-modal-backdrop {
-  background: rgba(6, 3, 12, 0.74);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(6, 3, 12, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .ui-modal {
-  border: 1px solid var(--editorial-line);
-  background: #241b36;
-  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: linear-gradient(145deg, #2d1b3e 0%, #3a1e4d 40%, #4a2b5c 100%);
+  box-shadow: var(--shadow-xl), 0 0 50px rgba(199, 166, 255, 0.25);
+  border-radius: 24px;
 }
 
 .ui-modal__head {
-  border-bottom: 1px solid var(--border-color-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .ui-modal__title {
   color: #fff;
+  background: linear-gradient(135deg, #c7a6ff 0%, #ffb7c5 60%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .ui-modal__close {
   color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .ui-modal__close:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-brand-primary);
   color: #fff;
+  border-color: var(--color-brand-primary);
+}
+
+.ui-modal__body {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* ------------------------------ Empty state ------------------------------ */

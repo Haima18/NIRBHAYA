@@ -16,12 +16,11 @@ import {
   Sparkles,
   PhoneCall,
   Settings,
-  UserRound
+  UserRound,
+  CreditCard
 } from 'lucide-react';
 import { useTranslation } from '@/localization/useTranslation';
-import { TranslationKey } from '@/localization/translations';
-
-interface NavItem {
+import { TranslationKey } from '@/localization/translations';interface NavItem {
   path: string;
   labelKey: TranslationKey;
   icon: React.ReactNode;
@@ -69,6 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Grow',
     items: [
       { path: '/ai-assistant', labelKey: 'navAssistant', icon: <Bot size={17} /> },
+      { path: '/document-vault', labelKey: 'navDocumentVault', icon: <CreditCard size={17} /> },
       { path: '/safety-news', labelKey: 'navNews', icon: <Newspaper size={17} /> },
       { path: '/empowerment', labelKey: 'navEmpowerment', icon: <Sparkles size={17} /> },
       { path: '/emergency-directory', labelKey: 'navEmergency', icon: <PhoneCall size={17} /> }

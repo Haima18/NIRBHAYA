@@ -31,6 +31,7 @@ export const UserProfilePage: React.FC = () => {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [bio, setBio] = useState(user?.bio || '');
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || '');
   const [quickExitUrl, setQuickExitUrl] = useState(user?.quickExitUrl || 'https://www.accuweather.com');
   const [language, setLanguage] = useState(user?.preferredLanguage || 'English');
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -50,6 +51,7 @@ export const UserProfilePage: React.FC = () => {
         email,
         phone,
         bio,
+        avatarUrl,
         quickExitUrl,
         preferredLanguage: language
       });
@@ -112,21 +114,48 @@ export const UserProfilePage: React.FC = () => {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem', position: 'relative', zIndex: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-            <div
-              aria-hidden="true"
-              className="profile-monogram"
-              style={{
-                width: '84px',
-                height: '84px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '2.2rem',
-                fontWeight: 400
-              }}
-            >
-              {(name || 'N').charAt(0).toUpperCase()}
+            <div style={{ position: 'relative', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <img
+                src={avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'N')}&background=random&color=fff`}
+                alt="Profile photo"
+                style={{
+                  width: '84px',
+                  height: '84px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  border: '2px solid rgba(255,255,255,0.35)'
+                }}
+              />
+              <label
+                htmlFor="profile-avatar"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  display: 'grid',
+                  placeItems: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                  marginTop: '-8px'
+                }}
+                title="Change profile photo"
+              >
+                <input
+                  id="profile-avatar"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const url = URL.createObjectURL(file);
+                    setAvatarUrl(url);
+                  }}
+                />
+                <span style={{ fontSize: '10px', lineHeight: 1 }}>📷</span>
+              </label>
             </div>
 
             <div>

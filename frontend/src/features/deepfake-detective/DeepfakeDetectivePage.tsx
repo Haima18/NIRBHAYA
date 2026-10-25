@@ -4,7 +4,9 @@ import {
   UploadCloud,
   FolderLock,
   ExternalLink,
-  Shield
+  Shield,
+  Play,
+  Zap
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -20,6 +22,7 @@ export const DeepfakeDetectivePage: React.FC = () => {
   const [report, setReport] = useState<DeepfakeReport | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileChange = (file: File) => {
@@ -59,6 +62,51 @@ export const DeepfakeDetectivePage: React.FC = () => {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleDemoAnalyze = async () => {
+    if (!selectedFile) return;
+    setIsAnalyzing(true);
+    setErrorMessage(null);
+    setReport(null);
+    setDemoMode(true);
+
+    // Simulated analysis delay for demo effect.
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    const demoReport: DeepfakeReport = {
+      id: `demo_${Date.now()}`,
+      fileName: selectedFile.name,
+      analyzedAt: new Date().toISOString(),
+      mediaType: selectedFile.type.startsWith('video') ? 'video' : selectedFile.type.startsWith('audio') ? 'audio' : 'image',
+      metadata: {
+        fileName: selectedFile.name,
+        fileSize: selectedFile.size,
+        mimeType: selectedFile.type || 'application/octet-stream',
+        hasExif: false,
+        deviceModel: undefined,
+        software: undefined,
+        signature: undefined,
+        signatureMatchesExtension: undefined
+      },
+      heuristics: [
+        { checkName: 'File signature vs extension', status: 'pass', explanation: 'Demo: file signature matches the declared extension.' },
+        { checkName: 'EXIF metadata present', status: 'warning', explanation: 'Demo: no EXIF metadata detected (may have been stripped).' },
+        { checkName: 'Container structure', status: 'pass', explanation: 'Demo: media container is well-formed.' }
+      ],
+      suspiciousTimestamps: undefined,
+      authenticityStatus: 'not_determined',
+      detectorConfigured: false,
+      method: 'DEMO simulation — not a real neural detector',
+      disclaimer: 'This is a demo simulation only. NIRBHAYA does not have a trained deepfake detector. Authenticity cannot be determined from this simulation. Do not use as forensic evidence.',
+      guidance: [
+        'Preserve the original file — do not edit, re-save, or re-upload it.',
+        'Report threats through official channels: cybercrime.gov.in or call 1930 (India).',
+        'A real detector would require a trained, independently evaluated model — not bundled in this app.'
+      ]
+    };
+    setReport(demoReport);
+    setIsAnalyzing(false);
   };
 
   const handleSaveToEvidence = () => {
@@ -159,6 +207,16 @@ export const DeepfakeDetectivePage: React.FC = () => {
               >
                 Start metadata inspection
               </Button>
+              <Button
+                variant="outline"
+                size="md"
+                onClick={handleDemoAnalyze}
+                isLoading={isAnalyzing && demoMode}
+                leftIcon={<Play size={18} />}
+                style={{ borderColor: 'var(--color-brand-primary)', color: 'var(--color-brand-primary)' }}
+              >
+                Demo simulation mode
+              </Button>
             </div>
           )}
 
@@ -208,6 +266,14 @@ export const DeepfakeDetectivePage: React.FC = () => {
         </Card>
       </div>
 
+      {/* DEMO simulation banner */}
+      {demoMode && (
+        <Alert type="warning" title="Demo simulation — not a real deepfake detector">
+          NIRBHAYA does not bundle a trained deepfake detector. This simulated result shows what a detector UI would look like.
+          Authenticity cannot be determined from this simulation. Do not use it as evidence or as proof that media is real or fake.
+        </Alert>
+      )}
+
       {/* Forensic Report Output */}
       {report && (
         <Card variant="highlight">
@@ -217,9 +283,12 @@ export const DeepfakeDetectivePage: React.FC = () => {
                 <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0 }}>
                   Media metadata report
                 </h2>
-                <Badge variant="neutral">
-                  Authenticity not determined
-                </Badge>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Badge variant="neutral">
+                    Authenticity not determined
+                  </Badge>
+                  {demoMode && <Badge variant="neutral">Demo simulation</Badge>}
+                </div>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Target: <strong>{report.fileName}</strong> • Inspected: {new Date(report.analyzedAt).toLocaleString('en-IN')}

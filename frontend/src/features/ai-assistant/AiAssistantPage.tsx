@@ -110,7 +110,7 @@ export const AiAssistantPage: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', height: 'calc(100vh - 180px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', minHeight: 'calc(100dvh - 180px)' }}>
       <div>
         <h1 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
           NIRBHAYA Guidance Assistant
@@ -174,7 +174,9 @@ export const AiAssistantPage: React.FC = () => {
       {/* Chat Messages Container */}
       <Card
         style={{
-          flexGrow: 1,
+          flex: '1 1 480px',
+          minHeight: 'min(58vh, 640px)',
+          maxHeight: '68vh',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
@@ -192,7 +194,8 @@ export const AiAssistantPage: React.FC = () => {
                 display: 'flex',
                 gap: '0.75rem',
                 alignSelf: isUser ? 'flex-end' : 'flex-start',
-                maxWidth: '85%'
+                maxWidth: isUser ? '85%' : '100%',
+                width: isUser ? 'fit-content' : '100%'
               }}
             >
               {!isUser && (
@@ -223,7 +226,9 @@ export const AiAssistantPage: React.FC = () => {
                   boxShadow: 'var(--shadow-xs)',
                   fontSize: '0.9rem',
                   lineHeight: 1.55,
-                  whiteSpace: 'pre-wrap'
+                  whiteSpace: 'pre-wrap',
+                  overflowWrap: 'anywhere',
+                  width: isUser ? 'fit-content' : 'min(100%, 760px)'
                 }}
               >
                 {msg.content}
@@ -310,24 +315,60 @@ export const AiAssistantPage: React.FC = () => {
         ))}
       </div>
 
+      {/* Character.ai link */}
+      <button
+        type="button"
+        onClick={() => window.open('https://character.ai/chat/N0MDhwKwK9BuoONLYZfk5fcsDJ1lldABF2jQkZl2CYM', '_blank')}
+        style={{
+          marginTop: '1rem',
+          padding: '0.9rem 1rem',
+          borderRadius: 'var(--radius-lg)',
+          backgroundColor: 'var(--bg-surface)',
+          border: '1px solid var(--border-color-default)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.6rem',
+          cursor: 'pointer',
+          fontSize: '0.85rem',
+          color: 'var(--text-primary)',
+          fontWeight: 500,
+          width: '100%',
+          justifyContent: 'center',
+          textAlign: 'left'
+        }}
+      >
+        <Bot size={18} />
+        <span>Chat on Character.ai — open your character in a new tab</span>
+        <ArrowRight size={14} />
+      </button>
+
       {/* Chat Input Bar */}
-      <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.5rem' }}>
-        <input
-          type="text"
+      <form onSubmit={handleSend} style={{ display: 'flex', gap: '0.75rem', padding: '0.5rem', backgroundColor: 'var(--bg-surface)', borderRadius: 'var(--radius-lg)', border: '2px solid var(--color-brand-primary-light)', boxShadow: 'var(--shadow-md)' }}>
+        <textarea
           placeholder="Type your safety question or describe your situation..."
           value={input}
           onChange={e => setInput(e.target.value)}
+          rows={2}
           style={{
             flexGrow: 1,
-            padding: '0.75rem 1rem',
+            padding: '0.875rem 1rem',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-color-default)',
-            backgroundColor: 'var(--bg-surface)',
-            fontSize: '0.9rem',
-            outline: 'none'
+            backgroundColor: 'var(--bg-app)',
+            fontSize: '1rem',
+            outline: 'none',
+            resize: 'vertical',
+            minHeight: '60px',
+            fontFamily: 'inherit'
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend(e as any);
+            }
           }}
         />
-        <Button variant="primary" type="submit" disabled={!input.trim() || loading} leftIcon={<Send size={18} />}>
+        <Button variant="primary" type="submit" disabled={!input.trim() || loading} leftIcon={<Send size={20} />} style={{ minWidth: '100px', height: 'fit-content', alignSelf: 'flex-end' }}>
           Send
         </Button>
       </form>

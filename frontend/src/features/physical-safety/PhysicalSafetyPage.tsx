@@ -60,6 +60,7 @@ export const PhysicalSafetyPage: React.FC = () => {
   const [sosDraft, setSosDraft] = useState<AlertDraft | null>(null);
   const [checkInDraft, setCheckInDraft] = useState<AlertDraft | null>(null);
   const [copyNotice, setCopyNotice] = useState<string | null>(null);
+  const [smsSending, setSmsSending] = useState(false);
 
   const [isFakeCallOpen, setIsFakeCallOpen] = useState(false);
   const [fakeCallerName, setFakeCallerName] = useState('Mom');
@@ -71,6 +72,8 @@ export const PhysicalSafetyPage: React.FC = () => {
   const [shareBusy, setShareBusy] = useState(false);
   const [shareNotice, setShareNotice] = useState<string | null>(null);
   const [shareError, setShareError] = useState<string | null>(null);
+  const [liveUpdates, setLiveUpdates] = useState(false);
+  const [liveUpdateInterval, setLiveUpdateInterval] = useState<ReturnType<typeof setInterval> | null>(null);
 
   const nearbyResources = locationService.getNearbyResources(null);
   const directoryLinks = locationService.getOfficialDirectoryLinks();
@@ -114,6 +117,20 @@ export const PhysicalSafetyPage: React.FC = () => {
     const result = notificationService.openTrustedContactsSms(draft);
     setSosStatus(result.statusMessage);
     setCopyNotice(null);
+  };
+
+  const handleSendSms = async (draft: AlertDraft) => {
+    if (!window.confirm(`Send an emergency SMS through the configured provider to ${draft.recipientsCount} selected contact(s)? Carrier charges may apply. NIRBHAYA cannot confirm delivery.`)) return;
+    setSmsSending(true);
+    setSosStatus(null);
+    try {
+      const result = await notificationService.sendSmsAlert(draft);
+      setSosStatus(`${result.message} Accepted: ${result.acceptedCount}; failed: ${result.failedCount}.`);
+    } catch (error) {
+      setSosStatus(error instanceof Error ? error.message : 'SMS could not be sent. Use the manual SMS draft instead.');
+    } finally {
+      setSmsSending(false);
+    }
   };
 
   const handleCopyDraft = async (draft: AlertDraft) => {
@@ -265,11 +282,51 @@ export const PhysicalSafetyPage: React.FC = () => {
       await locationShareService.stop(activeShare.token, ownerToken);
       locationShareService.forgetOwnerToken(activeShare.token);
       setActiveShare(null);
+      setLiveUpdates(false);
+      if (liveUpdateInterval) {
+        clearInterval(liveUpdateInterval);
+        setLiveUpdateInterval(null);
+      }
       setShareNotice('Sharing stopped and the stored coordinates were cleared on the server.');
     } catch (error) {
       setShareError(error instanceof Error ? error.message : 'Could not stop the share.');
     } finally {
       setShareBusy(false);
+    }
+  };
+
+  const fetchAndUpdateLocation = async () => {
+    if (!activeShare) return;
+    const ownerToken = activeShare.ownerToken || locationShareService.getOwnerToken(activeShare.token);
+    if (!ownerToken) return;
+    try {
+      const position = await locationService.getCurrentPosition();
+      if (!position.success || !position.coords) return;
+      const updated = await locationShareService.update(
+        activeShare.token,
+        ownerToken,
+        position.coords.lat,
+        position.coords.lng,
+        position.accuracyMeters
+      );
+      setActiveShare({ ...updated, ownerToken });
+    } catch {
+      // Silent on intermittent update failures; the panel retries on the next tick.
+    }
+  };
+
+  const startLiveUpdates = () => {
+    setLiveUpdates(true);
+    void fetchAndUpdateLocation();
+    const interval = setInterval(() => void fetchAndUpdateLocation(), 30000);
+    setLiveUpdateInterval(interval);
+  };
+
+  const stopLiveUpdates = () => {
+    setLiveUpdates(false);
+    if (liveUpdateInterval) {
+      clearInterval(liveUpdateInterval);
+      setLiveUpdateInterval(null);
     }
   };
 
@@ -320,13 +377,25 @@ export const PhysicalSafetyPage: React.FC = () => {
             </p>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '0.4rem 0 0' }}>
               {activeShare.location
-                ? `Last server update: ${new Date(activeShare.location.recordedAt || activeShare.updatedAt || '').toLocaleString()}`
+                ? `Last fetched: ${new Date(activeShare.location.recordedAt || activeShare.updatedAt || '').toLocaleString()} (±${activeShare.location.accuracyMeters ? Math.round(activeShare.location.accuracyMeters) + ' m' : 'accuracy not reported'})`
                 : 'No coordinates have been sent to this link yet.'}
             </p>
+            <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input
+                type="checkbox"
+                id={`live-updates-${activeShare.token}`}
+                checked={liveUpdates}
+                onChange={() => (liveUpdates ? stopLiveUpdates() : startLiveUpdates())}
+                style={{ width: '16px', height: '16px' }}
+              />
+              <label htmlFor={`live-updates-${activeShare.token}`} style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', cursor: 'pointer', margin: 0 }}>
+                {liveUpdates ? 'Stop live updates' : 'Send live location updates every 30s'}
+              </label>
+            </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <Button variant="outline" size="sm" onClick={copyShareLink} leftIcon={<Copy size={15} />}>Copy link</Button>
-            <Button variant="primary" size="sm" onClick={updateShare} isLoading={shareBusy} leftIcon={<RefreshCw size={15} />}>Update coordinates</Button>
+            <Button variant="primary" size="sm" onClick={updateShare} isLoading={shareBusy} leftIcon={<RefreshCw size={15} />}>Update now</Button>
             <Button variant="danger" size="sm" onClick={stopShare} isLoading={shareBusy} leftIcon={<Trash2 size={15} />}>Stop sharing</Button>
           </div>
         </div>
@@ -439,7 +508,7 @@ export const PhysicalSafetyPage: React.FC = () => {
             </div>
 
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.4 }}>
-              Tapping SOS opens <strong>tel:112</strong> and prepares an optional SMS draft for enabled trusted contacts. You must press send in your messaging app; NIRBHAYA cannot confirm delivery.
+              Tapping SOS opens <strong>tel:112 (India)</strong> and prepares an optional SMS draft for enabled trusted contacts. Outside India, call your local emergency number. You must press send in your messaging app; NIRBHAYA cannot confirm delivery.
             </p>
 
             <Alert type="warning">
@@ -465,6 +534,7 @@ export const PhysicalSafetyPage: React.FC = () => {
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <Button variant="outline" size="sm" onClick={() => handleOpenDraft(sosDraft)}>Open SMS app</Button>
                   <Button variant="ghost" size="sm" onClick={() => void handleCopyDraft(sosDraft)} leftIcon={<Copy size={14} />}>Copy text</Button>
+                  <Button variant="primary" size="sm" isLoading={smsSending} disabled={smsSending} onClick={() => void handleSendSms(sosDraft)}>Send via configured gateway</Button>
                 </div>
               </div>
             )}
@@ -591,9 +661,12 @@ export const PhysicalSafetyPage: React.FC = () => {
           {renderSharePanel()}
 
           <Card style={{ gridColumn: '1 / -1' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>National helplines & official directories</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>India helplines & official directories</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-              NIRBHAYA does not have a live verified facility feed. These are national numbers, and the links below open official directories where you can confirm a physical service.
+              These numbers and government links are for India. If you are elsewhere, use your local emergency service;
+              find global gender-based violence support organizations through{' '}
+              <a href="https://lila.help/" target="_blank" rel="noopener noreferrer">Lila.help</a>.
+              Nearby public map listings may be incomplete and are not a verified facility feed.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
               {nearbyResources.map(resource => (

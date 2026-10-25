@@ -47,7 +47,7 @@ export const aiService = {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: messageText,
-            history: history.slice(-6)
+            history: history.slice(0, -1).slice(-6)
           })
         });
 
@@ -81,7 +81,14 @@ export const aiService = {
     const q = query.toLowerCase();
 
     // 1. Imminent Danger / Emergency
-    if (q.includes('help me now') || q.includes('danger') || q.includes('emergency') || q.includes('he is here') || q.includes('attack') || q.includes('police')) {
+    const emergencyPhrases = [
+      'immediate danger', 'in immediate danger', 'danger right now', 'emergency',
+      'help me now', 'need help now', 'call 112', 'being attacked',
+      'attacking me right now', 'he is here', 'she is here', 'they are here',
+      'someone is here', 'about to hurt me', 'about to kill me',
+      'threatening me right now', 'following me right now', 'trapped right now'
+    ];
+    if (emergencyPhrases.some(phrase => q.includes(phrase))) {
       return {
         reply:
           "🚨 **Immediate Safety Priority**:\n\n" +

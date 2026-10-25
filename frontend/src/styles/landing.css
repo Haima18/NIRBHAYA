@@ -33,11 +33,10 @@
 }
 
 .mh-frame {
-  --u: min(calc(100vw / 1155), calc((100svh - var(--layout-quick-exit-height)) / 767));
   position: relative;
-  width: calc(1155 * var(--u));
-  height: calc(767 * var(--u));
-  margin: auto;
+  width: 100vw;
+  height: calc(100svh - var(--layout-quick-exit-height));
+  margin: 0;
   overflow: hidden;
   isolation: isolate;
   background: #3b2f5c;
@@ -131,7 +130,7 @@
 }
 
 .mh-grid__h { top: 52.83%; }
-.mh-grid__nav { top: calc(78 * var(--u)); animation-delay: 60ms; }
+.mh-grid__nav { top: 80px; animation-delay: 60ms; }
 
 /* ---------------------------------- Nav ----------------------------------- */
 
@@ -144,15 +143,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: calc(20 * var(--u));
-  height: calc(78 * var(--u));
-  padding: 0 calc(50 * var(--u));
+  gap: 2rem;
+  height: 80px;
+  padding: 0 2.5rem;
 }
 
 .mh-brand {
   color: #fff;
   font-family: var(--font-family-serif);
-  font-size: calc(27 * var(--u));
+  font-size: 2rem;
   font-style: italic;
   font-weight: 500;
   letter-spacing: 0.14em;
@@ -166,19 +165,19 @@
 .mh-nav__right {
   display: flex;
   align-items: center;
-  gap: calc(20 * var(--u));
+  gap: 2rem;
 }
 
 .mh-nav__links {
   display: flex;
   align-items: center;
-  gap: calc(14 * var(--u));
+  gap: 1.5rem;
   animation: mhDrop 800ms 160ms var(--mh-ease) both;
 }
 
 .mh-nav__links a {
   color: rgba(255, 255, 255, 0.86);
-  font-size: calc(10 * var(--u));
+  font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -190,22 +189,22 @@
 
 .mh-nav__links > span {
   width: 1px;
-  height: calc(11 * var(--u));
+  height: 14px;
   background: rgba(255, 255, 255, 0.34);
 }
 
 .mh-nav__actions {
   display: flex;
   align-items: center;
-  gap: calc(8 * var(--u));
+  gap: 0.75rem;
   animation: mhDrop 800ms 240ms var(--mh-ease) both;
 }
 
 .mh-icon {
   display: grid;
   place-items: center;
-  width: calc(37 * var(--u));
-  height: calc(37 * var(--u));
+  width: 42px;
+  height: 42px;
   border: 1px solid rgba(255, 255, 255, 0.42);
   border-radius: 50%;
   background: var(--mh-glass);
@@ -227,18 +226,18 @@
 }
 
 .mh-icon svg {
-  width: calc(16 * var(--u));
-  height: calc(16 * var(--u));
+  width: 18px;
+  height: 18px;
 }
 
 /* --------------------------------- Title ---------------------------------- */
 
 .mh-copy {
   position: absolute;
-  left: calc(50 * var(--u));
-  top: calc(205 * var(--u));
+  left: 2.5rem;
+  top: 22%;
   z-index: 4;
-  width: calc(760 * var(--u));
+  width: 600px;
   pointer-events: none;
 }
 
@@ -255,7 +254,7 @@
 .mh-title__line { display: block; }
 
 .mh-title__sans {
-  font-size: calc(92 * var(--u));
+  font-size: 4rem;
   animation: mhRise 1s var(--mh-ease) both;
 }
 
@@ -263,10 +262,10 @@
 .mh-title__line:nth-child(2) { animation-delay: 410ms; }
 
 .mh-title__serif {
-  margin-top: calc(4 * var(--u));
-  padding-bottom: calc(10 * var(--u));
+  margin-top: 1rem;
+  padding-bottom: 1rem;
   font-family: var(--font-family-serif);
-  font-size: calc(126 * var(--u));
+  font-size: 5.5rem;
   font-style: italic;
   font-weight: 400;
   line-height: 0.88;
@@ -278,19 +277,19 @@
 
 .mh-aside {
   position: absolute;
-  left: calc(872 * var(--u));
-  top: calc(235 * var(--u));
+  right: 3rem;
+  top: 28%;
   z-index: 5;
-  width: calc(250 * var(--u));
+  width: 320px;
 }
 
 .mh-season {
   display: flex;
   align-items: center;
-  gap: calc(8 * var(--u));
+  gap: 1rem;
   margin: 0;
   color: var(--mh-peach);
-  font-size: calc(10 * var(--u));
+  font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.24em;
   line-height: 1;
@@ -299,52 +298,44 @@
 }
 
 .mh-season > span {
-  font-size: calc(15 * var(--u));
+  font-size: 1.2rem;
   line-height: 1;
   animation: mhStarPulse 4.5s ease-in-out infinite;
 }
 
 .mh-aside__body {
-  margin-top: calc(185 * var(--u));
+  margin-top: 2rem;
   animation: mhFadeUp 900ms 760ms var(--mh-ease) both;
 }
 
 .mh-lede {
-  margin: 0 0 calc(12 * var(--u));
+  margin: 0 0 1.2rem;
   color: rgba(255, 255, 255, 0.88);
-  font-size: calc(13 * var(--u));
+  font-size: 1.05rem;
   line-height: 1.65;
 }
 
 .mh-limit {
-  margin: 0 0 calc(22 * var(--u));
+  margin: 0 0 2rem;
   color: rgba(255, 255, 255, 0.6);
-  font-size: calc(10 * var(--u));
+  font-size: 0.8rem;
   line-height: 1.55;
   letter-spacing: 0.01em;
 }
 
-.mh-limit a {
-  color: rgba(255, 255, 255, 0.86);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.mh-limit a:hover { color: #fff; }
-
 .mh-actions {
   display: flex;
   align-items: center;
-  gap: calc(12 * var(--u));
+  gap: 1rem;
 }
 
 .mh-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: calc(8 * var(--u));
-  min-height: calc(48 * var(--u));
-  padding: 0 calc(24 * var(--u));
+  gap: 0.75rem;
+  min-height: 48px;
+  padding: 0 1.5rem;
   border: 1px solid #fff;
   border-radius: 999px;
   background-color: #fff;
@@ -354,7 +345,7 @@
   background-size: 100% 0;
   color: #1a1029;
   font-family: var(--font-family-sans);
-  font-size: calc(10 * var(--u));
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -376,8 +367,8 @@
 }
 
 .mh-cta svg {
-  width: calc(16 * var(--u));
-  height: calc(16 * var(--u));
+  width: 18px;
+  height: 18px;
   transition: transform 260ms var(--mh-ease);
 }
 
@@ -386,8 +377,8 @@
 .mh-arrow {
   display: grid;
   place-items: center;
-  width: calc(48 * var(--u));
-  height: calc(48 * var(--u));
+  width: 48px;
+  height: 48px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   background: var(--mh-glass);
@@ -411,18 +402,18 @@
 }
 
 .mh-arrow svg {
-  width: calc(18 * var(--u));
-  height: calc(18 * var(--u));
+  width: 20px;
+  height: 20px;
 }
 
 /* ------------------------------- Polaroid --------------------------------- */
 
 .mh-polaroid-wrap {
   position: absolute;
-  left: calc(165 * var(--u));
-  bottom: calc(38 * var(--u));
+  right: 3rem;
+  bottom: 3rem;
   z-index: 6;
-  width: calc(165 * var(--u));
+  width: 220px;
   animation: mhPolaroidDrop 1.2s 820ms var(--mh-ease) both;
 }
 
@@ -430,7 +421,7 @@
   position: relative;
   width: 100%;
   margin: 0;
-  padding: calc(8 * var(--u)) calc(8 * var(--u)) calc(10 * var(--u));
+  padding: 1rem 1rem 1.2rem;
   border-radius: 2px;
   background: #fdf8f2;
   box-shadow: 0 30px 60px -24px rgba(25, 12, 40, 0.75);
@@ -459,10 +450,10 @@
 }
 
 .mh-polaroid figcaption {
-  margin-top: calc(6 * var(--u));
+  margin-top: 0.6rem;
   color: #3b2f5c;
   font-family: var(--font-family-serif);
-  font-size: calc(13 * var(--u));
+  font-size: 0.95rem;
   font-style: italic;
   line-height: 1.2;
   text-align: center;
@@ -472,14 +463,14 @@
 
 .mh-corner {
   position: absolute;
-  left: calc(50 * var(--u));
-  bottom: calc(50 * var(--u));
+  left: 2.5rem;
+  bottom: 2.5rem;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: calc(1 * var(--u));
+  gap: 0.25rem;
   color: rgba(255, 255, 255, 0.62);
-  font-size: calc(9 * var(--u));
+  font-size: 0.7rem;
   letter-spacing: 0.28em;
   line-height: 1.75;
   text-transform: uppercase;
@@ -489,11 +480,11 @@
 .mh-watermark {
   position: absolute;
   left: 50%;
-  bottom: calc(-30 * var(--u));
+  bottom: -1.5rem;
   z-index: 3;
   color: rgba(255, 255, 255, 0.09);
   font-family: var(--font-family-serif);
-  font-size: calc(200 * var(--u));
+  font-size: 10rem;
   font-style: italic;
   font-weight: 500;
   line-height: 0.8;

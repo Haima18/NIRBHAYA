@@ -82,6 +82,7 @@ export const PathwayPage: React.FC = () => {
   };
 
   const handleReset = () => {
+    storageService.clearPathwayPlans();
     setSelectedSituation(null);
     setActivePlan(null);
     setImmediateDanger(null);
@@ -99,7 +100,7 @@ export const PathwayPage: React.FC = () => {
           </p>
         </div>
 
-        {activePlan && (
+        {(activePlan || selectedSituation) && (
           <Button variant="outline" size="sm" onClick={handleReset} leftIcon={<RotateCcw size={14} />}>
             Choose Different Situation
           </Button>
@@ -232,6 +233,14 @@ export const PathwayPage: React.FC = () => {
                     <div
                       key={action.id}
                       onClick={() => handleToggleAction(step.id, action.id)}
+                      onKeyDown={event => {
+                        if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) {
+                          event.preventDefault();
+                          handleToggleAction(step.id, action.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
                       style={{
                         display: 'flex',
                         alignItems: 'flex-start',
@@ -247,6 +256,10 @@ export const PathwayPage: React.FC = () => {
                       <button
                         type="button"
                         aria-label={action.completed ? 'Mark incomplete' : 'Mark complete'}
+                        onClick={event => {
+                          event.stopPropagation();
+                          handleToggleAction(step.id, action.id);
+                        }}
                         style={{
                           color: action.completed ? 'var(--color-success)' : 'var(--color-neutral-400)',
                           marginTop: '2px'

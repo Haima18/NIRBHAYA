@@ -9,10 +9,8 @@ interface AuthShellProps {
   description: React.ReactNode;
   points?: string[];
   children: React.ReactNode;
+  variant?: 'default' | 'aurevon';
 }
-
-const POLAROID_PHOTO =
-  'https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/4612f265-40f3-4fc9-af4c-b03c289c2b75.jpg';
 
 /**
  * Shared frame for sign-in, registration, and password recovery.
@@ -24,10 +22,22 @@ export const AuthShell: React.FC<AuthShellProps> = ({
   title,
   description,
   points = [],
-  children
+  children,
+  variant = 'default'
 }) => (
-  <div className="auth-page">
+  <div className={`auth-page${variant === 'aurevon' ? ' auth-page--aurevon' : ''}`}>
     <QuickExitBar />
+    {variant === 'aurevon' && (
+      <video
+        className="auth-aurevon-video"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260819_212700_3bb9329b-5c50-4257-a09b-ca85cf3654a3.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+      />
+    )}
 
     <div className="auth-page__grid">
       <aside className="auth-story" aria-label="About NIRBHAYA">
@@ -55,11 +65,6 @@ export const AuthShell: React.FC<AuthShellProps> = ({
             </ul>
           )}
         </div>
-
-        <figure className="auth-story__polaroid" aria-hidden="true">
-          <img src={POLAROID_PHOTO} alt="" draggable={false} loading="lazy" />
-          <figcaption>Yours to control</figcaption>
-        </figure>
 
         <p className="auth-story__foot">
           Private by default · Honest about limits · Yours to control

@@ -32,6 +32,26 @@ export interface NearbyResource {
   isNationalHelpline: true;
 }
 
+export interface NearbyPlace {
+  id: string;
+  name: string;
+  category: 'police' | 'hospital' | 'clinic' | 'shelter' | 'legal' | 'railway_station' | 'bus_stop' | 'taxi' | 'hotel';
+  address: string;
+  phone: string | null;
+  distanceKm: number;
+  coords: LatLng;
+  mapUrl: string;
+}
+
+export interface CurrentWeather {
+  temperatureC: number;
+  apparentTemperatureC: number;
+  relativeHumidity: number;
+  precipitationMm: number;
+  windSpeedKmh: number;
+  weatherCode: number;
+}
+
 export const locationService = {
   async getCurrentPosition(): Promise<PositionResult> {
     if (!navigator.geolocation) {
@@ -64,7 +84,7 @@ export const locationService = {
           }
           resolve({ success: false, error: message });
         },
-        { enableHighAccuracy: true, timeout: 12000, maximumAge: 10000 }
+        { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 }
       );
     });
   },
@@ -85,6 +105,98 @@ export const locationService = {
 
   getMapsUrl(coords: LatLng): string {
     return `https://www.google.com/maps?q=${coords.lat},${coords.lng}`;
+  },
+
+  async getCurrentWeather(coords: LatLng): Promise<CurrentWeather> {
+    const params = new URLSearchParams({
+      latitude: String(coords.lat),
+      longitude: String(coords.lng),
+      current: 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,wind_speed_10m',
+      timezone: 'auto'
+    });
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if (!response.ok) throw new Error('Current weather is temporarily unavailable.');
+    const payload = await response.json() as { current?: Record<string, unknown> };
+    const current = payload.current;
+    if (!current) throw new Error('Weather provider returned no current conditions.');
+    const values = {
+      temperatureC: current.temperature_2m,
+      apparentTemperatureC: current.apparent_temperature,
+      relativeHumidity: current.relative_humidity_2m,
+      precipitationMm: current.precipitation,
+      windSpeedKmh: current.wind_speed_10m,
+      weatherCode: current.weather_code
+    };
+    if (Object.values(values).some(value => typeof value !== 'number' || !Number.isFinite(value))) {
+      throw new Error('Weather provider returned incomplete current conditions.');
+    }
+    return values as CurrentWeather;
+  },
+
+  async getNearbyPlaces(coords: LatLng, radiusMeters = 5000): Promise<NearbyPlace[]> {
+    if (
+      !Number.isFinite(coords.lat) || coords.lat < -90 || coords.lat > 90 ||
+      !Number.isFinite(coords.lng) || coords.lng < -180 || coords.lng > 180
+    ) {
+      throw new Error('A valid location is required to search nearby places.');
+    }
+    const radius = Number.isFinite(radiusMeters) ? Math.min(10000, Math.max(1000, Math.round(radiusMeters))) : 5000;
+    const controller = new AbortController();
+    const timeout = globalThis.setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const params = new URLSearchParams({
+        lat: String(coords.lat),
+        lng: String(coords.lng),
+        radius: String(radius)
+      });
+      const response = await fetch(`/api/location/nearby?${params}`, {
+        credentials: 'include',
+        signal: controller.signal
+      });
+      const data = await response.json() as { places?: unknown; error?: unknown };
+      if (!response.ok) {
+        throw new Error(typeof data.error === 'string' ? data.error : `Nearby-place lookup returned HTTP ${response.status}.`);
+      }
+      if (!Array.isArray(data.places)) {
+        throw new Error('OpenStreetMap returned an unexpected nearby-places response.');
+      }
+
+      const places = data.places.flatMap((item): NearbyPlace[] => {
+        if (!item || typeof item !== 'object') return [];
+        const place = item as Partial<NearbyPlace>;
+        const category = (['police', 'hospital', 'clinic', 'shelter', 'legal', 'railway_station', 'bus_stop', 'taxi', 'hotel'] as const)
+          .find(candidate => candidate === place.category);
+        if (
+          typeof place.id !== 'string' || typeof place.name !== 'string' ||
+          !category || typeof place.address !== 'string' ||
+          typeof place.distanceKm !== 'number' || !Number.isFinite(place.distanceKm) ||
+          !place.coords || typeof place.coords.lat !== 'number' || typeof place.coords.lng !== 'number' ||
+          !Number.isFinite(place.coords.lat) || !Number.isFinite(place.coords.lng)
+        ) {
+          return [];
+        }
+        const placeCoords = { lat: place.coords.lat, lng: place.coords.lng };
+        return [{
+          id: place.id,
+          name: place.name,
+          category,
+          address: place.address,
+          phone: typeof place.phone === 'string' ? place.phone : null,
+          distanceKm: place.distanceKm,
+          coords: placeCoords,
+          mapUrl: this.getMapsUrl(placeCoords)
+        }];
+      });
+      return places.sort((a, b) => a.distanceKm - b.distanceKm);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new Error('Nearby-place lookup timed out. Your map is still available; try again later.');
+      }
+      throw error;
+    } finally {
+      globalThis.clearTimeout(timeout);
+    }
   },
 
   /**

@@ -1,0 +1,163 @@
+.auth-page--aurevon {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+}
+
+.auth-aurevon-video {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.auth-page--aurevon .auth-page__grid {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+.auth-page--aurevon .auth-story {
+  background: transparent;
+  border-right-color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-page--aurevon .auth-story::after,
+.auth-page--aurevon .auth-panel::before {
+  display: none;
+}
+
+.auth-page--aurevon .auth-story__glow {
+  display: none;
+}
+
+.auth-page--aurevon .auth-story__brand strong,
+.auth-page--aurevon .auth-story h1,
+.auth-page--aurevon .auth-card h2 {
+  font-family: "Instrument Serif", serif;
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.auth-page--aurevon .auth-story__mark {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(0, 0, 0, 0.35);
+  font-family: "Instrument Serif", serif;
+}
+
+.auth-page--aurevon .auth-story__brand small,
+.auth-page--aurevon .auth-story__eyebrow,
+.auth-page--aurevon .auth-story__text,
+.auth-page--aurevon .auth-story__points li,
+.auth-page--aurevon .auth-story__foot {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.auth-page--aurevon .auth-story__eyebrow::before,
+.auth-page--aurevon .auth-story__points li span {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: none;
+}
+
+.auth-page--aurevon .auth-story__points {
+  border-top-color: rgba(255, 255, 255, 0.28);
+}
+
+.auth-page--aurevon .auth-panel {
+  background: transparent;
+}
+
+.auth-page--aurevon .auth-card {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-radius: 1.25rem;
+  background: rgba(0, 0, 0, 0.76);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.auth-page--aurevon .auth-card__eyebrow {
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.auth-page--aurevon .auth-card h2 {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.auth-page--aurevon .auth-card__intro,
+.auth-page--aurevon .auth-check,
+.auth-page--aurevon .auth-links {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.auth-page--aurevon .ui-label {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.auth-page--aurevon .auth-input .ui-input {
+  border-color: rgba(255, 255, 255, 0.24);
+  border-radius: 0.75rem;
+  background: rgba(0, 0, 0, 0.48);
+  color: #fff;
+}
+
+.auth-page--aurevon .auth-input .ui-input::placeholder {
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.auth-page--aurevon .auth-input > svg,
+.auth-page--aurevon .auth-input__toggle {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.auth-page--aurevon .auth-row a,
+.auth-page--aurevon .auth-links a {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.45);
+  text-underline-offset: 3px;
+}
+
+.auth-page--aurevon .auth-row a:hover,
+.auth-page--aurevon .auth-links a:hover {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.auth-page--aurevon .auth-links {
+  border-top-color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-page--aurevon .auth-submit {
+  min-height: 3rem;
+  border: 0;
+  border-radius: 9999px;
+  background: #fff;
+  color: #000;
+}
+
+.auth-page--aurevon .auth-submit:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+}
+
+.auth-page--aurevon .auth-panel__note {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 900px) {
+  .auth-page--aurevon .auth-panel {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-aurevon-video {
+    display: none;
+  }
+}

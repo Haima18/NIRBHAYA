@@ -5,6 +5,53 @@
  */
 import { PrivacyCheckItem } from '@/types';
 
+export interface BrowserPermissionAuditItem {
+  id: string;
+  label: string;
+  state: PermissionState | 'unsupported' | 'error';
+  detail: string;
+}
+
+const BROWSER_PERMISSION_CHECKS: Array<{ name: PermissionName; label: string }> = [
+  { name: 'geolocation', label: 'Location' },
+  { name: 'notifications', label: 'Notifications' },
+  { name: 'camera', label: 'Camera' },
+  { name: 'microphone', label: 'Microphone' }
+];
+
+export async function checkBrowserPermissions(): Promise<BrowserPermissionAuditItem[]> {
+  if (!navigator.permissions?.query) {
+    return BROWSER_PERMISSION_CHECKS.map(({ name, label }) => ({
+      id: name,
+      label,
+      state: 'unsupported',
+      detail: 'This browser does not expose this permission state.'
+    }));
+  }
+
+  return Promise.all(BROWSER_PERMISSION_CHECKS.map(async ({ name, label }) => {
+    try {
+      const permission = await navigator.permissions.query({ name });
+      const details: Record<PermissionState, string> = {
+        granted: 'Allowed by the browser. NIRBHAYA has not accessed this device feature.',
+        prompt: 'Not yet allowed or denied. The browser may prompt when a feature is used.',
+        denied: 'Blocked by the browser or site settings.'
+      };
+      return { id: name, label, state: permission.state, detail: details[permission.state] };
+    } catch (error) {
+      const unsupported = error instanceof DOMException && error.name === 'NotSupportedError';
+      return {
+        id: name,
+        label,
+        state: unsupported ? 'unsupported' : 'error',
+        detail: unsupported
+          ? 'This browser does not expose this permission state.'
+          : 'The browser could not report this permission state.'
+      };
+    }
+  }));
+}
+
 export const DEFAULT_PRIVACY_CHECKLIST: PrivacyCheckItem[] = [
   {
     id: 'prv_1',

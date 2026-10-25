@@ -21,6 +21,13 @@ export interface AlertDraft {
   recipientsCount: number;
 }
 
+export interface SmsSendResult {
+  acceptedCount: number;
+  failedCount: number;
+  deliveryConfirmed: false;
+  message: string;
+}
+
 export const notificationService = {
   triggerEmergencyDialer(): AlertDispatchResult {
     try {
@@ -104,6 +111,23 @@ export const notificationService = {
         recipientsCount: draft.recipientsCount
       };
     }
+  },
+
+  async sendSmsAlert(draft: AlertDraft): Promise<SmsSendResult> {
+    const response = await fetch('/api/alerts/sms', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipients: draft.phones.split(';').filter(Boolean),
+        message: draft.body
+      })
+    });
+    const payload = await response.json().catch(() => ({})) as Partial<SmsSendResult> & { error?: string };
+    if (!response.ok) {
+      throw new Error(payload.error || 'SMS delivery could not be started.');
+    }
+    return payload as SmsSendResult;
   },
 
   async copyAlertText(text: string): Promise<boolean> {

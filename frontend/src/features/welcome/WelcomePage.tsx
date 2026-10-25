@@ -178,8 +178,8 @@ export const WelcomePage: React.FC = () => {
       : '/';
 
   const enter = () =>
-    navigate(isAuthenticated ? intendedPath : '/login', {
-      state: isAuthenticated ? undefined : { from: intendedPath }
+    navigate('/login', {
+      state: { from: intendedPath }
     });
 
   const featureLink = (path: string) => (isAuthenticated ? path : '/login');
@@ -265,15 +265,6 @@ export const WelcomePage: React.FC = () => {
           <span>Private</span>
           <span>By design</span>
           <span>Always yours</span>
-        </div>
-
-        <div className="mh-polaroid-wrap" aria-hidden="true">
-          <figure className="mh-polaroid">
-            <div className="mh-polaroid__photo">
-              <img src={POLAROID_PHOTO} alt="" loading="lazy" />
-            </div>
-            <figcaption>Your everyday courage</figcaption>
-          </figure>
         </div>
 
         <div className="mh-watermark" aria-hidden="true">NIRBHAYA</div>

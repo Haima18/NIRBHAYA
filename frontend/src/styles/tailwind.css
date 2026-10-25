@@ -1,0 +1,13 @@
+/* Tailwind utility layer — imported last so utilities win over the product CSS.
+   Preflight is disabled in tailwind.config.cjs to protect the existing reset,
+   typography scale, and accessible form controls. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .font-instrument {
+    font-family: 'Instrument Serif', serif;
+  }
+}

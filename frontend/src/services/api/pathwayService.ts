@@ -34,7 +34,7 @@ const SITUATION_CONFIGS: Record<PathwaySituation, SituationConfig> = {
         category: 'support',
         isUrgent: false,
         actions: [
-          { id: 'pd_act_5', text: 'Go to a verified safe-place or contact a One Stop Centre (Sakhi: 181)', completed: false },
+          { id: 'pd_act_5', text: 'Call Women Helpline 181 to ask about a nearby One Stop Centre; availability is not verified by NIRBHAYA', completed: false },
           { id: 'pd_act_6', text: 'Notify a trusted family member or close friend of your whereabouts', completed: false }
         ]
       }
@@ -72,9 +72,9 @@ const SITUATION_CONFIGS: Record<PathwaySituation, SituationConfig> = {
         category: 'support',
         isUrgent: false,
         actions: [
-          { id: 'da_act_6', text: 'Talk anonymously with a peer listener on HerCircle', completed: false },
+          { id: 'da_act_6', text: 'Review HerCircle support-planning tools; this app does not connect peer listeners', completed: false },
           { id: 'da_act_7', text: 'Learn about Protection Orders under the Protection of Women from Domestic Violence Act (PWDVA)', completed: false },
-          { id: 'da_act_8', text: 'Consult an empaneled pro-bono female lawyer in our Legal Support directory', completed: false }
+          { id: 'da_act_8', text: 'Use Legal Support to find official legal-aid routes; its sample lawyer profiles are not real practitioners', completed: false }
         ]
       }
     ]
@@ -303,7 +303,7 @@ const SITUATION_CONFIGS: Record<PathwaySituation, SituationConfig> = {
         actions: [
           { id: 'nc_act_3', text: 'File urgent complaint on cybercrime.gov.in under Section 67A IT Act', completed: false },
           { id: 'nc_act_4', text: 'Call 1930 for priority cyber cell assistance', completed: false },
-          { id: 'nc_act_5', text: 'Consult a female cyber lawyer in Legal Support', completed: false }
+          { id: 'nc_act_5', text: 'Use Legal Support to find official legal-aid routes; its sample lawyer profiles are not real practitioners', completed: false }
         ]
       }
     ]

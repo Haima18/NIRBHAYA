@@ -11,3 +11,15 @@ temp_uploads/
 .env.local
 .DS_Store
 Thumbs.db
+.andromity/
+
+# Environment secrets
+.env.*
+!.env.example
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Local tooling
+.vscode/

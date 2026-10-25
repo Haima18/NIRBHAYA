@@ -24,7 +24,8 @@ class Config:
         origin.strip()
         for origin in os.environ.get(
             'CORS_ORIGINS',
-            'http://localhost:3000,http://127.0.0.1:3000'
+            'http://localhost:3000,http://127.0.0.1:3000,'
+            'http://localhost:3001,http://127.0.0.1:3001'
         ).split(',')
         if origin.strip()
     ]
@@ -38,11 +39,17 @@ class Config:
 
     # External AI Credentials (Optional; rule-based fallback is the default)
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
+    GEMINI_MODEL = os.environ.get('GEMINI_MODEL', 'gemini-3.6-flash')
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
     ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 
     # Optional external deepfake detector. No detector is bundled.
     DEEPFAKE_DETECTOR_URL = os.environ.get('DEEPFAKE_DETECTOR_URL', '')
+
+    # Optional Twilio SMS provider. Credentials remain server-side.
+    TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
+    TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
+    TWILIO_FROM_NUMBER = os.environ.get('TWILIO_FROM_NUMBER', '')
 
     # Security, media, and location-sharing limits
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50 MB

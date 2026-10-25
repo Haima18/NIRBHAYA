@@ -151,6 +151,10 @@ export const storageService = {
     localStorage.setItem(scopedKey(STORAGE_KEYS.PATHWAY_PLANS), JSON.stringify(list));
   },
 
+  clearPathwayPlans(): void {
+    localStorage.removeItem(scopedKey(STORAGE_KEYS.PATHWAY_PLANS));
+  },
+
   getHerCircleRequests(): HerCircleRequest[] {
     try {
       const data = localStorage.getItem(scopedKey(STORAGE_KEYS.HERCIRCLE_REQUESTS));

@@ -52,6 +52,12 @@ const FEATURE_TILES = [
     icon: <Eye size={20} />,
     title: 'Privacy Shield',
     text: 'A self-assessment for social visibility, app permissions, sessions, and doxxing response.'
+  },
+  {
+    to: '/map',
+    icon: <Navigation size={20} />,
+    title: 'Live map',
+    text: 'Consent-based location sharing with a real-time map that updates automatically. Create expiring links for trusted contacts.'
   }
 ];
 
@@ -66,12 +72,21 @@ export const DashboardPage: React.FC = () => {
   const [contacts, setContacts] = useState<TrustedContact[]>([]);
   const [plans, setPlans] = useState<PathwayPlan[]>([]);
   const [news, setNews] = useState<SafetyNewsArticle[]>([]);
+  const [newsUnavailable, setNewsUnavailable] = useState(false);
 
   useEffect(() => {
     setIncidents(storageService.getIncidents());
     setContacts(storageService.getTrustedContacts());
     setPlans(storageService.getPathwayPlans());
-    setNews(newsService.getArticles().slice(0, 3));
+    newsService.getLatestArticles()
+      .then(articles => {
+        setNews(articles.slice(0, 3));
+        setNewsUnavailable(false);
+      })
+      .catch(() => {
+        setNews([]);
+        setNewsUnavailable(true);
+      });
   }, []);
 
   const formatTimer = (seconds: number) => {
@@ -365,14 +380,24 @@ export const DashboardPage: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Sparkles size={19} color="var(--color-brand-primary)" aria-hidden="true" />
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Evergreen safety awareness</h3>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Latest global safety reports</h3>
             </div>
             <Link to="/safety-news" style={{ fontSize: '0.78rem', fontWeight: 700 }}>
-              Awareness library
+              All news & awareness
             </Link>
           </div>
-
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.6rem' }}>
+            GDELT Project + UN Women RSS. External reporting is not independently verified by NIRBHAYA.
+          </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+            {newsUnavailable && (
+              <p role="status" style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                Live headlines are temporarily unavailable. The awareness library is available from the news page.
+              </p>
+            )}
+            {!newsUnavailable && news.length === 0 && (
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>No current headlines were returned.</p>
+            )}
             {news.map(article => (
               <div
                 key={article.id}
@@ -385,11 +410,14 @@ export const DashboardPage: React.FC = () => {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                   <h4 style={{ fontSize: '0.84rem', fontWeight: 600, margin: 0 }}>{article.headline}</h4>
-                  <Badge variant="neutral">{article.category}</Badge>
+                  <Badge variant="neutral">{article.publisher}</Badge>
                 </div>
                 <p style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', marginTop: 4, lineHeight: 1.45 }}>
-                  <strong>Practical note:</strong> {article.safetyLesson}
+                  {article.date} · {article.summary}
                 </p>
+                <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.76rem', color: 'var(--color-info)' }}>
+                  Read original report
+                </a>
               </div>
             ))}
           </div>

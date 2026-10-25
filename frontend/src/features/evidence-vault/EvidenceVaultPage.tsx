@@ -17,6 +17,7 @@ import { Modal } from '@/components/ui/Modal';
 import { storageService } from '@/services/storage/storageService';
 import { generateIncidentHtmlSummary } from '@/utils/exportSummary';
 import { IncidentRecord, SeverityLevel } from '@/types';
+import { EvidenceCapturePanel } from './EvidenceCapturePanel';
 
 export const EvidenceVaultPage: React.FC = () => {
   const [incidents, setIncidents] = useState<IncidentRecord[]>(() => storageService.getIncidents());
@@ -153,6 +154,8 @@ export const EvidenceVaultPage: React.FC = () => {
         cryptographically certify them. Keep the original messages, files, and screenshots separately. A summary is not
         a substitute for original evidence, and rules such as Section 63 of the Bharatiya Sakshya Adhiniyam may apply.
       </Alert>
+
+      <EvidenceCapturePanel />
 
       <Card style={{ padding: 'var(--space-4)' }}>
         <Input

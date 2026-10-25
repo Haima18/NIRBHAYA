@@ -1,22 +1,35 @@
 import React, { useState } from 'react';
-import { Eye, ShieldCheck, CheckCircle2, Circle, ExternalLink, Filter } from 'lucide-react';
+import { Eye, ShieldCheck, CheckCircle2, Circle, ExternalLink, Filter, RefreshCw } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Progress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
 import { Alert } from '@/components/ui/Alert';
-import { privacyShieldService } from '@/services/api/privacyShieldService';
+import { BrowserPermissionAuditItem, checkBrowserPermissions, privacyShieldService } from '@/services/api/privacyShieldService';
 import { PrivacyCheckItem } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 export const PrivacyShieldPage: React.FC = () => {
   const [items, setItems] = useState<PrivacyCheckItem[]>(() => privacyShieldService.getChecklist());
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [permissionAudit, setPermissionAudit] = useState<BrowserPermissionAuditItem[] | null>(null);
+  const [auditBusy, setAuditBusy] = useState(false);
+  const { user } = useAuth();
 
   const { total, completed, percentage } = privacyShieldService.calculateProgress(items);
 
   const handleToggle = (id: string) => {
     const updated = privacyShieldService.toggleItem(id);
     setItems([...updated]);
+  };
+
+  const runPermissionAudit = async () => {
+    setAuditBusy(true);
+    try {
+      setPermissionAudit(await checkBrowserPermissions());
+    } finally {
+      setAuditBusy(false);
+    }
   };
 
   const filteredItems = categoryFilter === 'all'
@@ -38,6 +51,46 @@ export const PrivacyShieldPage: React.FC = () => {
       <Alert type="info">
         <strong>Self-Assessment Scope Notice:</strong> NIRBHAYA guides your personal hardening through established security practices. It does not perform illegal external hacking scans or promise total erasure from the entire internet.
       </Alert>
+
+      <Card>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Browser privacy check</h2>
+            <p style={{ margin: '0.35rem 0 0', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+              Reads permission states exposed by this browser. It does not request access, change settings, or inspect your other accounts.
+            </p>
+          </div>
+          <Button variant="outline" onClick={() => void runPermissionAudit()} isLoading={auditBusy} leftIcon={<RefreshCw size={16} />}>
+            {auditBusy ? 'Checking…' : permissionAudit ? 'Check again' : 'Check browser permissions'}
+          </Button>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.75rem', marginTop: '1rem' }}>
+          <div style={{ borderTop: '1px solid var(--border-color-default)', paddingTop: '0.65rem' }}>
+            <strong style={{ fontSize: '0.85rem' }}>NIRBHAYA location consent</strong>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+              {user?.locationConsent ? 'Enabled in your account preferences.' : 'Disabled in your account preferences.'}
+            </p>
+          </div>
+          <div style={{ borderTop: '1px solid var(--border-color-default)', paddingTop: '0.65rem' }}>
+            <strong style={{ fontSize: '0.85rem' }}>External AI consent</strong>
+            <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+              {user?.aiProcessingConsent ? 'Enabled in your account preferences.' : 'Disabled in your account preferences.'}
+            </p>
+          </div>
+        </div>
+
+        {permissionAudit && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.75rem', marginTop: '1rem' }}>
+            {permissionAudit.map(permission => (
+              <div key={permission.id} style={{ borderTop: '1px solid var(--border-color-default)', paddingTop: '0.65rem' }}>
+                <strong style={{ fontSize: '0.85rem' }}>{permission.label}: {permission.state}</strong>
+                <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{permission.detail}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
 
       {/* Progress Card */}
       <Card variant="highlight">

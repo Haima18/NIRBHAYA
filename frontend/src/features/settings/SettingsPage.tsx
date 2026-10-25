@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Alert } from '@/components/ui/Alert';
 import { storageService } from '@/services/storage/storageService';
+import { captureStorageService } from '@/services/storage/captureStorageService';
 import { aiService, AiStatus } from '@/services/ai/aiService';
 import { UserProfile } from '@/types';
 import { INDIAN_LANGUAGES } from '@/constants/languages';
@@ -83,7 +84,30 @@ export const SettingsPage: React.FC = () => {
     const updated = { ...profile, [key]: value };
     setProfile(updated);
     setErrorNotice(null);
+
     try {
+      if (key === 'locationConsent' && value) {
+        if (!('geolocation' in navigator)) {
+          throw new Error('This browser does not support geolocation permission requests.');
+        }
+
+        await new Promise<void>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            () => resolve(),
+            error => {
+              let message = 'Location permission was denied.';
+              if (error.code === error.POSITION_UNAVAILABLE) {
+                message = 'Location information is currently unavailable in this browser.';
+              } else if (error.code === error.TIMEOUT) {
+                message = 'The location request timed out. Please try again.';
+              }
+              reject(new Error(message));
+            },
+            { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+          );
+        });
+      }
+
       const saved = await updatePreferences({ [key]: value });
       setProfile(saved);
     } catch (error) {
@@ -103,13 +127,18 @@ export const SettingsPage: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleWipeLocalData = () => {
+  const handleWipeLocalData = async () => {
     const confirmed = window.confirm(
-      'This clears incidents, contacts, plans, checklists, and other records stored in this browser. It does not delete your account or server data. Continue?'
+      'This clears incidents, contacts, plans, checklists, and locally captured photos/videos stored for this account in this browser. It does not delete your account or server data. Continue?'
     );
     if (!confirmed) return;
     storageService.wipeAllData();
-    setLocalWipeNotice(true);
+    try {
+      await captureStorageService.clear(user?.id || 'guest');
+      setLocalWipeNotice(true);
+    } catch (error) {
+      setErrorNotice(error instanceof Error ? error.message : 'Could not clear all local records.');
+    }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -183,8 +212,7 @@ export const SettingsPage: React.FC = () => {
       )}
       {localWipeNotice && (
         <Alert type="warning" title="Local records cleared">
-          Records stored in this browser were removed. Your account and any server-backed location shares were not
-          deleted.
+          Records and locally captured media for this account were removed from this browser. Your account and any server-backed location shares were not deleted.
         </Alert>
       )}
       {errorNotice && <Alert type="danger" title="Settings action failed">{errorNotice}</Alert>}

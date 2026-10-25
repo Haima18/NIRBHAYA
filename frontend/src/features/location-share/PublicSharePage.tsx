@@ -154,7 +154,7 @@ export const PublicSharePage: React.FC = () => {
             Refresh now
           </Button>
           <a href="tel:112" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--color-danger-solid)', color: '#fff', fontWeight: 700 }}>
-            Call 112 if someone is in immediate danger
+            In India, call 112; elsewhere use your local emergency number
           </a>
         </div>
       </main>

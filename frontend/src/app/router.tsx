@@ -12,6 +12,7 @@ import { LegalSupportPage } from '@/features/legal-support/LegalSupportPage';
 import { EvidenceVaultPage } from '@/features/evidence-vault/EvidenceVaultPage';
 import { AiAssistantPage } from '@/features/ai-assistant/AiAssistantPage';
 import { SafetyNewsPage } from '@/features/safety-news/SafetyNewsPage';
+import { DocumentVaultPage } from '@/features/document-vault/DocumentVaultPage';
 import { EmpowermentPage } from '@/features/empowerment/EmpowermentPage';
 import { EmergencyDirectoryPage } from '@/features/emergency-directory/EmergencyDirectoryPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
@@ -54,7 +55,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <PublicOnlyRoute><LoginPage /></PublicOnlyRoute>
+    element: <LoginPage />
   },
   {
     path: '/signup',
@@ -93,6 +94,7 @@ export const router = createBrowserRouter([
       { path: 'evidence-vault', element: <EvidenceVaultPage /> },
       { path: 'ai-assistant', element: <AiAssistantPage /> },
       { path: 'safety-news', element: <SafetyNewsPage /> },
+      { path: 'document-vault', element: <DocumentVaultPage /> },
       { path: 'empowerment', element: <EmpowermentPage /> },
       { path: 'emergency-directory', element: <EmergencyDirectoryPage /> },
       { path: 'settings', element: <SettingsPage /> }

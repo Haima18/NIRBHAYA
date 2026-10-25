@@ -62,8 +62,24 @@ def analyze_message_text(text: str) -> dict:
 
     summary = f"Identified {len(detected)} concern pattern(s). Evaluated risk level: {overall_risk.upper()}." if detected else "No acute intimidation or extortion patterns detected."
 
+    # Build recommended steps from detected pattern advice, deduplicated
+    recommended_steps = []
+    seen = set()
+    for d in detected:
+        advice = d.get('actionAdvice', '')
+        if advice and advice not in seen:
+            seen.add(advice)
+            recommended_steps.append(advice)
+    if not recommended_steps:
+        recommended_steps = [
+            'Continue to monitor and save any concerning messages.',
+            'Reach out to a trusted person or helpline if you feel unsafe.',
+            'Report any escalation to cybercrime.gov.in or call 1930.',
+        ]
+
     return {
         'overallRisk': overall_risk,
+        'detectedPatterns': detected,
+        'recommendedSteps': recommended_steps,
         'summary': summary,
-        'detectedPatterns': detected
     }
