@@ -53,7 +53,10 @@ class Config:
 
     # Security, media, and location-sharing limits
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024  # 50 MB
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'temp_uploads')
+    UPLOAD_FOLDER = os.environ.get(
+        'UPLOAD_FOLDER',
+        os.path.join(os.path.dirname(__file__), 'temp_uploads')
+    )
     LOCATION_SHARE_MAX_MINUTES = 24 * 60
     LOCATION_SHARE_MIN_MINUTES = 5
     RATE_LIMIT_ENABLED = os.environ.get('RATE_LIMIT_ENABLED', 'True').lower() in ('true', '1')
