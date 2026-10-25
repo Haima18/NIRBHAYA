@@ -95,11 +95,11 @@ export const authService = {
       }
       setAuthenticatedUser(response.user);
     } catch (error) {
-      if (error instanceof Error && error.message === 'Authentication required.') {
-        clearLocalSession();
-        return currentSession;
-      }
-      throw error;
+      // 401 = not logged in (expected on first visit / after logout).
+      // Any other error (500, network failure, CORS issue, etc.) should also
+      // be treated as "not authenticated" so the app lands on the welcome page
+      // instead of showing an unrecoverable error screen.
+      clearLocalSession();
     }
     return currentSession;
   },

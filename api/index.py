@@ -16,4 +16,14 @@ os.environ.setdefault('UPLOAD_FOLDER', '/tmp/nirbhaya_uploads')
 # Cookies must be secure on HTTPS (Vercel always uses HTTPS).
 os.environ.setdefault('SESSION_COOKIE_SECURE', 'True')
 
+# Vercel sets VERCEL_URL automatically to the current deployment hostname.
+# Inject it into CORS_ORIGINS so the origin-check middleware passes for
+# login/register requests made from the same Vercel deployment.
+_vercel_host = os.environ.get('VERCEL_URL') or os.environ.get('VERCEL_BRANCH_URL')
+if _vercel_host:
+    _vercel_origin = f'https://{_vercel_host}'
+    _existing_origins = os.environ.get('CORS_ORIGINS', '')
+    if _vercel_origin not in _existing_origins:
+        os.environ['CORS_ORIGINS'] = f'{_vercel_origin},{_existing_origins}'.strip(',')
+
 from app import app  # noqa: F401  – `app` is the WSGI callable Vercel uses

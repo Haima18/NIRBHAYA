@@ -124,6 +124,25 @@ def add_security_headers(response):
     return response
 
 
+@app.route('/api/health', methods=['GET'])
+def health():
+    """Simple liveness probe — useful for verifying the backend is running."""
+    import sqlite3 as _sqlite3
+    db_ok = False
+    try:
+        conn = _sqlite3.connect(Config.AUTH_DATABASE)
+        conn.execute('SELECT 1')
+        conn.close()
+        db_ok = True
+    except Exception:
+        pass
+    return jsonify({
+        'status': 'ok',
+        'db': 'ok' if db_ok else 'error',
+        'upload_folder': Config.UPLOAD_FOLDER,
+    })
+
+
 @app.errorhandler(413)
 def request_too_large(_error):
     limit_mb = Config.MAX_CONTENT_LENGTH // (1024 * 1024)
